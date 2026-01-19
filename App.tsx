@@ -187,6 +187,7 @@ const App: React.FC = () => {
             selectedSectorIds={selectedSectorIds}
             appointmentTypes={appointmentTypes}
             onNavigateToChat={handleNavigateToChat}
+            onToggleSidebar={() => setIsSidebarOpen(true)}
           />
         );
       case 'list':
@@ -198,6 +199,7 @@ const App: React.FC = () => {
             selectedSectorIds={selectedSectorIds}
             appointmentTypes={appointmentTypes}
             sectors={sectors}
+            onToggleSidebar={() => setIsSidebarOpen(true)}
           />
         );
       case 'team':
@@ -211,11 +213,17 @@ const App: React.FC = () => {
             setIsModalOpen(true);
           }}
           onNavigateToChat={handleNavigateToChat}
+          onToggleSidebar={() => setIsSidebarOpen(true)}
         />;
       case 'performance':
         return <PerformanceView />;
       case 'settings':
-        return <SettingsView user={currentUser} appointmentTypes={appointmentTypes} onUpdateTypes={fetchData} />;
+        return <SettingsView
+          user={currentUser}
+          appointmentTypes={appointmentTypes}
+          onUpdateTypes={fetchData}
+          onToggleSidebar={() => setIsSidebarOpen(true)}
+        />;
       case 'messages':
         return (
           <MessagesView
@@ -226,6 +234,7 @@ const App: React.FC = () => {
               setInitialSelectedUsers(userId ? [userId] : []);
               setIsModalOpen(true);
             }}
+            onToggleSidebar={() => setIsSidebarOpen(true)}
           />
         );
       default:
@@ -242,6 +251,7 @@ const App: React.FC = () => {
             selectedSectorIds={selectedSectorIds}
             appointmentTypes={appointmentTypes}
             onNavigateToChat={handleNavigateToChat}
+            onToggleSidebar={() => setIsSidebarOpen(true)}
           />
         );
     }
@@ -297,6 +307,7 @@ const App: React.FC = () => {
         currentView={currentView}
         onChangeView={setCurrentView}
         unreadCount={unreadCount}
+        onToggleSidebar={() => setIsSidebarOpen(true)}
       />
 
       <Modal

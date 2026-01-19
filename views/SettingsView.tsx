@@ -6,9 +6,10 @@ interface SettingsViewProps {
     user: User | null;
     appointmentTypes: AppointmentType[];
     onUpdateTypes: () => void;
+    onToggleSidebar?: () => void;
 }
 
-export const SettingsView: React.FC<SettingsViewProps> = ({ user, appointmentTypes, onUpdateTypes }) => {
+export const SettingsView: React.FC<SettingsViewProps> = ({ user, appointmentTypes, onUpdateTypes, onToggleSidebar }) => {
     const [sectors, setSectors] = useState<Sector[]>([]);
     const [locations, setLocations] = useState<Location[]>([]);
     const [newSectorName, setNewSectorName] = useState('');
@@ -223,9 +224,17 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ user, appointmentTyp
     return (
         <div className="flex-1 p-8 bg-slate-50 overflow-y-auto custom-scrollbar">
             <div className="max-w-4xl mx-auto pb-20">
-                <header className="mb-8">
-                    <h1 className="text-2xl font-black text-slate-900 mb-2">Configurações</h1>
-                    <p className="text-sm font-medium text-slate-500">Gerencie sua conta e as preferências do sistema.</p>
+                <header className="mb-8 flex items-center gap-4">
+                    <button
+                        onClick={onToggleSidebar}
+                        className="md:hidden size-12 flex items-center justify-center rounded-2xl bg-primary-dark text-white shadow-lg active:scale-95 transition-all shrink-0"
+                    >
+                        <span className="material-symbols-outlined text-2xl">menu</span>
+                    </button>
+                    <div>
+                        <h1 className="text-2xl font-black text-slate-900 mb-1">Configurações</h1>
+                        <p className="text-sm font-medium text-slate-500">Gerencie sua conta e as preferências do sistema.</p>
+                    </div>
                 </header>
 
                 <div className="space-y-8">

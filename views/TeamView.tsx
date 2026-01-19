@@ -7,10 +7,16 @@ interface TeamViewProps {
   currentUser: User | null;
   sectors: Sector[];
   onOpenModal?: (participants?: string[]) => void;
+  onUpdateProfile?: () => void;
   onNavigateToChat?: (userId: string) => void;
+  onToggleSidebar?: () => void;
 }
 
-export const TeamView: React.FC<TeamViewProps> = ({ onChangeView, currentUser, sectors, onOpenModal, onNavigateToChat }) => {
+export const TeamView: React.FC<TeamViewProps> = ({ onChangeView, currentUser, sectors, onOpenModal,
+  onUpdateProfile,
+  onNavigateToChat,
+  onToggleSidebar
+}) => {
   const [members, setMembers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -82,12 +88,18 @@ export const TeamView: React.FC<TeamViewProps> = ({ onChangeView, currentUser, s
   return (
     <div className="flex-1 flex flex-col h-full overflow-hidden bg-surface">
       {/* Header */}
-      <header className="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-8 sticky top-0 z-10">
-        <div className="flex items-center gap-2">
+      <header className="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-4 md:px-8 sticky top-0 z-10 shrink-0">
+        <div className="flex items-center gap-3">
+          <button
+            onClick={onToggleSidebar}
+            className="md:hidden size-10 flex items-center justify-center rounded-xl bg-primary-dark text-white shadow-lg active:scale-90 transition-all"
+          >
+            <span className="material-symbols-outlined">menu</span>
+          </button>
           <nav className="flex items-center gap-2 text-sm">
-            <a onClick={() => onChangeView('calendar')} className="text-slate-500 hover:text-primary-dark transition-colors cursor-pointer text-xs font-bold uppercase tracking-wider">Home</a>
-            <span className="text-slate-400">/</span>
-            <span className="font-black text-slate-900 text-xs uppercase tracking-wider">Membros da Equipe</span>
+            <a onClick={() => onChangeView('calendar')} className="hidden sm:block text-slate-500 hover:text-primary-dark transition-colors cursor-pointer text-[10px] font-bold uppercase tracking-wider">Home</a>
+            <span className="hidden sm:block text-slate-400">/</span>
+            <span className="font-black text-slate-900 text-[10px] md:text-xs uppercase tracking-wider truncate max-w-[150px] md:max-w-none">Membros da Equipe</span>
           </nav>
         </div>
         <div className="flex items-center gap-4">

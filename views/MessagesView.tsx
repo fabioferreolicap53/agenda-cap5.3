@@ -7,9 +7,10 @@ interface MessagesViewProps {
     currentUser: User | null;
     initialSelectedUserId?: string | null;
     onOpenModal: (userId?: string) => void;
+    onToggleSidebar?: () => void;
 }
 
-export const MessagesView: React.FC<MessagesViewProps> = ({ currentUser, initialSelectedUserId, onOpenModal }) => {
+export const MessagesView: React.FC<MessagesViewProps> = ({ currentUser, initialSelectedUserId, onOpenModal, onToggleSidebar }) => {
     const [users, setUsers] = useState<User[]>([]);
     const [messages, setMessages] = useState<Message[]>([]);
     const [unreadCounts, setUnreadCounts] = useState<{ [key: string]: number }>({});
@@ -174,9 +175,17 @@ export const MessagesView: React.FC<MessagesViewProps> = ({ currentUser, initial
         <div className="flex-1 flex h-full overflow-hidden bg-slate-50">
             {/* Sidebar: Users List */}
             <div className="w-80 bg-white border-r border-slate-200 flex flex-col">
-                <div className="p-6 border-b border-slate-100">
-                    <h2 className="text-xl font-black text-slate-900">Mensagens</h2>
-                    <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mt-1">Converse com sua equipe</p>
+                <div className="p-6 border-b border-slate-100 flex items-center gap-3">
+                    <button
+                        onClick={onToggleSidebar}
+                        className="md:hidden size-10 flex items-center justify-center rounded-xl bg-primary-dark text-white shadow-lg active:scale-90 transition-all"
+                    >
+                        <span className="material-symbols-outlined">menu</span>
+                    </button>
+                    <div>
+                        <h2 className="text-xl font-black text-slate-900">Mensagens</h2>
+                        <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mt-0.5">Equipe</p>
+                    </div>
                 </div>
                 <div className="flex-1 overflow-y-auto custom-scrollbar p-2 space-y-1">
                     {users.map(user => (

@@ -5,12 +5,14 @@ interface MobileNavProps {
     currentView: ViewState;
     onChangeView: (view: ViewState) => void;
     unreadCount?: number;
+    onToggleSidebar?: () => void;
 }
 
 export const MobileNav: React.FC<MobileNavProps> = ({
     currentView,
     onChangeView,
-    unreadCount = 0
+    unreadCount = 0,
+    onToggleSidebar
 }) => {
     const navItem = (view: ViewState, icon: string, label: string) => {
         const isActive = currentView === view;
@@ -42,11 +44,8 @@ export const MobileNav: React.FC<MobileNavProps> = ({
             {navItem('messages', 'chat', 'Chat')}
             {navItem('performance', 'analytics', 'Stats')}
             <button
-                onClick={() => {
-                    // Trigger Sidebar via some global state or prop later if needed, 
-                    // but for now, let's keep core 4 + a "more" button
-                }}
-                className="flex flex-col items-center justify-center flex-1 gap-1 text-slate-400"
+                onClick={onToggleSidebar}
+                className="flex flex-col items-center justify-center flex-1 gap-1 text-slate-400 active:scale-90 transition-all"
             >
                 <span className="material-symbols-outlined text-[24px]">more_horiz</span>
                 <span className="text-[10px] font-bold uppercase tracking-wider">Mais</span>

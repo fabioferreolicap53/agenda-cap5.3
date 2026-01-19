@@ -9,6 +9,7 @@ interface AppointmentListViewProps {
     selectedSectorIds: string[];
     appointmentTypes: AppointmentType[];
     sectors: Sector[];
+    onToggleSidebar?: () => void;
 }
 
 export const AppointmentListView: React.FC<AppointmentListViewProps> = ({
@@ -17,7 +18,8 @@ export const AppointmentListView: React.FC<AppointmentListViewProps> = ({
     user,
     selectedSectorIds,
     appointmentTypes,
-    sectors
+    sectors,
+    onToggleSidebar
 }) => {
     const [appointments, setAppointments] = useState<Appointment[]>([]);
     const [locations, setLocations] = useState<Location[]>([]);
@@ -138,10 +140,18 @@ export const AppointmentListView: React.FC<AppointmentListViewProps> = ({
                 </div>
             </header>
 
-            <div className="p-8 flex flex-col h-full overflow-hidden">
+            <div className="p-4 md:p-8 flex flex-col h-full overflow-hidden">
                 <div className="mb-8 space-y-4 shrink-0">
                     <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
-                        <h1 className="text-2xl font-bold text-slate-900">Lista de Compromissos</h1>
+                        <div className="flex items-center gap-3 w-full md:w-auto">
+                            <button
+                                onClick={onToggleSidebar}
+                                className="md:hidden size-10 flex items-center justify-center rounded-xl bg-primary-dark text-white shadow-lg active:scale-90 transition-all"
+                            >
+                                <span className="material-symbols-outlined">menu</span>
+                            </button>
+                            <h1 className="text-xl md:text-2xl font-bold text-slate-900">Lista de Compromissos</h1>
+                        </div>
                         <div className="flex items-center gap-2">
                             <button
                                 onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
