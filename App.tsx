@@ -15,6 +15,7 @@ import { supabase } from './lib/supabase';
 import { Session } from '@supabase/supabase-js';
 import { User as AppUser, Appointment, Sector, AppointmentType } from './types';
 import { useCallback } from 'react';
+import { MobileNav } from './components/MobileNav';
 
 const App: React.FC = () => {
   const [currentView, setCurrentView] = useState<ViewState>('login');
@@ -30,6 +31,7 @@ const App: React.FC = () => {
   const [initialDate, setInitialDate] = useState<string | undefined>(undefined);
   const [chatTargetUserId, setChatTargetUserId] = useState<string | null>(null);
   const [unreadCount, setUnreadCount] = useState(0);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   const fetchData = useCallback(async (uid?: string) => {
     const userId = uid || session?.user.id;
@@ -283,11 +285,19 @@ const App: React.FC = () => {
         onUpdateProfile={() => fetchData(session?.user.id)}
         onNavigateToChat={handleNavigateToChat}
         unreadCount={unreadCount}
+        isOpen={isSidebarOpen}
+        onClose={() => setIsSidebarOpen(false)}
       />
-      <main className="flex-1 flex flex-col min-w-0 h-full relative">
+      <main className="flex-1 flex flex-col min-w-0 h-full relative pb-16 md:pb-0">
         {renderContent()}
         <Footer />
       </main>
+
+      <MobileNav
+        currentView={currentView}
+        onChangeView={setCurrentView}
+        unreadCount={unreadCount}
+      />
 
       <Modal
         isOpen={isModalOpen}

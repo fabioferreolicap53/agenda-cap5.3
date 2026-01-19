@@ -10,6 +10,7 @@ interface CalendarViewProps {
   selectedSectorIds: string[];
   appointmentTypes: AppointmentType[];
   onNavigateToChat: (userId: string) => void;
+  onToggleSidebar?: () => void;
 }
 
 export const CalendarView: React.FC<CalendarViewProps> = ({
@@ -19,7 +20,8 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
   user,
   selectedSectorIds,
   appointmentTypes,
-  onNavigateToChat
+  onNavigateToChat,
+  onToggleSidebar
 }) => {
   const [viewMode, setViewMode] = useState<'month' | 'week' | 'day'>('month');
   const [appointments, setAppointments] = useState<Appointment[]>([]);
@@ -520,9 +522,17 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
     <div className="flex flex-1 h-full overflow-hidden bg-white">
       <div className="flex-1 flex flex-col min-w-0 h-full">
         {/* Header */}
-        <header className="h-16 bg-primary-dark text-white flex items-center justify-between px-8 sticky top-0 z-10 shadow-md shrink-0">
-          <div className="flex items-center gap-12">
-            <div className="flex items-center gap-4 text-white/90">
+        <header className="h-16 bg-primary-dark text-white flex items-center justify-between px-4 md:px-8 sticky top-0 z-10 shadow-md shrink-0">
+          <div className="flex items-center gap-2 md:gap-12">
+            {/* Mobile Menu Toggle */}
+            <button
+              onClick={onToggleSidebar}
+              className="md:hidden size-10 flex items-center justify-center rounded-xl hover:bg-white/10 active:scale-90 transition-all"
+            >
+              <span className="material-symbols-outlined">menu</span>
+            </button>
+
+            <div className="flex items-center gap-2 md:gap-4 text-white/90">
               <button
                 onClick={goToToday}
                 className="px-3 py-1.5 text-xs font-bold border border-white/20 rounded-lg hover:bg-white/10 transition-all"
@@ -542,7 +552,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
                 >
                   <span className="material-symbols-outlined">chevron_left</span>
                 </button>
-                <h2 className="text-md font-semibold min-w-[200px] text-center capitalize">
+                <h2 className="text-sm md:text-md font-semibold min-w-[140px] md:min-w-[200px] text-center capitalize truncate">
                   {viewMode === 'month'
                     ? currentDate.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })
                     : viewMode === 'week'
@@ -565,14 +575,14 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
               </div>
             </div>
 
-            {/* Filters */}
-            <div className="flex items-center gap-3">
+            {/* Filters - Hidden on small mobile */}
+            <div className="hidden sm:flex items-center gap-2 md:gap-3">
               <select
                 value={filterEventType}
                 onChange={(e) => setFilterEventType(e.target.value)}
-                className="bg-white/10 text-white border border-white/20 rounded-lg px-2 py-1.5 text-xs font-bold focus:outline-none focus:bg-white/20 option:bg-slate-800"
+                className="bg-white/10 text-white border border-white/20 rounded-lg px-2 py-1.5 text-[10px] md:text-xs font-bold focus:outline-none focus:bg-white/20 option:bg-slate-800 max-w-[100px] md:max-w-none"
               >
-                <option value="all" className="text-slate-800">Tipos (Todos)</option>
+                <option value="all" className="text-slate-800">Tipos</option>
                 {appointmentTypes.map(t => (
                   <option key={t.id} value={t.value} className="text-slate-800">{t.label}</option>
                 ))}
@@ -581,9 +591,9 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
               <select
                 value={filterLocation}
                 onChange={(e) => setFilterLocation(e.target.value)}
-                className="bg-white/10 text-white border border-white/20 rounded-lg px-2 py-1.5 text-xs font-bold focus:outline-none focus:bg-white/20 option:bg-slate-800"
+                className="bg-white/10 text-white border border-white/20 rounded-lg px-2 py-1.5 text-[10px] md:text-xs font-bold focus:outline-none focus:bg-white/20 option:bg-slate-800 max-w-[100px] md:max-w-none"
               >
-                <option value="all" className="text-slate-800">Locais (Todos)</option>
+                <option value="all" className="text-slate-800">Locais</option>
                 {locations.map(l => (
                   <option key={l.id} value={l.id} className="text-slate-800">{l.name}</option>
                 ))}
