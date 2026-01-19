@@ -29,6 +29,7 @@ const App: React.FC = () => {
   const [selectedSectorIds, setSelectedSectorIds] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [initialDate, setInitialDate] = useState<string | undefined>(undefined);
+  const [duplicateAppointment, setDuplicateAppointment] = useState<Appointment | null>(null);
   const [chatTargetUserId, setChatTargetUserId] = useState<string | null>(null);
   const [unreadCount, setUnreadCount] = useState(0);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -171,6 +172,15 @@ const App: React.FC = () => {
     setCurrentView('messages');
   };
 
+  const handleDuplicateAppointment = (appointment: Appointment) => {
+    setInitialDate(appointment.date);
+    // Map attendees to user IDs
+    const userIds = appointment.attendees?.map(a => a.user_id) || [];
+    setInitialSelectedUsers(userIds);
+    setDuplicateAppointment(appointment);
+    setIsModalOpen(true);
+  };
+
   const renderContent = () => {
     switch (currentView) {
       case 'calendar':
@@ -179,6 +189,7 @@ const App: React.FC = () => {
             onOpenModal={(date) => {
               setInitialDate(date);
               setInitialSelectedUsers([]);
+              setDuplicateAppointment(null);
               setIsModalOpen(true);
             }}
             onChangeView={setCurrentView}
@@ -188,6 +199,7 @@ const App: React.FC = () => {
             appointmentTypes={appointmentTypes}
             onNavigateToChat={handleNavigateToChat}
             onToggleSidebar={() => setIsSidebarOpen(true)}
+            onDuplicate={handleDuplicateAppointment}
           />
         );
       case 'list':
@@ -200,6 +212,7 @@ const App: React.FC = () => {
             appointmentTypes={appointmentTypes}
             sectors={sectors}
             onToggleSidebar={() => setIsSidebarOpen(true)}
+            onDuplicate={handleDuplicateAppointment}
           />
         );
       case 'team':
@@ -210,6 +223,7 @@ const App: React.FC = () => {
           onOpenModal={(participants) => {
             setInitialDate(undefined);
             setInitialSelectedUsers(participants || []);
+            setDuplicateAppointment(null);
             setIsModalOpen(true);
           }}
           onNavigateToChat={handleNavigateToChat}
@@ -232,6 +246,7 @@ const App: React.FC = () => {
             onOpenModal={(userId) => {
               setInitialDate(undefined);
               setInitialSelectedUsers(userId ? [userId] : []);
+              setDuplicateAppointment(null);
               setIsModalOpen(true);
             }}
             onToggleSidebar={() => setIsSidebarOpen(true)}
@@ -243,6 +258,7 @@ const App: React.FC = () => {
             onOpenModal={(date) => {
               setInitialDate(date);
               setInitialSelectedUsers([]);
+              setDuplicateAppointment(null);
               setIsModalOpen(true);
             }}
             onChangeView={setCurrentView}
@@ -252,6 +268,7 @@ const App: React.FC = () => {
             appointmentTypes={appointmentTypes}
             onNavigateToChat={handleNavigateToChat}
             onToggleSidebar={() => setIsSidebarOpen(true)}
+            onDuplicate={handleDuplicateAppointment}
           />
         );
     }
@@ -277,6 +294,7 @@ const App: React.FC = () => {
         appointmentTypes={appointmentTypes}
         onBack={() => setCurrentView('calendar')}
         onNavigateToChat={handleNavigateToChat}
+        onDuplicate={handleDuplicateAppointment}
       />
     );
   }
@@ -315,11 +333,13 @@ const App: React.FC = () => {
         onClose={() => {
           setIsModalOpen(false);
           setInitialDate(undefined);
+          setDuplicateAppointment(null);
         }}
         user={currentUser}
         appointmentTypes={appointmentTypes}
         initialDate={initialDate}
         initialSelectedUsers={initialSelectedUsers}
+        initialAppointment={duplicateAppointment}
       />
     </div>
   );

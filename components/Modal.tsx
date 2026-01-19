@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { User as AppUser, AppointmentType, Location } from '../types';
+import { User as AppUser, AppointmentType, Location, Appointment } from '../types';
 import { supabase } from '../lib/supabase';
 
 interface ModalProps {
@@ -11,9 +11,10 @@ interface ModalProps {
   onSave?: (appointment: any) => void;
   refreshAppointments?: () => void;
   initialSelectedUsers?: string[];
+  initialAppointment?: Appointment | null;
 }
 
-export const Modal: React.FC<ModalProps> = ({ isOpen, onClose, user, appointmentTypes, initialDate, refreshAppointments, initialSelectedUsers }) => {
+export const Modal: React.FC<ModalProps> = ({ isOpen, onClose, user, appointmentTypes, initialDate, refreshAppointments, initialSelectedUsers, initialAppointment }) => {
   const [title, setTitle] = useState('');
   const [date, setDate] = useState('');
   const [startTime, setStartTime] = useState('');
@@ -28,20 +29,38 @@ export const Modal: React.FC<ModalProps> = ({ isOpen, onClose, user, appointment
   const [locationConflict, setLocationConflict] = useState<string | null>(null);
 
   useEffect(() => {
-    if (isOpen && initialDate) {
-      setDate(initialDate);
-    }
     // Reset state on open
     if (isOpen) {
-      setTitle('');
-      setStartTime('');
-      setEndTime('');
-      setDescription('');
-      setSelectedUserIds(initialSelectedUsers || []);
-      setSelectedLocationId('');
+      if (initialAppointment) {
+        setTitle(initialAppointment.title);
+
+        // Ensure date is a string in YYYY-MM-DD format
+        let formattedDate = '';
+        if (typeof initialAppointment.date === 'string') {
+          formattedDate = initialAppointment.date.split('T')[0];
+        } else if (initialAppointment.date instanceof Date) {
+          formattedDate = (initialAppointment.date as Date).toISOString().split('T')[0];
+        }
+        setDate(formattedDate);
+
+        setStartTime(initialAppointment.startTime);
+        setEndTime(initialAppointment.endTime || '');
+        setType(initialAppointment.type);
+        setDescription(initialAppointment.description || '');
+        setSelectedLocationId(initialAppointment.location_id || '');
+        setSelectedUserIds(initialSelectedUsers || []);
+      } else {
+        setTitle('');
+        setDate(initialDate ? initialDate.split('T')[0] : '');
+        setStartTime('');
+        setEndTime('');
+        setDescription('');
+        setSelectedUserIds(initialSelectedUsers || []);
+        setSelectedLocationId('');
+      }
       setLocationConflict(null);
     }
-  }, [isOpen, initialDate, initialSelectedUsers]);
+  }, [isOpen, initialDate, initialSelectedUsers, initialAppointment]);
 
   useEffect(() => {
     if (appointmentTypes.length > 0 && !type) {

@@ -10,6 +10,7 @@ interface AppointmentListViewProps {
     appointmentTypes: AppointmentType[];
     sectors: Sector[];
     onToggleSidebar?: () => void;
+    onDuplicate?: (appointment: Appointment) => void;
 }
 
 export const AppointmentListView: React.FC<AppointmentListViewProps> = ({
@@ -19,7 +20,8 @@ export const AppointmentListView: React.FC<AppointmentListViewProps> = ({
     selectedSectorIds,
     appointmentTypes,
     sectors,
-    onToggleSidebar
+    onToggleSidebar,
+    onDuplicate
 }) => {
     const [appointments, setAppointments] = useState<Appointment[]>([]);
     const [locations, setLocations] = useState<Location[]>([]);
@@ -257,7 +259,17 @@ export const AppointmentListView: React.FC<AppointmentListViewProps> = ({
                                                     <p className="text-sm text-slate-500 line-clamp-1">{app.description || 'Sem descrição.'}</p>
                                                 </div>
                                             </div>
-                                            <div className="flex items-center gap-4 self-end md:self-auto">
+                                            <div className="flex items-center gap-2 self-end md:self-auto">
+                                                <button
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        onDuplicate && onDuplicate(app);
+                                                    }}
+                                                    className="p-2 text-slate-400 hover:text-primary-dark hover:bg-primary-dark/5 rounded-lg transition-all"
+                                                    title="Duplicar Compromisso"
+                                                >
+                                                    <span className="material-symbols-outlined text-xl">content_copy</span>
+                                                </button>
                                                 <span className={`material-symbols-outlined group-hover:text-primary transition-colors ${isToday ? 'text-primary-dark' : 'text-slate-300'}`}>chevron_right</span>
                                             </div>
                                         </div>

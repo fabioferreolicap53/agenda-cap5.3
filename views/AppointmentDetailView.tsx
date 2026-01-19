@@ -9,6 +9,7 @@ interface AppointmentDetailViewProps {
   user: User | null;
   appointmentTypes: AppointmentType[];
   onNavigateToChat?: (userId: string) => void;
+  onDuplicate?: (appointment: Appointment) => void;
 }
 
 export const AppointmentDetailView: React.FC<AppointmentDetailViewProps> = ({
@@ -16,7 +17,8 @@ export const AppointmentDetailView: React.FC<AppointmentDetailViewProps> = ({
   appointment,
   user,
   appointmentTypes,
-  onNavigateToChat
+  onNavigateToChat,
+  onDuplicate
 }) => {
   const isOwner = user?.id === appointment.created_by;
   const isAdmin = user?.role === 'Administrador';
@@ -297,6 +299,14 @@ export const AppointmentDetailView: React.FC<AppointmentDetailViewProps> = ({
             <div className="flex items-center gap-3">
               {!isEditing ? (
                 <>
+                  <button
+                    onClick={() => onDuplicate && onDuplicate(appointment)}
+                    className="flex items-center gap-2 bg-primary-dark/10 hover:bg-primary-dark/20 text-primary-dark font-bold px-6 py-2.5 rounded-xl transition-all active:scale-[0.98]"
+                    title="Duplicar Compromisso"
+                  >
+                    <span className="material-symbols-outlined text-xl">content_copy</span>
+                    Duplicar
+                  </button>
                   <button
                     onClick={() => setIsEditing(true)}
                     className="flex items-center gap-2 bg-primary-dark hover:bg-primary-light text-white font-bold px-6 py-2.5 rounded-xl transition-all shadow-md active:scale-[0.98]"

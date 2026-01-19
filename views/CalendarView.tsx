@@ -11,6 +11,7 @@ interface CalendarViewProps {
   appointmentTypes: AppointmentType[];
   onNavigateToChat: (userId: string) => void;
   onToggleSidebar?: () => void;
+  onDuplicate?: (appointment: Appointment) => void;
 }
 
 export const CalendarView: React.FC<CalendarViewProps> = ({
@@ -21,7 +22,8 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
   selectedSectorIds,
   appointmentTypes,
   onNavigateToChat,
-  onToggleSidebar
+  onToggleSidebar,
+  onDuplicate
 }) => {
   const [viewMode, setViewMode] = useState<'month' | 'week' | 'day'>('month');
   const [appointments, setAppointments] = useState<Appointment[]>([]);
