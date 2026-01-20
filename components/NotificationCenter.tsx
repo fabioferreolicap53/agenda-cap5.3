@@ -29,19 +29,19 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({ user, on
             setInvitations(invData as any);
         }
 
-        // 2. Fetch pending requests (where I am the organizer and others requested)
+        // 2. Fetch pending requests (where I am the organizer)
+        // Fetch all specific requests visible due to RLS, then filter in memory for safety
         const { data: reqData, error } = await supabase
             .from('appointment_attendees')
-            .select('*, appointments!inner(title, date, created_by), profiles:user_id(full_name, avatar)')
-            .eq('status', 'requested')
-            .eq('appointments.created_by', user.id);
+            .select('*, appointments(title, date, created_by), profiles:user_id(full_name, avatar)')
+            .eq('status', 'requested');
 
         if (error) {
             console.error('Error fetching requests:', error);
-        }
-
-        if (reqData) {
-            setPendingRequests(reqData);
+        } else if (reqData) {
+            // Filter: only keep requests where I am the creator of the appointment
+            const myRequests = reqData.filter((r: any) => r.appointments?.created_by === user.id);
+            setPendingRequests(myRequests);
         }
     };
 
