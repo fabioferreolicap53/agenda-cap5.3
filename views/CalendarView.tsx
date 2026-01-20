@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { ViewState, User, Appointment, AppointmentType, Location } from '../types';
 import { supabase } from '../lib/supabase';
+import { DashboardNotifications } from '../components/DashboardNotifications';
 
 interface CalendarViewProps {
   onOpenModal: () => void;
@@ -636,6 +637,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
         </header>
 
         {/* Content Area */}
+        <DashboardNotifications user={user} onViewAppointment={onOpenDetails} />
         {viewMode === 'month' && renderMonthView()}
         {viewMode === 'week' && renderWeekView()}
         {viewMode === 'day' && renderDayView()}

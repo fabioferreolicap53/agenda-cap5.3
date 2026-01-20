@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { ViewState, User, Appointment, AppointmentType, Sector, Location } from '../types';
 import { supabase } from '../lib/supabase';
+import { DashboardNotifications } from '../components/DashboardNotifications';
 
 interface AppointmentListViewProps {
     onChangeView: (view: ViewState) => void;
@@ -143,6 +144,7 @@ export const AppointmentListView: React.FC<AppointmentListViewProps> = ({
             </header>
 
             <div className="p-4 md:p-8 flex flex-col h-full overflow-hidden">
+                <DashboardNotifications user={user} onViewAppointment={onOpenDetails} />
                 <div className="mb-8 space-y-4 shrink-0">
                     <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
                         <div className="flex items-center gap-3 w-full md:w-auto">
