@@ -257,7 +257,13 @@ export const TeamView: React.FC<TeamViewProps> = ({ onChangeView, currentUser, s
                     }[member.status || 'online']
                   }
                 </p>
-                <p className="text-[10px] text-slate-400 font-medium mb-3 -mt-2 truncate w-full px-4">{member.email}</p>
+                <p className="text-[10px] text-slate-400 font-medium mb-1 -mt-2 truncate w-full px-4">{member.email}</p>
+                {member.phone && (
+                  <p className="text-[10px] text-primary-dark font-bold mb-3 truncate w-full px-4 flex items-center justify-center gap-1">
+                    <span className="material-symbols-outlined text-[12px]">call</span>
+                    {member.phone}
+                  </p>
+                )}
 
                 <div className="px-3 py-1 bg-slate-50 rounded-lg mb-4">
                   <p className="text-[9px] font-black text-primary-dark/60 uppercase tracking-widest">
@@ -381,6 +387,16 @@ export const TeamView: React.FC<TeamViewProps> = ({ onChangeView, currentUser, s
                   <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none">Perfil</span>
                   <p className="text-xs font-bold text-slate-700">{selectedMember.role === 'Administrador' ? '🚀 Administrador' : '👥 Membro Normal'}</p>
                 </div>
+
+                {selectedMember.phone && (
+                  <div className="flex flex-col items-center gap-1">
+                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none">Telefone</span>
+                    <p className="text-xs font-bold text-primary-dark flex items-center gap-1">
+                      <span className="material-symbols-outlined text-sm">call</span>
+                      {selectedMember.phone}
+                    </p>
+                  </div>
+                )}
 
                 <div className="pt-4 border-t border-slate-100 w-full">
                   <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 block">Observações</span>

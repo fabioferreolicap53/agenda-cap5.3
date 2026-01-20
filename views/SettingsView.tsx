@@ -28,6 +28,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ user, appointmentTyp
     // Profile states
     const [avatar, setAvatar] = useState(user?.avatar || '');
     const [observations, setObservations] = useState(user?.observations || '');
+    const [phone, setPhone] = useState(user?.phone || '');
     const [savingProfile, setSavingProfile] = useState(false);
     const [uploadingAvatar, setUploadingAvatar] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
@@ -45,6 +46,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ user, appointmentTyp
         if (user) {
             setAvatar(user.avatar || '');
             setObservations(user.observations || '');
+            setPhone(user.phone || '');
         }
     }, [user]);
 
@@ -208,7 +210,8 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ user, appointmentTyp
             .from('profiles')
             .update({
                 avatar: avatar.trim(),
-                observations: observations.trim()
+                observations: observations.trim(),
+                phone: phone.trim()
             })
             .eq('id', user.id);
 
@@ -309,6 +312,19 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ user, appointmentTyp
                                     <div className="space-y-2">
                                         <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.15em] ml-1">E-mail Corporativo</label>
                                         <input readOnly title="O e-mail não pode ser alterado" className="w-full px-4 py-3 rounded-xl border border-slate-100 bg-slate-50 text-slate-400 outline-none text-sm font-bold cursor-not-allowed" value={user?.email || ''} />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.15em] ml-1">Telefone de Contato</label>
+                                        <div className="relative">
+                                            <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-300 text-sm">call</span>
+                                            <input
+                                                type="text"
+                                                value={phone}
+                                                onChange={(e) => setPhone(e.target.value)}
+                                                placeholder="(00) 00000-0000"
+                                                className="w-full pl-9 pr-4 py-3 rounded-xl border border-slate-100 bg-slate-50 text-slate-700 outline-none text-sm font-bold focus:border-primary-dark transition-all"
+                                            />
+                                        </div>
                                     </div>
                                     <div className="space-y-2 md:col-span-2">
                                         <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.15em] ml-1">Observações</label>
