@@ -25,6 +25,7 @@ export interface User {
   status?: 'online' | 'offline' | 'busy' | 'away' | 'meeting' | 'lunch' | 'vacation' | 'out_of_office';
   statusText?: string;
   observations?: string;
+  phone?: string;
 }
 
 export interface AppointmentType {
@@ -42,6 +43,7 @@ export interface Attendee {
   status: 'pending' | 'accepted' | 'declined' | 'requested';
   full_name?: string;
   avatar?: string;
+  phone?: string;
 }
 
 export interface Message {
