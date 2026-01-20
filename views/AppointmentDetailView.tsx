@@ -687,7 +687,7 @@ export const AppointmentDetailView: React.FC<AppointmentDetailViewProps> = ({
                             <div className="flex-1 min-w-0 flex flex-col gap-2.5">
                               <div>
                                 <h4 className="text-base font-black text-slate-900 truncate tracking-tight mb-0.5 capitalize">{organizer?.full_name}</h4>
-                                <p className="text-[11px] text-slate-400 font-bold uppercase tracking-widest">{organizer?.role || 'Membro da Equipe'}</p>
+                                <p className="text-[11px] text-slate-400 font-bold uppercase tracking-widest">{organizer?.observations || 'Sem observações'}</p>
                               </div>
                               {user?.id !== organizer?.id && (
                                 <button
