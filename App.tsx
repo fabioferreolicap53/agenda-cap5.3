@@ -137,7 +137,14 @@ const App: React.FC = () => {
       setSession(session);
       if (session) {
         fetchData(session.user.id);
-        setCurrentView('calendar');
+        // Não redirecionar para o calendário se for uma sessão de recuperação
+        const isRecovery = window.location.hash.includes('type=recovery');
+        if (!isRecovery) {
+          setCurrentView('calendar');
+        } else {
+          setIsRecovering(true);
+          setCurrentView('reset_password');
+        }
       }
       setLoading(false);
     });
@@ -151,8 +158,11 @@ const App: React.FC = () => {
         setCurrentView('reset_password');
       } else if (session) {
         fetchData(session.user.id);
-        // Only redirect to calendar if NOT in the middle of a password recovery
-        if (!isRecovering && (currentView === 'login' || currentView === 'reset_password')) {
+
+        // Verifica o hash novamente para ter certeza absoluta de não sobrescrever a recuperação
+        const isRecovery = window.location.hash.includes('type=recovery') || event === 'PASSWORD_RECOVERY';
+
+        if (!isRecovery && (currentView === 'login' || currentView === 'reset_password')) {
           setCurrentView('calendar');
         }
       } else {
