@@ -262,7 +262,17 @@ const App: React.FC = () => {
   };
 
   const handleLogout = async () => {
-    await supabase.auth.signOut();
+    try {
+      await supabase.auth.signOut();
+      // Defensive: Clear local state immediately to ensure UI responds even if listener is slow
+      setSession(null);
+      setCurrentUser(null);
+      setCurrentView('login');
+    } catch (error) {
+      console.error('Error signing out:', error);
+      // Fallback: forcefully reset view on error
+      setCurrentView('login');
+    }
   };
 
   const handleOpenDetails = (app: Appointment) => {
