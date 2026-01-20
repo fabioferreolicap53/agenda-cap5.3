@@ -331,7 +331,7 @@ export const AppointmentDetailView: React.FC<AppointmentDetailViewProps> = ({
               className="flex items-center gap-2 text-sm font-bold text-white bg-slate-800 hover:bg-slate-900 px-5 py-2.5 rounded-xl transition-all shadow-lg shadow-slate-900/10 active:scale-95"
             >
               <span className="material-symbols-outlined text-lg">arrow_back</span>
-              Voltar para Agenda
+              Voltar
             </button>
           </div>
           {canEdit && (
