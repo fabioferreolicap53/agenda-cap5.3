@@ -1,4 +1,4 @@
-export type ViewState = 'login' | 'calendar' | 'list' | 'team' | 'details' | 'performance' | 'settings' | 'messages' | 'notifications';
+export type ViewState = 'login' | 'calendar' | 'list' | 'team' | 'details' | 'performance' | 'settings' | 'messages' | 'notifications' | 'reset_password';
 
 export interface Sector {
   id: string;

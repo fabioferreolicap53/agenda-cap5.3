@@ -40,7 +40,7 @@ export const LoginView: React.FC<LoginViewProps> = () => {
         if (error) throw error;
       } else if (mode === 'forgot_password') {
         const { error } = await supabase.auth.resetPasswordForEmail(email, {
-          redirectTo: window.location.origin + '/reset-password', // Redirect to the app after reset
+          redirectTo: window.location.origin, // Redirect to the app root to handle recovery event
         });
         if (error) throw error;
         setMessage({ type: 'success', text: 'Se o e-mail estiver cadastrado, você receberá um link de recuperação!' });

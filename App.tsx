@@ -12,6 +12,7 @@ import { MessagesView } from './views/MessagesView';
 import { NotificationsView } from './views/NotificationsView';
 import { Modal } from './components/Modal';
 import { Footer } from './components/Footer';
+import { ResetPasswordView } from './views/ResetPasswordView';
 import { supabase } from './lib/supabase';
 import { Session } from '@supabase/supabase-js';
 import { User as AppUser, Appointment, Sector, AppointmentType } from './types';
@@ -116,11 +117,15 @@ const App: React.FC = () => {
     });
 
     // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       setSession(session);
-      if (session) {
+      if (event === 'PASSWORD_RECOVERY') {
+        setCurrentView('reset_password');
+      } else if (session) {
         fetchData(session.user.id);
-        setCurrentView('calendar');
+        if (currentView === 'login' || currentView === 'reset_password') {
+          setCurrentView('calendar');
+        }
       } else {
         setCurrentUser(null);
         setCurrentView('login');
@@ -335,6 +340,16 @@ const App: React.FC = () => {
             onToggleSidebar={() => setIsSidebarOpen(true)}
           />
         );
+      case 'reset_password':
+        return (
+          <ResetPasswordView
+            onSuccess={() => setCurrentView('calendar')}
+            onCancel={() => {
+              supabase.auth.signOut();
+              setCurrentView('login');
+            }}
+          />
+        );
       default:
         return (
           <CalendarView
@@ -367,6 +382,18 @@ const App: React.FC = () => {
 
   if (currentView === 'login' && !session) {
     return <LoginView />;
+  }
+
+  if (currentView === 'reset_password') {
+    return (
+      <ResetPasswordView
+        onSuccess={() => setCurrentView('calendar')}
+        onCancel={() => {
+          supabase.auth.signOut();
+          setCurrentView('login');
+        }}
+      />
+    );
   }
 
   if (currentView === 'details' && selectedAppointment) {
