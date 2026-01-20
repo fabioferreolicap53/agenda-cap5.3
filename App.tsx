@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { ViewState } from './types';
 import { LoginView } from './views/LoginView';
 import { Sidebar } from './components/Sidebar';
@@ -16,7 +16,7 @@ import { ResetPasswordView } from './views/ResetPasswordView';
 import { supabase } from './lib/supabase';
 import { Session } from '@supabase/supabase-js';
 import { User as AppUser, Appointment, Sector, AppointmentType } from './types';
-import { useCallback } from 'react';
+
 
 
 const App: React.FC = () => {
@@ -39,6 +39,9 @@ const App: React.FC = () => {
   const [previousView, setPreviousView] = useState<ViewState | null>(null);
   const [authError, setAuthError] = useState<string | null>(null);
   const [isRecovering, setIsRecovering] = useState(false);
+
+  // Detecção ultra-precoce de recuperação de senha
+  const recoveryLock = useRef(window.location.hash.includes('type=recovery'));
 
   const fetchData = useCallback(async (uid?: string) => {
     const userId = uid || session?.user.id;
@@ -109,8 +112,7 @@ const App: React.FC = () => {
 
   useEffect(() => {
     // Check for recovery type in hash early
-    const isInitialRecovery = window.location.hash.includes('type=recovery');
-    if (isInitialRecovery) {
+    if (recoveryLock.current) {
       setIsRecovering(true);
       setCurrentView('reset_password');
     }
@@ -140,7 +142,7 @@ const App: React.FC = () => {
         fetchData(session.user.id);
 
         // IMPORTANT: DO NOT redirect to calendar if we are in recovery mode
-        if (!isInitialRecovery && !window.location.hash.includes('type=recovery')) {
+        if (!recoveryLock.current) {
           setCurrentView('calendar');
         } else {
           setIsRecovering(true);
@@ -154,16 +156,17 @@ const App: React.FC = () => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       setSession(session);
 
-      const isRecoverySession = event === 'PASSWORD_RECOVERY' || window.location.hash.includes('type=recovery');
+      const isRecoverySession = event === 'PASSWORD_RECOVERY' || recoveryLock.current;
 
       if (event === 'PASSWORD_RECOVERY') {
+        recoveryLock.current = true;
         setIsRecovering(true);
         setCurrentView('reset_password');
       } else if (session) {
         fetchData(session.user.id);
 
         // Only redirect to calendar if NOT in the middle of a password recovery
-        if (!isRecovering && !isRecoverySession && (currentView === 'login' || currentView === 'reset_password')) {
+        if (!isRecoverySession && (currentView === 'login' || currentView === 'reset_password')) {
           setCurrentView('calendar');
         } else if (isRecoverySession) {
           setIsRecovering(true);
@@ -173,6 +176,7 @@ const App: React.FC = () => {
         setCurrentUser(null);
         setCurrentView('login');
         setIsRecovering(false);
+        recoveryLock.current = false;
       }
     });
 
@@ -388,11 +392,13 @@ const App: React.FC = () => {
         return (
           <ResetPasswordView
             onSuccess={() => {
+              recoveryLock.current = false;
               setIsRecovering(false);
               setAuthError(null);
               setCurrentView('calendar');
             }}
             onCancel={() => {
+              recoveryLock.current = false;
               setIsRecovering(false);
               setAuthError(null);
               supabase.auth.signOut();
@@ -438,11 +444,13 @@ const App: React.FC = () => {
     return (
       <ResetPasswordView
         onSuccess={() => {
+          recoveryLock.current = false;
           setIsRecovering(false);
           setAuthError(null);
           setCurrentView('calendar');
         }}
         onCancel={() => {
+          recoveryLock.current = false;
           setIsRecovering(false);
           setAuthError(null);
           supabase.auth.signOut();
