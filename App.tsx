@@ -162,10 +162,18 @@ const App: React.FC = () => {
         recoveryLock.current = true;
         setIsRecovering(true);
         setCurrentView('reset_password');
+      } else if (event === 'SIGNED_OUT') {
+        // Absolute forced cleanup and redirect
+        setCurrentUser(null);
+        setCurrentView('login');
+        setIsRecovering(false);
+        recoveryLock.current = false;
+        window.location.hash = 'login';
       } else if (session) {
         fetchData(session.user.id);
 
         // Only redirect to calendar if NOT in the middle of a password recovery
+        // AND not if we just came from a signed out state in this listener pass
         if (!isRecoverySession && (currentView === 'login' || currentView === 'reset_password')) {
           setCurrentView('calendar');
         } else if (isRecoverySession) {
@@ -263,14 +271,22 @@ const App: React.FC = () => {
 
   const handleLogout = async () => {
     try {
+      // Clear URL hash immediately to prevent any recovery logic from firing
+      window.location.hash = 'login';
+
       await supabase.auth.signOut();
-      // Defensive: Clear local state immediately to ensure UI responds even if listener is slow
+
+      // Clear local state
       setSession(null);
       setCurrentUser(null);
       setCurrentView('login');
+
+      // Clear all potential persistent storage as extra guard
+      localStorage.clear();
+      sessionStorage.clear();
+
     } catch (error) {
       console.error('Error signing out:', error);
-      // Fallback: forcefully reset view on error
       setCurrentView('login');
     }
   };
