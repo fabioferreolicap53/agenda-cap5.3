@@ -173,13 +173,13 @@ export const PerformanceView: React.FC<PerformanceViewProps> = ({ onToggleSideba
                     {/* Filters Bar */}
                     <div className="bg-white p-4 rounded-xl border border-slate-100 shadow-sm flex flex-wrap gap-4 items-center">
                         <div className="flex flex-col gap-1 min-w-[200px] flex-1">
-                            <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Usuário</label>
+                            <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Participante</label>
                             <select
                                 value={filterUserId}
                                 onChange={(e) => setFilterUserId(e.target.value)}
                                 className="w-full p-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-bold text-slate-700 outline-none focus:border-primary-dark"
                             >
-                                <option value="all">Todos os Usuários</option>
+                                <option value="all">Todos os Participantes</option>
                                 {profiles.map(p => <option key={p.id} value={p.id}>{p.full_name}</option>)}
                             </select>
                         </div>

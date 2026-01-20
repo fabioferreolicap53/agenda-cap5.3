@@ -625,7 +625,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
                   onChange={(e) => setFilterUserId(e.target.value)}
                   className="bg-white/10 text-white border border-white/20 rounded-lg px-2 py-1.5 text-[10px] md:text-xs font-bold focus:outline-none focus:bg-white/20 option:bg-slate-800 max-w-[120px] md:max-w-[150px]"
                 >
-                  <option value="all" className="text-slate-800">Todos os Usuários</option>
+                  <option value="all" className="text-slate-800">Todos os Participantes</option>
                   {allUsers.map(u => (
                     <option key={u.id} value={u.id} className="text-slate-800">{u.full_name}</option>
                   ))}
@@ -705,7 +705,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
                 onChange={(e) => setFilterUserId(e.target.value)}
                 className="bg-white/10 text-white border border-white/20 rounded-lg px-2 py-2 text-xs font-bold focus:outline-none focus:bg-white/20 option:bg-slate-800 w-full"
               >
-                <option value="all" className="text-slate-800">Todos os Usuários</option>
+                <option value="all" className="text-slate-800">Todos os Participantes</option>
                 {allUsers.map(u => (
                   <option key={u.id} value={u.id} className="text-slate-800">{u.full_name}</option>
                 ))}
