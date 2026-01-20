@@ -316,6 +316,164 @@ export const PerformanceView: React.FC<PerformanceViewProps> = ({ onToggleSideba
                         ))}
                     </div>
                 </div>
+
+                {/* NEW SECTION: Análise de Engajamento */}
+                <div className="mb-8">
+                    <h2 className="text-xl font-bold text-slate-900 mb-4">Análise de Engajamento</h2>
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                        {/* 1. Global Engagement Stats */}
+                        <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-8">
+                            <h3 className="font-bold text-slate-900 mb-6">Taxas de Aceitação e Rejeição</h3>
+                            {(() => {
+                                // Calculate Engagement Stats
+                                let totalInvites = 0;
+                                let accepted = 0;
+                                let declined = 0;
+                                let pending = 0;
+
+                                filteredAppointments.forEach(app => {
+                                    app.attendees?.forEach(att => {
+                                        totalInvites++;
+                                        if (att.status === 'accepted') accepted++;
+                                        else if (att.status === 'declined') declined++;
+                                        else pending++;
+                                    });
+                                });
+
+                                const acceptanceRate = totalInvites > 0 ? (accepted / totalInvites) * 100 : 0;
+                                const rejectionRate = totalInvites > 0 ? (declined / totalInvites) * 100 : 0;
+                                const pendingRate = totalInvites > 0 ? (pending / totalInvites) * 100 : 0;
+
+                                return (
+                                    <div className="space-y-6">
+                                        <div className="grid grid-cols-2 gap-4">
+                                            <div className="p-4 bg-emerald-50 rounded-xl border border-emerald-100">
+                                                <p className="text-[10px] font-black text-emerald-600 uppercase tracking-widest mb-1">Taxa de Aceitação</p>
+                                                <p className="text-3xl font-black text-emerald-700">{acceptanceRate.toFixed(1)}%</p>
+                                                <p className="text-xs font-bold text-emerald-600/60 mt-1">{accepted} convites aceitos</p>
+                                            </div>
+                                            <div className="p-4 bg-rose-50 rounded-xl border border-rose-100">
+                                                <p className="text-[10px] font-black text-rose-600 uppercase tracking-widest mb-1">Taxa de Rejeição</p>
+                                                <p className="text-3xl font-black text-rose-700">{rejectionRate.toFixed(1)}%</p>
+                                                <p className="text-xs font-bold text-rose-600/60 mt-1">{declined} recusados</p>
+                                            </div>
+                                        </div>
+
+                                        {/* Status Distribution Bar */}
+                                        <div className="space-y-2">
+                                            <div className="flex justify-between text-xs font-bold text-slate-500">
+                                                <span>Distribuição Total ({totalInvites} convites)</span>
+                                            </div>
+                                            <div className="flex w-full h-4 rounded-full overflow-hidden bg-slate-100">
+                                                <div style={{ width: `${acceptanceRate}%` }} className="bg-emerald-500 h-full" title="Aceitos"></div>
+                                                <div style={{ width: `${pendingRate}%` }} className="bg-amber-400 h-full" title="Pendentes"></div>
+                                                <div style={{ width: `${rejectionRate}%` }} className="bg-rose-500 h-full" title="Recusados"></div>
+                                            </div>
+                                            <div className="flex gap-4 justify-center pt-2">
+                                                <div className="flex items-center gap-1.5">
+                                                    <div className="size-2 rounded-full bg-emerald-500"></div>
+                                                    <span className="text-[10px] font-bold text-slate-500 uppercase">Aceitos</span>
+                                                </div>
+                                                <div className="flex items-center gap-1.5">
+                                                    <div className="size-2 rounded-full bg-amber-400"></div>
+                                                    <span className="text-[10px] font-bold text-slate-500 uppercase">Pendentes</span>
+                                                </div>
+                                                <div className="flex items-center gap-1.5">
+                                                    <div className="size-2 rounded-full bg-rose-500"></div>
+                                                    <span className="text-[10px] font-bold text-slate-500 uppercase">Recusados</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                );
+                            })()}
+                        </div>
+
+                        {/* 2. Breakdown by Type and Location */}
+                        <div className="space-y-6">
+                            {/* By Type */}
+                            <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-6">
+                                <h3 className="font-bold text-slate-900 mb-4 text-sm">Aceitação por Tipo de Evento</h3>
+                                <div className="space-y-3">
+                                    {(() => {
+                                        const typeStats: Record<string, { total: number, accepted: number }> = {};
+
+                                        filteredAppointments.forEach(app => {
+                                            const type = app.type || 'outros';
+                                            if (!typeStats[type]) typeStats[type] = { total: 0, accepted: 0 };
+
+                                            app.attendees?.forEach(att => {
+                                                typeStats[type].total++;
+                                                if (att.status === 'accepted') typeStats[type].accepted++;
+                                            });
+                                        });
+
+                                        return Object.entries(typeStats)
+                                            .sort(([, a], [, b]) => b.total - a.total) // Sort by volume
+                                            .slice(0, 5) // Top 5
+                                            .map(([type, stats]) => {
+                                                const rate = stats.total > 0 ? (stats.accepted / stats.total) * 100 : 0;
+                                                const label = appointmentTypes.find(t => t.value === type)?.label || type;
+
+                                                return (
+                                                    <div key={type}>
+                                                        <div className="flex justify-between text-xs font-bold text-slate-600 mb-1">
+                                                            <span className="capitalize">{label}</span>
+                                                            <span>{rate.toFixed(0)}%</span>
+                                                        </div>
+                                                        <div className="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
+                                                            <div className="bg-primary-dark h-full rounded-full" style={{ width: `${rate}%` }}></div>
+                                                        </div>
+                                                    </div>
+                                                );
+                                            });
+                                    })()}
+                                </div>
+                            </div>
+
+                            {/* By Location */}
+                            <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-6">
+                                <h3 className="font-bold text-slate-900 mb-4 text-sm">Aceitação por Local</h3>
+                                <div className="space-y-3">
+                                    {(() => {
+                                        const locStats: Record<string, { total: number, accepted: number }> = {};
+
+                                        filteredAppointments.forEach(app => {
+                                            const locId = app.location_id || 'unknown';
+                                            if (!locStats[locId]) locStats[locId] = { total: 0, accepted: 0 };
+
+                                            app.attendees?.forEach(att => {
+                                                locStats[locId].total++;
+                                                if (att.status === 'accepted') locStats[locId].accepted++;
+                                            });
+                                        });
+
+                                        return Object.entries(locStats)
+                                            .filter(([id]) => id !== 'unknown')
+                                            .sort(([, a], [, b]) => b.total - a.total)
+                                            .slice(0, 5)
+                                            .map(([locId, stats]) => {
+                                                const rate = stats.total > 0 ? (stats.accepted / stats.total) * 100 : 0;
+                                                const locName = locations.find(l => l.id === locId)?.name || 'Local Removido';
+
+                                                return (
+                                                    <div key={locId}>
+                                                        <div className="flex justify-between text-xs font-bold text-slate-600 mb-1">
+                                                            <span>{locName}</span>
+                                                            <span>{rate.toFixed(0)}%</span>
+                                                        </div>
+                                                        <div className="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
+                                                            <div className="bg-emerald-500 h-full rounded-full" style={{ width: `${rate}%` }}></div>
+                                                        </div>
+                                                    </div>
+                                                );
+                                            });
+                                    })()}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     );
