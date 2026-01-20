@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ViewState, User, Appointment, AppointmentType, Sector, Location } from '../types';
+import { ViewState, User, Appointment, AppointmentType, Sector, Location, Attendee } from '../types';
 import { supabase } from '../lib/supabase';
 import { DashboardNotifications } from '../components/DashboardNotifications';
 
@@ -32,6 +32,14 @@ export const AppointmentListView: React.FC<AppointmentListViewProps> = ({
     const [filterLocation, setFilterLocation] = useState('all');
     const [localSectorId, setLocalSectorId] = useState<string>('all');
     const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
+    const [filterUserId, setFilterUserId] = useState<string>('all');
+    const [allUsers, setAllUsers] = useState<User[]>([]);
+
+    useEffect(() => {
+        if (user?.id && filterUserId === 'all') {
+            setFilterUserId(user.id);
+        }
+    }, [user?.id]);
 
     const fetchAppointments = async () => {
         setLoading(true);
@@ -64,6 +72,10 @@ export const AppointmentListView: React.FC<AppointmentListViewProps> = ({
         }
 
         if (data) {
+            // Fetch all users for filter
+            const { data: allProfiles } = await supabase.from('profiles').select('*').order('full_name');
+            if (allProfiles) setAllUsers(allProfiles as User[]);
+
             // Fix: appointments_view might be missing location_id, fetch it explicitly
             const appIds = data.map(d => d.id);
             const { data: rawApps } = await supabase
@@ -76,6 +88,21 @@ export const AppointmentListView: React.FC<AppointmentListViewProps> = ({
                 rawApps.forEach(ra => locationMap.set(ra.id, ra.location_id));
             }
 
+            // Fetch attendees for these appointments
+            const { data: attendeesData } = await supabase
+                .from('appointment_attendees')
+                .select('*')
+                .in('appointment_id', appIds);
+
+            const attendeesMap = new Map<string, Attendee[]>();
+            if (attendeesData) {
+                attendeesData.forEach((att: any) => {
+                    const current = attendeesMap.get(att.appointment_id) || [];
+                    current.push(att);
+                    attendeesMap.set(att.appointment_id, current);
+                });
+            }
+
             const mapped: Appointment[] = data.map(d => ({
                 id: d.id,
                 title: d.title,
@@ -85,7 +112,8 @@ export const AppointmentListView: React.FC<AppointmentListViewProps> = ({
                 type: d.type as any,
                 description: d.description,
                 created_by: d.created_by,
-                location_id: locationMap.get(d.id) || d.location_id
+                location_id: locationMap.get(d.id) || d.location_id,
+                attendees: attendeesMap.get(d.id) || []
             }));
             setAppointments(mapped);
         } else {
@@ -115,7 +143,11 @@ export const AppointmentListView: React.FC<AppointmentListViewProps> = ({
             (app.description?.toLowerCase().includes(searchTerm.toLowerCase()) ?? false);
         const matchesType = filterType === 'all' || app.type === filterType;
         const matchesLocation = filterLocation === 'all' || app.location_id === filterLocation;
-        return matchesSearch && matchesType && matchesLocation;
+        const matchesUser = filterUserId === 'all' ||
+            app.created_by === filterUserId ||
+            (app.attendees?.some(a => a.user_id === filterUserId && a.status !== 'declined') ?? false);
+
+        return matchesSearch && matchesType && matchesLocation && matchesUser;
     });
 
     const getTypeLabel = (type: string) => {
@@ -169,7 +201,7 @@ export const AppointmentListView: React.FC<AppointmentListViewProps> = ({
                         </div>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
                         <div className="relative group md:col-span-2">
                             <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-primary-dark transition-colors">search</span>
                             <input
@@ -179,6 +211,19 @@ export const AppointmentListView: React.FC<AppointmentListViewProps> = ({
                                 placeholder="Buscar por título ou descrição..."
                                 type="text"
                             />
+                        </div>
+                        <div className="relative">
+                            <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">person</span>
+                            <select
+                                value={filterUserId}
+                                onChange={(e) => setFilterUserId(e.target.value)}
+                                className="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl focus:ring-4 focus:ring-primary-dark/5 focus:border-primary-dark transition-all outline-none text-[11px] font-bold uppercase tracking-wider appearance-none cursor-pointer"
+                            >
+                                <option value="all">Usuários (Todos)</option>
+                                {allUsers.map(u => (
+                                    <option key={u.id} value={u.id}>{u.full_name}</option>
+                                ))}
+                            </select>
                         </div>
                         <div className="relative">
                             <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">filter_list</span>

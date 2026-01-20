@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ViewState, User, Appointment, AppointmentType, Location } from '../types';
+import { ViewState, User, Appointment, AppointmentType, Location, Attendee } from '../types';
 import { supabase } from '../lib/supabase';
 import { DashboardNotifications } from '../components/DashboardNotifications';
 
@@ -36,6 +36,14 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
   const [locations, setLocations] = useState<Location[]>([]);
   const [filterEventType, setFilterEventType] = useState('all');
   const [filterLocation, setFilterLocation] = useState('all');
+  const [filterUserId, setFilterUserId] = useState<string>('all');
+  const [allUsers, setAllUsers] = useState<User[]>([]);
+
+  useEffect(() => {
+    if (user?.id && filterUserId === 'all') {
+      setFilterUserId(user.id);
+    }
+  }, [user?.id]);
 
   const goToToday = () => {
     setCurrentDate(new Date());
@@ -78,6 +86,10 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
       query = query.filter('all_participant_sector_ids', 'ov', `{${finalSectorIds.join(',')}}`);
     }
 
+    // Fetch all users for filter
+    const { data: allProfiles } = await supabase.from('profiles').select('*').order('full_name');
+    if (allProfiles) setAllUsers(allProfiles as User[]);
+
     const { data: appData, error } = await query.order('start_time');
 
     if (error) {
@@ -99,6 +111,21 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
         rawApps.forEach(ra => locationMap.set(ra.id, ra.location_id));
       }
 
+      // Fetch attendees for these appointments
+      const { data: attendeesData } = await supabase
+        .from('appointment_attendees')
+        .select('*')
+        .in('appointment_id', appIds);
+
+      const attendeesMap = new Map<string, Attendee[]>();
+      if (attendeesData) {
+        attendeesData.forEach((att: any) => {
+          const current = attendeesMap.get(att.appointment_id) || [];
+          current.push(att);
+          attendeesMap.set(att.appointment_id, current);
+        });
+      }
+
       const mapped: Appointment[] = appData.map(d => ({
         id: d.id,
         title: d.title,
@@ -108,7 +135,8 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
         type: d.type as any,
         description: d.description,
         created_by: d.created_by,
-        location_id: locationMap.get(d.id) || d.location_id // Prefer raw fetch, fallback to view
+        location_id: locationMap.get(d.id) || d.location_id, // Prefer raw fetch, fallback to view
+        attendees: attendeesMap.get(d.id) || []
       }));
       setAppointments(mapped);
     } else {
@@ -160,7 +188,12 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
   const filteredAppointments = appointments.filter(app => {
     const matchesType = filterEventType === 'all' || app.type === filterEventType;
     const matchesLocation = filterLocation === 'all' || app.location_id === filterLocation;
-    return matchesType && matchesLocation;
+
+    const matchesUser = filterUserId === 'all' ||
+      app.created_by === filterUserId ||
+      (app.attendees?.some(a => a.user_id === filterUserId && a.status !== 'declined') ?? false);
+
+    return matchesType && matchesLocation && matchesUser;
   });
 
   // ...
@@ -580,6 +613,17 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
 
             {/* Filters - Hidden on small mobile */}
             <div className="hidden sm:flex items-center gap-2 md:gap-3">
+              <select
+                value={filterUserId}
+                onChange={(e) => setFilterUserId(e.target.value)}
+                className="bg-white/10 text-white border border-white/20 rounded-lg px-2 py-1.5 text-[10px] md:text-xs font-bold focus:outline-none focus:bg-white/20 option:bg-slate-800 max-w-[120px] md:max-w-[150px]"
+              >
+                <option value="all" className="text-slate-800">Todos os Usuários</option>
+                {allUsers.map(u => (
+                  <option key={u.id} value={u.id} className="text-slate-800">{u.full_name}</option>
+                ))}
+              </select>
+
               <select
                 value={filterEventType}
                 onChange={(e) => setFilterEventType(e.target.value)}

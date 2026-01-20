@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
-import { User, Appointment, Sector, AppointmentType, Location } from '../types';
+import { User, Appointment, Sector, AppointmentType, Location, Attendee } from '../types';
 
 interface PerformanceViewProps {
     onToggleSidebar?: () => void;
@@ -20,6 +20,7 @@ export const PerformanceView: React.FC<PerformanceViewProps> = ({ onToggleSideba
     const [filterSector, setFilterSector] = useState('all');
     const [filterType, setFilterType] = useState('all');
     const [filterLocation, setFilterLocation] = useState('all');
+    const [filterUserId, setFilterUserId] = useState<string>('all');
 
     // Derived stats
     const [statusStats, setStatusStats] = useState<Record<string, number>>({});
@@ -49,7 +50,32 @@ export const PerformanceView: React.FC<PerformanceViewProps> = ({ onToggleSideba
 
         // Fetch Appointments (Last 30 days roughly for charts - or all for now)
         const { data: appData } = await supabase.from('appointments').select('*');
-        if (appData) setAppointments(appData as Appointment[]);
+
+        if (appData) {
+            const appIds = appData.map(d => d.id);
+
+            // Fetch attendees
+            const { data: attendeesData } = await supabase
+                .from('appointment_attendees')
+                .select('*')
+                .in('appointment_id', appIds);
+
+            const attendeesMap = new Map<string, Attendee[]>();
+            if (attendeesData) {
+                attendeesData.forEach((att: any) => {
+                    const current = attendeesMap.get(att.appointment_id) || [];
+                    current.push(att);
+                    attendeesMap.set(att.appointment_id, current);
+                });
+            }
+
+            const mapped: Appointment[] = appData.map(d => ({
+                ...d,
+                attendees: attendeesMap.get(d.id) || []
+            }));
+
+            setAppointments(mapped);
+        }
 
         setLoading(false);
     };
@@ -57,12 +83,14 @@ export const PerformanceView: React.FC<PerformanceViewProps> = ({ onToggleSideba
     // --- Filtering Logic ---
 
     // 1. Filter Profiles (affected by Sector filter)
+    // 1. Filter Profiles (affected by Sector filter and User filter)
     const filteredProfiles = profiles.filter(p => {
         const matchesSector = filterSector === 'all' || p.sector_id === filterSector;
-        return matchesSector;
+        const matchesUser = filterUserId === 'all' || p.id === filterUserId;
+        return matchesSector && matchesUser;
     });
 
-    // 2. Filter Appointments (affected by Type and Location filters)
+    // 2. Filter Appointments (affected by Type, Location, and User filters)
     // Note: Appointments don't directly have sector_id usually, unless we join or infer from creator.
     // For this view, we'll assume Sector filter affects Profiles/Team Stats primarily, 
     // and Type/Location filters affect Appointment Stats.
@@ -71,7 +99,10 @@ export const PerformanceView: React.FC<PerformanceViewProps> = ({ onToggleSideba
     const filteredAppointments = appointments.filter(a => {
         const matchesType = filterType === 'all' || a.type === filterType;
         const matchesLocation = filterLocation === 'all' || a.location_id === filterLocation;
-        return matchesType && matchesLocation;
+        const matchesUser = filterUserId === 'all' ||
+            a.created_by === filterUserId ||
+            (a.attendees?.some(att => att.user_id === filterUserId && att.status !== 'declined') ?? false);
+        return matchesType && matchesLocation && matchesUser;
     });
 
     // --- Recalculate Stats based on Filtered Data ---
@@ -141,6 +172,17 @@ export const PerformanceView: React.FC<PerformanceViewProps> = ({ onToggleSideba
 
                     {/* Filters Bar */}
                     <div className="bg-white p-4 rounded-xl border border-slate-100 shadow-sm flex flex-wrap gap-4 items-center">
+                        <div className="flex flex-col gap-1 min-w-[200px] flex-1">
+                            <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Usuário</label>
+                            <select
+                                value={filterUserId}
+                                onChange={(e) => setFilterUserId(e.target.value)}
+                                className="w-full p-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-bold text-slate-700 outline-none focus:border-primary-dark"
+                            >
+                                <option value="all">Todos os Usuários</option>
+                                {profiles.map(p => <option key={p.id} value={p.id}>{p.full_name}</option>)}
+                            </select>
+                        </div>
                         <div className="flex flex-col gap-1 min-w-[200px] flex-1">
                             <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Setor (Equipe)</label>
                             <select
