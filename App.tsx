@@ -182,6 +182,7 @@ const App: React.FC = () => {
   };
 
   const handleOpenDetails = (app: Appointment) => {
+    setPreviousView(currentView);
     setSelectedAppointment(app);
     setCurrentView('details');
   };
@@ -340,7 +341,13 @@ const App: React.FC = () => {
           appointment={selectedAppointment}
           user={currentUser}
           appointmentTypes={appointmentTypes}
-          onBack={() => setCurrentView('calendar')}
+          onBack={() => {
+            if (previousView) {
+              setCurrentView(previousView);
+            } else {
+              setCurrentView('calendar');
+            }
+          }}
           onNavigateToChat={handleNavigateToChat}
           onDuplicate={handleDuplicateAppointment}
         />
