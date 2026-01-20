@@ -575,7 +575,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
                             {appointmentTypes.find(t => t.value === app.type)?.icon}
                           </span>
                         )}
-                        {app.type}
+                        {appointmentTypes.find(t => t.value === app.type)?.label || app.type}
                       </span>
                     </div>
                     <h3 className="text-base md:text-lg font-bold text-slate-900 mb-1 md:mb-2 line-clamp-2">{app.title}</h3>

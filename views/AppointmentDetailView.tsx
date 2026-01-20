@@ -359,9 +359,9 @@ export const AppointmentDetailView: React.FC<AppointmentDetailViewProps> = ({
           <div className="flex items-center gap-2">
             <button
               onClick={onBack}
-              className="flex items-center gap-2 text-sm font-bold text-white bg-slate-800 hover:bg-slate-900 px-5 py-2.5 rounded-xl transition-all shadow-lg shadow-slate-900/10 active:scale-95"
+              className="flex items-center gap-1.5 text-xs font-bold text-white bg-slate-800 hover:bg-slate-900 px-4 py-2 rounded-xl transition-all shadow-lg shadow-slate-900/10 active:scale-95"
             >
-              <span className="material-symbols-outlined text-lg">arrow_back</span>
+              <span className="material-symbols-outlined text-base">arrow_back</span>
               Voltar
             </button>
           </div>
@@ -371,17 +371,17 @@ export const AppointmentDetailView: React.FC<AppointmentDetailViewProps> = ({
                 <>
                   <button
                     onClick={() => onDuplicate && onDuplicate(appointment)}
-                    className="flex items-center gap-2 bg-primary-dark/10 hover:bg-primary-dark/20 text-primary-dark font-bold px-6 py-2.5 rounded-xl transition-all active:scale-[0.98]"
+                    className="flex items-center gap-1.5 bg-primary-dark/10 hover:bg-primary-dark/20 text-primary-dark font-bold px-4 py-2 rounded-xl transition-all active:scale-[0.98] text-xs"
                     title="Duplicar Compromisso"
                   >
-                    <span className="material-symbols-outlined text-xl">content_copy</span>
+                    <span className="material-symbols-outlined text-base">content_copy</span>
                     Duplicar
                   </button>
                   <button
                     onClick={() => setIsEditing(true)}
-                    className="flex items-center gap-2 bg-primary-dark hover:bg-primary-light text-white font-bold px-6 py-2.5 rounded-xl transition-all shadow-md active:scale-[0.98]"
+                    className="flex items-center gap-1.5 bg-primary-dark hover:bg-primary-light text-white font-bold px-4 py-2 rounded-xl transition-all shadow-md active:scale-[0.98] text-xs"
                   >
-                    <span className="material-symbols-outlined text-xl">edit</span>
+                    <span className="material-symbols-outlined text-base">edit</span>
                     Editar
                   </button>
                   <button
