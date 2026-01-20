@@ -180,10 +180,11 @@ export const MessagesView: React.FC<MessagesViewProps> = ({ currentUser, initial
                     {onBack && (
                         <button
                             onClick={onBack}
-                            className="size-8 flex items-center justify-center rounded-lg bg-slate-100 text-slate-500 hover:bg-slate-200 hover:text-slate-700 transition-colors mr-2"
-                            title="Voltar"
+                            className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-slate-100 text-slate-600 hover:bg-slate-200 hover:text-slate-800 transition-colors mr-2 mb-1"
+                            title="Retornar aos detalhes do último evento visualizado"
                         >
                             <span className="material-symbols-outlined text-lg">arrow_back</span>
+                            <span className="text-xs font-bold uppercase tracking-wide">Voltar ao Evento</span>
                         </button>
                     )}
                     <button
