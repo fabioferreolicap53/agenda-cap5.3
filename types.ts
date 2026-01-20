@@ -33,6 +33,7 @@ export interface AppointmentType {
   label: string;
   value: string;
   color: string;
+  icon?: string;
   created_at?: string;
 }
 

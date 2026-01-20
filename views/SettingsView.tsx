@@ -23,6 +23,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ user, appointmentTyp
     const [newTypeLabel, setNewTypeLabel] = useState('');
     const [newTypeValue, setNewTypeValue] = useState('');
     const [newTypeColor, setNewTypeColor] = useState('#3b82f6');
+    const [newTypeIcon, setNewTypeIcon] = useState('label');
     const [loadingTypes, setLoadingTypes] = useState(false);
 
     // Profile states
@@ -127,7 +128,8 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ user, appointmentTyp
         const { error } = await supabase.from('appointment_types').insert({
             label: newTypeLabel.trim(),
             value: newTypeValue.trim().toLowerCase().replace(/\s+/g, '_'),
-            color: newTypeColor
+            color: newTypeColor,
+            icon: newTypeIcon.trim() || 'label'
         });
 
         if (error) {
@@ -136,6 +138,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ user, appointmentTyp
             setNewTypeLabel('');
             setNewTypeValue('');
             setNewTypeColor('#3b82f6');
+            setNewTypeIcon('label');
             onUpdateTypes();
         }
         setLoadingTypes(false);
@@ -361,7 +364,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ user, appointmentTyp
                                 <span className="bg-primary-dark/10 text-primary-dark text-[10px] font-bold px-3 py-1 rounded-full border border-primary-dark/20 uppercase tracking-[0.1em]">Configuração Admin</span>
                             </div>
                             <div className="p-6 space-y-8">
-                                <form onSubmit={handleAddType} className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end bg-slate-50/50 p-6 rounded-2xl border border-dashed border-slate-200">
+                                <form onSubmit={handleAddType} className="grid grid-cols-1 md:grid-cols-5 gap-4 items-end bg-slate-50/50 p-6 rounded-2xl border border-dashed border-slate-200">
                                     <div className="space-y-2 md:col-span-2">
                                         <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.1em] ml-1">Nome do Tipo</label>
                                         <input
@@ -374,6 +377,19 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ user, appointmentTyp
                                             placeholder="Ex: Reunião Mensal"
                                             className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-white focus:border-primary-dark transition-all outline-none text-sm font-bold"
                                         />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.1em] ml-1">Ícone (Material Symbol)</label>
+                                        <div className="flex gap-2 items-center px-4 py-2 border border-slate-200 bg-white rounded-xl h-[46px]">
+                                            <span className="material-symbols-outlined text-slate-400 text-lg">{newTypeIcon || 'label'}</span>
+                                            <input
+                                                type="text"
+                                                value={newTypeIcon}
+                                                onChange={(e) => setNewTypeIcon(e.target.value)}
+                                                placeholder="event, work..."
+                                                className="w-full bg-transparent outline-none text-[11px] font-bold text-slate-700"
+                                            />
+                                        </div>
                                     </div>
                                     <div className="space-y-2">
                                         <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.1em] ml-1">Cor do Card</label>
@@ -402,7 +418,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ user, appointmentTyp
                                         <div key={type.id} className="group relative flex items-center justify-between p-4 bg-white border border-slate-100 rounded-2xl shadow-sm hover:shadow-md hover:border-slate-200 transition-all">
                                             <div className="flex items-center gap-4">
                                                 <div className="size-10 rounded-xl flex items-center justify-center text-white shadow-sm" style={{ backgroundColor: type.color }}>
-                                                    <span className="material-symbols-outlined text-[20px]">label</span>
+                                                    <span className="material-symbols-outlined text-[20px]">{type.icon || 'label'}</span>
                                                 </div>
                                                 <div>
                                                     <p className="text-sm font-black text-slate-900 leading-none mb-1">{type.label}</p>

@@ -420,9 +420,14 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
                     key={app.id}
                     onClick={(e) => { e.stopPropagation(); onOpenDetails(app); }}
                     style={getStyleObj(app.type)}
-                    className="group/event relative px-2 py-1 border-l-2 rounded-r text-[10px] lg:text-[11px] font-bold cursor-pointer hover:opacity-90 transition-opacity truncate shadow-sm mb-1"
+                    className="group/event relative px-2 py-1 border-l-2 rounded-r text-[10px] lg:text-[11px] font-bold cursor-pointer hover:opacity-90 transition-opacity truncate shadow-sm mb-1 flex items-center gap-1"
                   >
-                    {app.startTime} - {app.title}
+                    {appointmentTypes.find(t => t.value === app.type)?.icon && (
+                      <span className="material-symbols-outlined text-[12px] shrink-0">
+                        {appointmentTypes.find(t => t.value === app.type)?.icon}
+                      </span>
+                    )}
+                    <span className="truncate">{app.startTime} - {app.title}</span>
 
                     {/* Hover Preview Tooltip */}
                     <div className="absolute left-0 bottom-full mb-2 w-48 p-2 bg-slate-900 text-white rounded-lg shadow-xl opacity-0 invisible group-hover/event:opacity-100 group-hover/event:visible transition-all z-50 pointer-events-none">
@@ -489,7 +494,14 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
                     className="group/event relative p-3 rounded-xl border-l-4 shadow-sm cursor-pointer transition-all hover:translate-x-1"
                   >
                     <p className="text-[10px] font-bold opacity-70 mb-1">{app.startTime}{app.endTime ? ` - ${app.endTime}` : ''}</p>
-                    <h4 className="text-xs font-bold leading-tight">{app.title}</h4>
+                    <div className="flex items-center gap-2 mb-1">
+                      {appointmentTypes.find(t => t.value === app.type)?.icon && (
+                        <span className="material-symbols-outlined text-[14px]">
+                          {appointmentTypes.find(t => t.value === app.type)?.icon}
+                        </span>
+                      )}
+                      <h4 className="text-xs font-bold leading-tight truncate">{app.title}</h4>
+                    </div>
 
                     {/* Hover Preview Tooltip */}
                     <div className="absolute left-0 bottom-full mb-3 w-56 p-3 bg-slate-900 text-white rounded-xl shadow-2xl opacity-0 invisible group-hover/event:opacity-100 group-hover/event:visible transition-all z-50 pointer-events-none translate-y-2 group-hover/event:translate-y-0">
@@ -522,48 +534,55 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
     });
     return (
       <div className="flex-1 flex flex-col min-h-0 bg-white overflow-y-auto">
-        <div className="p-8 border-b border-slate-100 bg-slate-50/50">
+        <div className="p-4 md:p-8 border-b border-slate-100 bg-slate-50/50">
           <div className="flex items-center gap-4 mb-2">
-            <span className="text-3xl font-black text-slate-900">{currentDate.getDate()}</span>
+            <span className="text-2xl md:text-3xl font-black text-slate-900">{currentDate.getDate()}</span>
             <div>
-              <p className="text-xs font-bold text-primary-dark uppercase tracking-widest">
+              <p className="text-[10px] md:text-xs font-bold text-primary-dark uppercase tracking-widest">
                 {currentDate.toLocaleDateString('pt-BR', { weekday: 'long' })}
               </p>
-              <p className="text-sm font-semibold text-slate-500">
+              <p className="text-xs md:text-sm font-semibold text-slate-500">
                 {currentDate.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })}
               </p>
             </div>
           </div>
         </div>
-        <div className="p-8 flex-grow">
+        <div className="p-4 md:p-8 flex-grow">
           {apps.length === 0 ? (
             <div className="h-64 flex flex-col items-center justify-center text-slate-300">
               <span className="material-symbols-outlined text-6xl mb-4 opacity-20">event_busy</span>
-              <p className="font-bold uppercase tracking-widest text-sm">Nenhum compromisso agendado</p>
+              <p className="font-bold uppercase tracking-widest text-sm text-center px-4">Nenhum compromisso agendado</p>
             </div>
           ) : (
-            <div className="max-w-3xl space-y-6">
+            <div className="max-w-3xl space-y-4 md:space-y-6">
               {apps.map(app => (
                 <div
                   key={app.id}
                   onClick={() => onOpenDetails(app)}
                   style={getStyleObj(app.type)}
-                  className="flex gap-6 p-6 rounded-2xl border border-slate-100 shadow-sm cursor-pointer transition-all hover:shadow-md hover:border-slate-200 bg-white"
+                  className="flex flex-col sm:flex-row gap-4 sm:gap-6 p-4 md:p-6 rounded-2xl border border-slate-100 shadow-sm cursor-pointer transition-all hover:shadow-md hover:border-slate-200 bg-white group"
                 >
-                  <div className="w-24 shrink-0 flex flex-col items-center justify-center border-r border-slate-100 py-1">
+                  <div className="flex sm:flex-col items-center justify-between sm:justify-center w-full sm:w-24 shrink-0 border-b sm:border-b-0 sm:border-r border-slate-100 pb-3 sm:pb-0 sm:py-1">
                     <span className="text-sm font-black text-slate-900">{app.startTime}</span>
-                    <div className="h-4 w-px bg-slate-200 my-1"></div>
+                    <div className="hidden sm:block h-4 w-px bg-slate-200 my-1"></div>
                     <span className="text-[10px] font-bold text-slate-400">{app.endTime}</span>
                   </div>
-                  <div className="flex-1">
+                  <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-2">
-                      <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded border" style={getStyleObj(app.type)}>{app.type}</span>
+                      <span className="text-[9px] md:text-[10px] font-bold uppercase px-2 py-0.5 rounded border flex items-center gap-1.5" style={getStyleObj(app.type)}>
+                        {appointmentTypes.find(t => t.value === app.type)?.icon && (
+                          <span className="material-symbols-outlined text-[14px]">
+                            {appointmentTypes.find(t => t.value === app.type)?.icon}
+                          </span>
+                        )}
+                        {app.type}
+                      </span>
                     </div>
-                    <h3 className="text-lg font-bold text-slate-900 mb-2">{app.title}</h3>
-                    <p className="text-sm text-slate-500 line-clamp-2">{app.description || 'Nenhuma descrição fornecida.'}</p>
+                    <h3 className="text-base md:text-lg font-bold text-slate-900 mb-1 md:mb-2 line-clamp-2">{app.title}</h3>
+                    <p className="text-xs md:text-sm text-slate-500 line-clamp-2">{app.description || 'Nenhuma descrição fornecida.'}</p>
                   </div>
-                  <div className="flex items-center">
-                    <span className="material-symbols-outlined text-slate-300">chevron_right</span>
+                  <div className="hidden sm:flex items-center">
+                    <span className="material-symbols-outlined text-slate-300 group-hover:text-primary-dark transition-colors">chevron_right</span>
                   </div>
                 </div>
               ))}

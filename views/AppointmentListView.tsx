@@ -346,9 +346,14 @@ export const AppointmentListView: React.FC<AppointmentListViewProps> = ({
                                                 <div>
                                                     <div className="flex flex-wrap items-center gap-2 mb-1">
                                                         <span
-                                                            className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full"
+                                                            className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full flex items-center gap-1.5"
                                                             style={{ backgroundColor: getTypeColor(app.type) + '20', color: getTypeColor(app.type) }}
                                                         >
+                                                            {appointmentTypes.find(t => t.value === app.type)?.icon && (
+                                                                <span className="material-symbols-outlined text-[12px]">
+                                                                    {appointmentTypes.find(t => t.value === app.type)?.icon}
+                                                                </span>
+                                                            )}
                                                             {getTypeLabel(app.type)}
                                                         </span>
                                                         <span className={`text-xs font-bold ${isToday ? 'text-primary-dark' : 'text-slate-400'}`}>
