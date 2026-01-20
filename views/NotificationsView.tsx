@@ -195,14 +195,14 @@ export const NotificationsView: React.FC<NotificationsViewProps> = ({ user, onVi
                                             className="px-4 py-2 bg-slate-100 text-slate-600 rounded-xl text-xs font-black hover:bg-slate-200 transition-all flex items-center gap-2"
                                         >
                                             <span className="material-symbols-outlined text-[18px]">chat</span>
-                                            Chat
+                                            Conversa
                                         </button>
                                         <button
                                             onClick={() => onViewAppointment(inv.appointment_id)}
                                             className="px-4 py-2 bg-slate-100 text-slate-600 rounded-xl text-xs font-black hover:bg-slate-200 transition-all flex items-center gap-2"
                                         >
                                             <span className="material-symbols-outlined text-[18px]">visibility</span>
-                                            Ver
+                                            Ver evento
                                         </button>
                                         <div className="w-px h-8 bg-slate-100 mx-1 hidden md:block"></div>
                                         <button
@@ -256,14 +256,14 @@ export const NotificationsView: React.FC<NotificationsViewProps> = ({ user, onVi
                                             className="px-4 py-2 bg-slate-100 text-slate-600 rounded-xl text-xs font-black hover:bg-slate-200 transition-all flex items-center gap-2"
                                         >
                                             <span className="material-symbols-outlined text-[18px]">chat</span>
-                                            Conversar
+                                            Conversa
                                         </button>
                                         <button
                                             onClick={() => onViewAppointment(req.appointment_id)}
                                             className="px-4 py-2 bg-slate-100 text-slate-600 rounded-xl text-xs font-black hover:bg-slate-200 transition-all flex items-center gap-2"
                                         >
                                             <span className="material-symbols-outlined text-[18px]">visibility</span>
-                                            Ver Evento
+                                            Ver evento
                                         </button>
                                         <div className="w-px h-8 bg-slate-100 mx-1 hidden md:block"></div>
                                         <button

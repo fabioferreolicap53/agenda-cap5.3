@@ -184,7 +184,7 @@ export const MessagesView: React.FC<MessagesViewProps> = ({ currentUser, initial
                             title="Retornar aos detalhes do último evento visualizado"
                         >
                             <span className="material-symbols-outlined text-lg">arrow_back</span>
-                            <span className="text-xs font-bold uppercase tracking-wide">Voltar ao Evento</span>
+                            <span className="text-xs font-bold uppercase tracking-wide">VOLTAR</span>
                         </button>
                     )}
                     <button
