@@ -30,25 +30,18 @@ export const NotificationCenter: React.FC<NotificationCenterProps> = ({ user, on
         }
 
         // 2. Fetch pending requests (where I am the organizer and others requested)
-        // Two-step fetch to avoid deep filtering issues
-        const { data: myApps } = await supabase
-            .from('appointments')
-            .select('id')
-            .eq('created_by', user.id);
+        const { data: reqData, error } = await supabase
+            .from('appointment_attendees')
+            .select('*, appointments!inner(title, date, created_by), profiles:user_id(full_name, avatar)')
+            .eq('status', 'requested')
+            .eq('appointments.created_by', user.id);
 
-        if (myApps && myApps.length > 0) {
-            const myAppIds = myApps.map(a => a.id);
-            const { data: reqData } = await supabase
-                .from('appointment_attendees')
-                .select('*, appointments(title, date, created_by), profiles:user_id(full_name, avatar)')
-                .eq('status', 'requested')
-                .in('appointment_id', myAppIds);
+        if (error) {
+            console.error('Error fetching requests:', error);
+        }
 
-            if (reqData) {
-                setPendingRequests(reqData);
-            }
-        } else {
-            setPendingRequests([]);
+        if (reqData) {
+            setPendingRequests(reqData);
         }
     };
 
