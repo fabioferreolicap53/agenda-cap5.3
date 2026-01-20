@@ -334,7 +334,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
 
   const renderMonthView = () => (
     <div className="flex-1 flex flex-col min-h-0 bg-white overflow-y-auto">
-      <div className="grid grid-cols-7 border-b border-slate-200 bg-slate-50 shrink-0">
+      <div className="grid grid-cols-7 border-b border-slate-200 bg-slate-50 shrink-0 sticky top-0 z-10 shadow-sm">
         {['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'].map(day => (
           <div key={day} className="py-4 text-center text-xs font-bold text-slate-500 uppercase tracking-widest border-r border-slate-200 last:border-r-0">
             {day}
@@ -370,10 +370,10 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
                 const dateStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
                 onOpenModal(dateStr);
               }}
-              className={`p-1 lg:p-2 relative group transition-colors min-h-[120px] flex flex-col ${date.month === 'current' ? (isToday ? 'bg-primary-dark/[0.04] ring-1 ring-inset ring-primary-dark/10' : 'bg-white hover:bg-slate-50') : 'bg-slate-50/50 text-slate-400'}`}
+              className={`p-1 lg:p-2 relative group transition-colors min-h-[120px] flex flex-col ${date.month === 'current' ? (isToday ? 'bg-emerald-50 ring-1 ring-inset ring-emerald-200' : 'bg-white hover:bg-slate-50') : 'bg-slate-50/50 text-slate-400'}`}
             >
               <div className="flex items-center justify-between mb-1.5 shrink-0">
-                <span
+                <button
                   onClick={(e) => {
                     e.stopPropagation();
                     const year = currentDate.getFullYear();
@@ -384,11 +384,11 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
                     setCurrentDate(d);
                     setViewMode('day');
                   }}
-                  className={`text-xs font-semibold inline-flex items-center justify-center cursor-pointer hover:underline ${isToday ? 'size-6 bg-primary-dark text-white rounded-full p-1' : 'text-slate-500'}`}
+                  className={`size-7 text-xs font-bold inline-flex items-center justify-center rounded-full transition-all active:scale-90 ${isToday ? 'bg-emerald-500 text-white shadow-md shadow-emerald-500/20' : 'text-slate-500 hover:bg-slate-100 hover:text-slate-900'}`}
                 >
                   {date.day}
-                </span>
-                {isToday && <span className="text-[8px] font-black text-primary-dark uppercase tracking-widest mr-1 opacity-60">Hoje</span>}
+                </button>
+                {isToday && <span className="text-[8px] font-black text-emerald-600 uppercase tracking-widest mr-1 opacity-80">Hoje</span>}
               </div>
 
               <div className="space-y-1 flex-1 overflow-y-auto custom-scrollbar pr-0.5 max-h-[80px] lg:max-h-[100px]">
@@ -556,15 +556,15 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
       <div className="flex-1 flex flex-col min-w-0 h-full">
         {/* Header */}
         {/* Header */}
-        <header className="bg-primary-dark text-white flex flex-col px-4 md:px-8 sticky top-0 z-10 shadow-md shrink-0 transition-all duration-300">
-          <div className="h-16 flex items-center justify-between">
-            <div className="flex items-center gap-2 md:gap-12 w-full md:w-auto">
+        <header className="bg-primary-dark text-white flex flex-col px-2 md:px-8 sticky top-0 z-10 shadow-md shrink-0 transition-all duration-300">
+          <div className="h-12 md:h-16 flex items-center justify-between">
+            <div className="flex items-center gap-1.5 md:gap-12 w-full md:w-auto">
               {/* Mobile Menu Toggle */}
               <button
                 onClick={onToggleSidebar}
-                className="md:hidden size-10 flex items-center justify-center rounded-xl hover:bg-white/10 active:scale-90 transition-all shrink-0"
+                className="md:hidden size-8 flex items-center justify-center rounded-lg hover:bg-white/10 active:scale-90 transition-all shrink-0"
               >
-                <span className="material-symbols-outlined">menu</span>
+                <span className="material-symbols-outlined text-[20px]">menu</span>
               </button>
 
               <div className="flex items-center gap-2 md:gap-4 text-white/90 flex-1 md:flex-none justify-center md:justify-start">
@@ -613,9 +613,9 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
               {/* Mobile Filter Toggle */}
               <button
                 onClick={() => setMobileFiltersOpen(!mobileFiltersOpen)}
-                className="md:hidden size-10 flex items-center justify-center rounded-xl hover:bg-white/10 active:scale-90 transition-all shrink-0"
+                className="md:hidden size-8 flex items-center justify-center rounded-lg hover:bg-white/10 active:scale-90 transition-all shrink-0"
               >
-                <span className="material-symbols-outlined">{mobileFiltersOpen ? 'filter_list_off' : 'filter_list'}</span>
+                <span className="material-symbols-outlined text-[20px]">{mobileFiltersOpen ? 'filter_list_off' : 'filter_list'}</span>
               </button>
 
               {/* Filters - Desktop */}
@@ -691,9 +691,9 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
             */}
             <button
               onClick={() => onOpenModal()}
-              className="md:hidden size-10 flex items-center justify-center bg-white text-primary-dark rounded-xl shadow-lg ml-2 active:scale-95 transition-all shrink-0"
+              className="md:hidden size-8 flex items-center justify-center bg-white text-primary-dark rounded-lg shadow-lg ml-1.5 active:scale-95 transition-all shrink-0"
             >
-              <span className="material-symbols-outlined">add</span>
+              <span className="material-symbols-outlined text-[20px]">add</span>
             </button>
           </div>
 
