@@ -363,7 +363,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
           </div>
         ))}
       </div>
-      <div className="grid grid-cols-7 grid-rows-5 flex-grow divide-x divide-y divide-slate-200 min-h-[600px]">
+      <div className="grid grid-cols-7 grid-rows-5 flex-grow divide-x divide-y divide-slate-200 min-h-[600px] overflow-visible">
         {monthDays.map((date, idx) => {
           const apps = date.month === 'current'
             ? filteredAppointments.filter(app => {
@@ -414,7 +414,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
                 {isToday && <span className="text-[8px] font-black text-emerald-600 uppercase tracking-widest mr-1 opacity-80">Hoje</span>}
               </div>
 
-              <div className="space-y-1 flex-1 overflow-y-auto custom-scrollbar pr-0.5 max-h-[80px] lg:max-h-[100px]">
+              <div className="space-y-1 flex-1 overflow-visible custom-scrollbar pr-0.5 max-h-[80px] lg:max-h-[100px]">
                 {apps.map(app => (
                   <div
                     key={app.id}
