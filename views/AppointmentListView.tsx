@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { ViewState, User, Appointment, AppointmentType, Sector, Location, Attendee } from '../types';
+import { translateType, getTypeColor as getSharedTypeColor } from '../utils';
 import { supabase } from '../lib/supabase';
 import { DashboardNotifications } from '../components/DashboardNotifications';
 
@@ -148,11 +149,11 @@ export const AppointmentListView: React.FC<AppointmentListViewProps> = ({
     });
 
     const getTypeLabel = (type: string) => {
-        return appointmentTypes.find(t => t.value === type)?.label || type;
+        return translateType(type, appointmentTypes);
     };
 
     const getTypeColor = (type: string) => {
-        return appointmentTypes.find(t => t.value === type)?.color || '#cbd5e1';
+        return getSharedTypeColor(type, appointmentTypes);
     };
 
     const formatDate = (dateStr: string) => {

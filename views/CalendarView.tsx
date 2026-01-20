@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { ViewState, User, Appointment, AppointmentType, Location, Attendee } from '../types';
+import { translateType, getTypeColor as getSharedTypeColor } from '../utils';
 import { supabase } from '../lib/supabase';
 import { DashboardNotifications } from '../components/DashboardNotifications';
 
@@ -69,23 +70,17 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
   };
 
   const getTypeStyle = (type: string) => {
-    const found = appointmentTypes.find(t => t.value === type);
-    if (found) {
-      return `border-[${found.color}] text-slate-800`;
-    }
-    return 'bg-slate-100 border-slate-400 text-slate-800';
+    const color = getSharedTypeColor(type, appointmentTypes);
+    return `border-[${color}] text-slate-800`;
   };
 
   const getStyleObj = (type: string) => {
-    const found = appointmentTypes.find(t => t.value === type);
-    if (found) {
-      return {
-        backgroundColor: found.color + '15', // 15 is ~8% opacity
-        borderLeftColor: found.color,
-        color: found.color
-      };
-    }
-    return {};
+    const color = getSharedTypeColor(type, appointmentTypes);
+    return {
+      backgroundColor: color + '15', // 15 is ~8% opacity
+      borderLeftColor: color,
+      color: color
+    };
   };
 
   const [hoverInfo, setHoverInfo] = useState<{ app: Appointment; x: number; y: number } | null>(null);
@@ -506,7 +501,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
                         <span className="p-1 rounded bg-white/10">
                           <span className="material-symbols-outlined text-[14px]">event</span>
                         </span>
-                        <p className="text-[10px] font-bold text-primary-light">{app.startTime}{app.endTime ? ` - ${app.endTime}` : ''}</p>
+                        <p className="text-[10px] font-bold text-sky-300">{app.startTime}{app.endTime ? ` - ${app.endTime}` : ''}</p>
                       </div>
                       <p className="text-xs font-bold mb-1.5 leading-tight">{app.title}</p>
                       {app.description && (
@@ -572,7 +567,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
                             {appointmentTypes.find(t => t.value === app.type)?.icon}
                           </span>
                         )}
-                        {appointmentTypes.find(t => t.value === app.type)?.label || app.type}
+                        {translateType(app.type, appointmentTypes)}
                       </span>
                     </div>
                     <h3 className="text-base md:text-lg font-bold text-slate-900 mb-1 md:mb-2 line-clamp-2">{app.title}</h3>
@@ -930,7 +925,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
             <span className="p-1 rounded bg-white/10">
               <span className="material-symbols-outlined text-[14px]">event</span>
             </span>
-            <p className="text-[10px] font-bold text-primary-light">
+            <p className="text-[10px] font-bold text-sky-300">
               {hoverInfo.app.startTime}{hoverInfo.app.endTime ? ` - ${hoverInfo.app.endTime}` : ''}
             </p>
           </div>

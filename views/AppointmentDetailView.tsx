@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { ViewState, User, Appointment, AppointmentType, Attendee, Location } from '../types';
+import { translateType, getTypeColor as getSharedTypeColor } from '../utils';
 import { supabase } from '../lib/supabase';
 import { Footer } from '../components/Footer';
 
@@ -288,42 +289,11 @@ export const AppointmentDetailView: React.FC<AppointmentDetailViewProps> = ({
   const myAttendeeRecord = attendees.find(a => a.user_id === user?.id);
 
   const getTypeLabel = (type: string) => {
-    const normalize = (str: string) => str.toLowerCase().trim();
-    const normalizedType = normalize(type);
-
-    // 1. Direct match
-    const match = appointmentTypes.find(t => normalize(t.value) === normalizedType);
-    if (match) return match.label;
-
-    // 2. Legacy/Fallback mapping
-    if (normalizedType === 'planning') {
-      const planningMatch = appointmentTypes.find(t =>
-        normalize(t.value).includes('planej') || normalize(t.label).includes('planej')
-      );
-      if (planningMatch) return planningMatch.label;
-      return 'Planejamento';
-    }
-
-    return type;
+    return translateType(type, appointmentTypes);
   };
 
   const getTypeColor = (type: string) => {
-    const normalize = (str: string) => str.toLowerCase().trim();
-    const normalizedType = normalize(type);
-
-    // 1. Direct match
-    const match = appointmentTypes.find(t => normalize(t.value) === normalizedType);
-    if (match) return match.color;
-
-    // 2. Legacy/Fallback mapping
-    if (normalizedType === 'planning') {
-      const planningMatch = appointmentTypes.find(t =>
-        normalize(t.value).includes('planej') || normalize(t.label).includes('planej')
-      );
-      if (planningMatch) return planningMatch.color;
-    }
-
-    return '#1e293b';
+    return getSharedTypeColor(type, appointmentTypes);
   };
 
   const formatDate = (dateStr: string) => {
