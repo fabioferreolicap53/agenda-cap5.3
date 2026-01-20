@@ -58,7 +58,8 @@ const App: React.FC = () => {
         sector_id: profile.sector_id,
         observations: profile.observations,
         avatar: profile.avatar,
-        status: profile.status
+        status: profile.status,
+        phone: profile.phone
       });
     }
 
