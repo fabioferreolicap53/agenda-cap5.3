@@ -14,39 +14,94 @@ export const NotificationsView: React.FC<NotificationsViewProps> = ({ user, onVi
     const [pendingRequests, setPendingRequests] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [actionLoading, setActionLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
 
     const fetchNotifications = async () => {
-        if (!user) return;
+        const userId = user?.id;
+        if (!userId) return;
+
         setLoading(true);
+        setError(null);
 
         try {
-            // 1. Fetch invitations (where I am invited)
-            const { data: invData, error: invError } = await supabase
+            // ---------------------------------------------------------
+            // 1. INVITATIONS (I am the attendee)
+            // ---------------------------------------------------------
+            // Get my invitations
+            const { data: myInvites, error: invError } = await supabase
                 .from('appointment_attendees')
-                .select('*, appointments(title, date, created_by)')
-                .eq('user_id', user.id)
+                .select('*')
+                .eq('user_id', userId)
                 .eq('status', 'pending');
 
             if (invError) throw invError;
-            if (invData) {
-                setInvitations(invData as any);
-            }
 
-            // 2. Fetch pending requests (where I am the organizer)
-            // Fetch all specific requests visible due to RLS, then filter in memory for safety
-            const { data: reqData, error: reqError } = await supabase
+            let enrichedInvitations: any[] = [];
+            if (myInvites && myInvites.length > 0) {
+                const appIds = myInvites.map(inv => inv.appointment_id);
+                const { data: apps } = await supabase
+                    .from('appointments')
+                    .select('id, title, date, created_by')
+                    .in('id', appIds);
+
+                // Map apps to invites
+                enrichedInvitations = myInvites.map(inv => {
+                    const app = apps?.find(a => a.id === inv.appointment_id);
+                    return app ? { ...inv, appointments: app } : null;
+                }).filter(Boolean);
+            }
+            setInvitations(enrichedInvitations);
+
+            // ---------------------------------------------------------
+            // 2. REQUESTS (I am the organizer)
+            // ---------------------------------------------------------
+            const { data: allRequests, error: reqError } = await supabase
                 .from('appointment_attendees')
-                .select('*, appointments(title, date, created_by), profiles:user_id(full_name, avatar)')
+                .select('*')
                 .eq('status', 'requested');
 
             if (reqError) throw reqError;
-            if (reqData) {
-                // Filter: only keep requests where I am the creator of the appointment
-                const myRequests = reqData.filter((r: any) => r.appointments?.created_by === user.id);
-                setPendingRequests(myRequests);
+
+            let myPendingRequests: any[] = [];
+            if (allRequests && allRequests.length > 0) {
+                const reqAppIds = allRequests.map(r => r.appointment_id);
+                // Fetch appointments for these requests
+                const { data: reqApps } = await supabase
+                    .from('appointments')
+                    .select('id, title, date, created_by')
+                    .in('id', reqAppIds);
+
+                // Filter requests where I am the creator
+                const validRequests = allRequests.filter(req => {
+                    const app = reqApps?.find(a => a.id === req.appointment_id);
+                    return app && app.created_by === userId;
+                });
+
+                // Now fetch profiles for these valid requests
+                if (validRequests.length > 0) {
+                    const userIds = validRequests.map(r => r.user_id);
+                    const { data: profiles } = await supabase
+                        .from('profiles')
+                        .select('id, full_name, avatar')
+                        .in('id', userIds);
+
+                    myPendingRequests = validRequests.map(req => {
+                        const app = reqApps?.find(a => a.id === req.appointment_id);
+                        const profile = profiles?.find(p => p.id === req.user_id);
+                        return {
+                            ...req,
+                            appointments: app,
+                            profiles: profile
+                        };
+                    });
+                }
             }
+
+            setPendingRequests(myPendingRequests);
+
         } catch (err: any) {
             console.error('Error fetching notifications:', err.message);
+            setError(err.message);
         } finally {
             setLoading(false);
         }
