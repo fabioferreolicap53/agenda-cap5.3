@@ -4,7 +4,7 @@ import { supabase } from '../lib/supabase';
 import { DashboardNotifications } from '../components/DashboardNotifications';
 
 interface CalendarViewProps {
-  onOpenModal: () => void;
+  onOpenModal: (date?: string) => void;
   onChangeView: (view: ViewState) => void;
   onOpenDetails: (app: Appointment) => void;
   user: User | null;
@@ -40,11 +40,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
   const [allUsers, setAllUsers] = useState<User[]>([]);
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
 
-  useEffect(() => {
-    if (user?.id && filterUserId === 'all') {
-      setFilterUserId(user.id);
-    }
-  }, [user?.id]);
+
 
   const goToToday = () => {
     setCurrentDate(new Date());
@@ -682,7 +678,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
               </div>
               <div className="h-8 w-px bg-white/20 mx-2"></div>
               <button
-                onClick={onOpenModal}
+                onClick={() => onOpenModal()}
                 className="flex items-center gap-2 px-5 py-2 bg-white text-primary-dark hover:bg-slate-100 rounded-lg font-bold text-sm transition-all shadow-lg shadow-black/5"
               >
                 <span className="material-symbols-outlined text-[20px]">add_circle</span>
@@ -694,7 +690,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
                 I need to make sure 'onOpenModal' is accessible on mobile.
             */}
             <button
-              onClick={onOpenModal}
+              onClick={() => onOpenModal()}
               className="md:hidden size-10 flex items-center justify-center bg-white text-primary-dark rounded-xl shadow-lg ml-2 active:scale-95 transition-all shrink-0"
             >
               <span className="material-symbols-outlined">add</span>

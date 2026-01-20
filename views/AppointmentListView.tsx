@@ -36,11 +36,7 @@ export const AppointmentListView: React.FC<AppointmentListViewProps> = ({
     const [allUsers, setAllUsers] = useState<User[]>([]);
     const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
 
-    useEffect(() => {
-        if (user?.id && filterUserId === 'all') {
-            setFilterUserId(user.id);
-        }
-    }, [user?.id]);
+
 
     const fetchAppointments = async () => {
         setLoading(true);
