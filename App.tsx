@@ -288,14 +288,29 @@ const App: React.FC = () => {
 
   if (currentView === 'details' && selectedAppointment) {
     return (
-      <AppointmentDetailView
-        appointment={selectedAppointment}
-        user={currentUser}
-        appointmentTypes={appointmentTypes}
-        onBack={() => setCurrentView('calendar')}
-        onNavigateToChat={handleNavigateToChat}
-        onDuplicate={handleDuplicateAppointment}
-      />
+      <>
+        <AppointmentDetailView
+          appointment={selectedAppointment}
+          user={currentUser}
+          appointmentTypes={appointmentTypes}
+          onBack={() => setCurrentView('calendar')}
+          onNavigateToChat={handleNavigateToChat}
+          onDuplicate={handleDuplicateAppointment}
+        />
+        <Modal
+          isOpen={isModalOpen}
+          onClose={() => {
+            setIsModalOpen(false);
+            setInitialDate(undefined);
+            setDuplicateAppointment(null);
+          }}
+          user={currentUser}
+          appointmentTypes={appointmentTypes}
+          initialDate={initialDate}
+          initialSelectedUsers={initialSelectedUsers}
+          initialAppointment={duplicateAppointment}
+        />
+      </>
     );
   }
 
