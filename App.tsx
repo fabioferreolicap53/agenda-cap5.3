@@ -16,7 +16,7 @@ import { supabase } from './lib/supabase';
 import { Session } from '@supabase/supabase-js';
 import { User as AppUser, Appointment, Sector, AppointmentType } from './types';
 import { useCallback } from 'react';
-import { MobileNav } from './components/MobileNav';
+
 
 const App: React.FC = () => {
   const [currentView, setCurrentView] = useState<ViewState>('login');
@@ -172,6 +172,23 @@ const App: React.FC = () => {
     };
   }, [session?.user?.id, fetchData]);
 
+  useEffect(() => {
+    const handlePopState = (event: PopStateEvent) => {
+      if (event.state && event.state.view) {
+        setCurrentView(event.state.view);
+        setPreviousView(event.state.previousView || 'calendar');
+      }
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
+
+  const changeView = (view: ViewState) => {
+    setCurrentView(view);
+    window.history.pushState({ view, previousView: currentView }, '', `#${view}`);
+  };
+
 
   const handleLogin = () => {
     // CurrentView will be updated by handleLogin in LoginView calling supabase.auth.signIn
@@ -185,7 +202,7 @@ const App: React.FC = () => {
   const handleOpenDetails = (app: Appointment) => {
     setPreviousView(currentView);
     setSelectedAppointment(app);
-    setCurrentView('details');
+    changeView('details');
   };
 
   const openAppointmentById = async (id: string) => {
@@ -208,7 +225,7 @@ const App: React.FC = () => {
   const handleNavigateToChat = (userId: string) => {
     setPreviousView(currentView);
     setChatTargetUserId(userId);
-    setCurrentView('messages');
+    changeView('messages');
   };
 
   const handleDuplicateAppointment = (appointment: Appointment) => {
@@ -231,7 +248,7 @@ const App: React.FC = () => {
               setDuplicateAppointment(null);
               setIsModalOpen(true);
             }}
-            onChangeView={setCurrentView}
+            onChangeView={changeView}
             onOpenDetails={handleOpenDetails}
             user={currentUser}
             selectedSectorIds={selectedSectorIds}
@@ -244,7 +261,7 @@ const App: React.FC = () => {
       case 'list':
         return (
           <AppointmentListView
-            onChangeView={setCurrentView}
+            onChangeView={changeView}
             onOpenDetails={handleOpenDetails}
             user={currentUser}
             selectedSectorIds={selectedSectorIds}
@@ -256,7 +273,7 @@ const App: React.FC = () => {
         );
       case 'team':
         return <TeamView
-          onChangeView={setCurrentView}
+          onChangeView={changeView}
           currentUser={currentUser}
           sectors={sectors}
           onOpenModal={(participants) => {
@@ -269,7 +286,7 @@ const App: React.FC = () => {
           onToggleSidebar={() => setIsSidebarOpen(true)}
         />;
       case 'performance':
-        return <PerformanceView />;
+        return <PerformanceView onToggleSidebar={() => setIsSidebarOpen(true)} />;
       case 'settings':
         return <SettingsView
           user={currentUser}
@@ -289,7 +306,7 @@ const App: React.FC = () => {
               setIsModalOpen(true);
             }}
             onToggleSidebar={() => setIsSidebarOpen(true)}
-            onBack={previousView ? () => setCurrentView(previousView) : undefined}
+            onBack={previousView ? () => changeView(previousView) : undefined}
           />
         );
       case 'notifications':
@@ -310,7 +327,7 @@ const App: React.FC = () => {
               setDuplicateAppointment(null);
               setIsModalOpen(true);
             }}
-            onChangeView={setCurrentView}
+            onChangeView={changeView}
             onOpenDetails={handleOpenDetails}
             user={currentUser}
             selectedSectorIds={selectedSectorIds}
@@ -344,9 +361,9 @@ const App: React.FC = () => {
           appointmentTypes={appointmentTypes}
           onBack={() => {
             if (previousView) {
-              setCurrentView(previousView);
+              changeView(previousView);
             } else {
-              setCurrentView('calendar');
+              changeView('calendar');
             }
           }}
           onNavigateToChat={handleNavigateToChat}
@@ -373,7 +390,7 @@ const App: React.FC = () => {
     <div className="flex h-screen w-full bg-slate-100 overflow-hidden font-sans">
       <Sidebar
         currentView={currentView}
-        onChangeView={setCurrentView}
+        onChangeView={changeView}
         onLogout={handleLogout}
         user={currentUser}
         sectors={sectors}
@@ -387,17 +404,12 @@ const App: React.FC = () => {
         isOpen={isSidebarOpen}
         onClose={() => setIsSidebarOpen(false)}
       />
-      <main className="flex-1 flex flex-col min-w-0 h-full relative pb-16 md:pb-0">
+      <main className="flex-1 flex flex-col min-w-0 h-full relative">
         {renderContent()}
         <Footer />
       </main>
 
-      <MobileNav
-        currentView={currentView}
-        onChangeView={setCurrentView}
-        unreadCount={unreadCount}
-        onToggleSidebar={() => setIsSidebarOpen(true)}
-      />
+
 
       <Modal
         isOpen={isModalOpen}

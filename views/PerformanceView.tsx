@@ -2,7 +2,11 @@ import React, { useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
 import { User, Appointment, Sector, AppointmentType, Location } from '../types';
 
-export const PerformanceView: React.FC = () => {
+interface PerformanceViewProps {
+    onToggleSidebar?: () => void;
+}
+
+export const PerformanceView: React.FC<PerformanceViewProps> = ({ onToggleSidebar }) => {
     const [loading, setLoading] = useState(true);
     const [profiles, setProfiles] = useState<User[]>([]);
     const [appointments, setAppointments] = useState<Appointment[]>([]);
@@ -121,9 +125,19 @@ export const PerformanceView: React.FC = () => {
     return (
         <div className="flex-1 p-8 bg-slate-50 overflow-y-auto">
             <div className="max-w-6xl mx-auto">
-                <header className="mb-8">
-                    <h1 className="text-2xl font-bold text-slate-900 mb-2">Desempenho da Equipe</h1>
-                    <p className="text-slate-500 mb-6">Visão geral em tempo real da equipe e atividades.</p>
+                <header className="mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div className="flex items-center gap-4">
+                        <button
+                            onClick={onToggleSidebar}
+                            className="md:hidden size-10 flex items-center justify-center rounded-xl bg-primary-dark text-white shadow-lg active:scale-90 transition-all shrink-0"
+                        >
+                            <span className="material-symbols-outlined">menu</span>
+                        </button>
+                        <div>
+                            <h1 className="text-2xl font-bold text-slate-900 mb-2">Desempenho da Equipe</h1>
+                            <p className="text-slate-500">Visão geral em tempo real da equipe e atividades.</p>
+                        </div>
+                    </div>
 
                     {/* Filters Bar */}
                     <div className="bg-white p-4 rounded-xl border border-slate-100 shadow-sm flex flex-wrap gap-4 items-center">

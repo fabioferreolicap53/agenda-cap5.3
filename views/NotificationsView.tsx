@@ -156,9 +156,9 @@ export const NotificationsView: React.FC<NotificationsViewProps> = ({ user, onVi
                 <div className="flex items-center gap-4">
                     <button
                         onClick={onToggleSidebar}
-                        className="md:hidden size-10 flex items-center justify-center rounded-xl hover:bg-slate-100 active:scale-90 transition-all"
+                        className="md:hidden size-10 flex items-center justify-center rounded-xl hover:bg-slate-100 active:scale-90 transition-all text-slate-600"
                     >
-                        <span className="material-symbols-outlined text-slate-600">menu</span>
+                        <span className="material-symbols-outlined">menu</span>
                     </button>
                     <h2 className="text-lg font-black text-slate-900 uppercase tracking-widest">Solicitações e Convites</h2>
                 </div>
