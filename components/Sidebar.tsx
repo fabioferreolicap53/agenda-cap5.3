@@ -16,6 +16,7 @@ interface SidebarProps {
   onUpdateProfile?: () => void;
   onNavigateToChat?: (userId: string) => void;
   unreadCount?: number;
+  pendingNotificationsCount?: number;
   isOpen?: boolean;
   onClose?: () => void;
 }
@@ -32,6 +33,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   onUpdateProfile,
   onNavigateToChat,
   unreadCount = 0,
+  pendingNotificationsCount = 0,
   isOpen,
   onClose
 }) => {
@@ -226,6 +228,18 @@ export const Sidebar: React.FC<SidebarProps> = ({
             >
               <span className={`material-symbols-outlined text-[16px] ${currentView === 'settings' ? 'text-white' : 'text-slate-400 group-hover:text-primary-dark'}`}>settings</span>
               <span className="text-xs">Configurações</span>
+            </button>
+            <button
+              onClick={() => { onChangeView('notifications'); onClose?.(); }}
+              className={navItemClass('notifications', currentView === 'notifications')}
+            >
+              <span className={`material-symbols-outlined text-[16px] ${currentView === 'notifications' ? 'text-white' : 'text-slate-400 group-hover:text-primary-dark'}`}>notifications</span>
+              <span className="text-xs">Solicitações</span>
+              {pendingNotificationsCount > 0 && (
+                <span className="absolute right-3 flex h-5 min-w-[20px] items-center justify-center rounded-full bg-indigo-500 px-1.5 text-[10px] font-bold text-white shadow-sm ring-2 ring-white">
+                  {pendingNotificationsCount > 99 ? '99+' : pendingNotificationsCount}
+                </span>
+              )}
             </button>
           </nav>
 

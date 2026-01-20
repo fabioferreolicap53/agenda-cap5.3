@@ -9,6 +9,7 @@ import { PerformanceView } from './views/PerformanceView';
 import { SettingsView } from './views/SettingsView';
 import { AppointmentListView } from './views/AppointmentListView';
 import { MessagesView } from './views/MessagesView';
+import { NotificationsView } from './views/NotificationsView';
 import { Modal } from './components/Modal';
 import { Footer } from './components/Footer';
 import { supabase } from './lib/supabase';
@@ -32,6 +33,7 @@ const App: React.FC = () => {
   const [duplicateAppointment, setDuplicateAppointment] = useState<Appointment | null>(null);
   const [chatTargetUserId, setChatTargetUserId] = useState<string | null>(null);
   const [unreadCount, setUnreadCount] = useState(0);
+  const [pendingNotificationsCount, setPendingNotificationsCount] = useState(0);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [previousView, setPreviousView] = useState<ViewState | null>(null);
 
@@ -82,6 +84,22 @@ const App: React.FC = () => {
     if (!countError && count !== null) {
       setUnreadCount(count);
     }
+
+    // 5. Fetch Pending Notifications Count (Invitations + Requests)
+    const { data: invitations } = await supabase
+      .from('appointment_attendees')
+      .select('id')
+      .eq('user_id', userId)
+      .eq('status', 'pending');
+
+    const { data: requests } = await supabase
+      .from('appointment_attendees')
+      .select('*, appointments!inner(created_by)')
+      .eq('status', 'requested')
+      .eq('appointments.created_by', userId);
+
+    const totalNotifications = (invitations?.length || 0) + (requests?.length || 0);
+    setPendingNotificationsCount(totalNotifications);
   }, [session?.user.id, session?.user.email]);
 
   useEffect(() => {
@@ -125,7 +143,22 @@ const App: React.FC = () => {
           filter: `receiver_id=eq.${session.user.id}`
         },
         () => {
-          // Re-fetch unread count on any change to user's messages
+          // Re-fetch unread count and notifications on any change to user's messages
+          fetchData(session.user.id);
+        }
+      )
+      .subscribe();
+
+    const notificationsSubscription = supabase
+      .channel('public:appointment_attendees_badge')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'appointment_attendees'
+        },
+        () => {
           fetchData(session.user.id);
         }
       )
@@ -133,6 +166,7 @@ const App: React.FC = () => {
 
     return () => {
       subscription.unsubscribe();
+      notificationsSubscription.unsubscribe();
     };
   }, [session?.user?.id, fetchData]);
 
@@ -255,6 +289,15 @@ const App: React.FC = () => {
             onBack={previousView ? () => setCurrentView(previousView) : undefined}
           />
         );
+      case 'notifications':
+        return (
+          <NotificationsView
+            user={currentUser}
+            onViewAppointment={openAppointmentById}
+            onNavigateToChat={handleNavigateToChat}
+            onToggleSidebar={() => setIsSidebarOpen(true)}
+          />
+        );
       default:
         return (
           <CalendarView
@@ -331,6 +374,7 @@ const App: React.FC = () => {
         onUpdateProfile={() => fetchData(session?.user.id)}
         onNavigateToChat={handleNavigateToChat}
         unreadCount={unreadCount}
+        pendingNotificationsCount={pendingNotificationsCount}
         isOpen={isSidebarOpen}
         onClose={() => setIsSidebarOpen(false)}
       />
