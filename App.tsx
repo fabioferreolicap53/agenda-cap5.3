@@ -174,9 +174,22 @@ const App: React.FC = () => {
 
   useEffect(() => {
     const handlePopState = (event: PopStateEvent) => {
-      if (event.state && event.state.view) {
-        setCurrentView(event.state.view);
-        setPreviousView(event.state.previousView || 'calendar');
+      const state = event.state || {};
+
+      // Handle Modal via History
+      if (state.modal) {
+        setIsModalOpen(true);
+      } else {
+        // If we pop to a state without 'modal', close it
+        setIsModalOpen(false);
+        setInitialDate(undefined);
+        setDuplicateAppointment(null);
+      }
+
+      // Handle View
+      if (state.view) {
+        setCurrentView(state.view);
+        setPreviousView(state.previousView || 'calendar');
       }
     };
 
@@ -234,6 +247,9 @@ const App: React.FC = () => {
     const userIds = appointment.attendees?.map(a => a.user_id) || [];
     setInitialSelectedUsers(userIds);
     setDuplicateAppointment(appointment);
+
+    // Push modal state
+    window.history.pushState({ ...window.history.state, modal: true }, '', '');
     setIsModalOpen(true);
   };
 
@@ -246,6 +262,7 @@ const App: React.FC = () => {
               setInitialDate(date);
               setInitialSelectedUsers([]);
               setDuplicateAppointment(null);
+              window.history.pushState({ ...window.history.state, modal: true }, '', '');
               setIsModalOpen(true);
             }}
             onChangeView={changeView}
@@ -372,9 +389,8 @@ const App: React.FC = () => {
         <Modal
           isOpen={isModalOpen}
           onClose={() => {
-            setIsModalOpen(false);
-            setInitialDate(undefined);
-            setDuplicateAppointment(null);
+            // Navigating back will trigger the popstate listener which closes the modal
+            window.history.back();
           }}
           user={currentUser}
           appointmentTypes={appointmentTypes}
@@ -414,9 +430,7 @@ const App: React.FC = () => {
       <Modal
         isOpen={isModalOpen}
         onClose={() => {
-          setIsModalOpen(false);
-          setInitialDate(undefined);
-          setDuplicateAppointment(null);
+          window.history.back();
         }}
         user={currentUser}
         appointmentTypes={appointmentTypes}

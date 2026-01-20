@@ -27,6 +27,28 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
   onDuplicate
 }) => {
   const [viewMode, setViewMode] = useState<'month' | 'week' | 'day'>('month');
+
+  // History management for internal view mode
+  useEffect(() => {
+    const handlePopState = (event: PopStateEvent) => {
+      if (event.state && event.state.calendarView) {
+        setViewMode(event.state.calendarView);
+      }
+    };
+    window.addEventListener('popstate', handlePopState);
+
+    // Check initial state
+    if (window.history.state?.calendarView) {
+      setViewMode(window.history.state.calendarView);
+    }
+
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
+
+  const changeViewMode = (mode: 'month' | 'week' | 'day') => {
+    window.history.pushState({ ...window.history.state, calendarView: mode }, '', '');
+    setViewMode(mode);
+  };
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [team, setTeam] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
@@ -382,7 +404,8 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
                     if (date.month === 'prev') d.setMonth(month - 1);
                     else if (date.month === 'next') d.setMonth(month + 1);
                     setCurrentDate(d);
-                    setViewMode('day');
+                    setCurrentDate(d);
+                    changeViewMode('day');
                   }}
                   className={`size-7 text-xs font-bold inline-flex items-center justify-center rounded-full transition-all active:scale-90 ${isToday ? 'bg-emerald-500 text-white shadow-md shadow-emerald-500/20' : 'text-slate-500 hover:bg-slate-100 hover:text-slate-900'}`}
                 >
@@ -658,19 +681,19 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
             <div className="hidden md:flex items-center gap-4">
               <div className="flex bg-white/10 p-1 rounded-lg">
                 <button
-                  onClick={() => setViewMode('month')}
+                  onClick={() => changeViewMode('month')}
                   className={`px-4 py-1.5 text-xs font-bold rounded-md transition-all ${viewMode === 'month' ? 'bg-white text-primary-dark shadow-sm' : 'text-white/70 hover:text-white'}`}
                 >
                   Mês
                 </button>
                 <button
-                  onClick={() => setViewMode('week')}
+                  onClick={() => changeViewMode('week')}
                   className={`px-4 py-1.5 text-xs font-bold rounded-md transition-all ${viewMode === 'week' ? 'bg-white text-primary-dark shadow-sm' : 'text-white/70 hover:text-white'}`}
                 >
                   Semana
                 </button>
                 <button
-                  onClick={() => setViewMode('day')}
+                  onClick={() => changeViewMode('day')}
                   className={`px-4 py-1.5 text-xs font-bold rounded-md transition-all ${viewMode === 'day' ? 'bg-white text-primary-dark shadow-sm' : 'text-white/70 hover:text-white'}`}
                 >
                   Dia
@@ -712,9 +735,9 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
               </select>
               <div className="flex bg-white/10 p-1 rounded-lg col-span-2 justify-between">
                 {/* View Mode Toggle Mobile */}
-                <button onClick={() => setViewMode('month')} className={`flex-1 py-1.5 text-[10px] font-bold rounded md:rounded-md transition-all ${viewMode === 'month' ? 'bg-white text-primary-dark shadow-sm' : 'text-white/70'}`}>Mês</button>
-                <button onClick={() => setViewMode('week')} className={`flex-1 py-1.5 text-[10px] font-bold rounded md:rounded-md transition-all ${viewMode === 'week' ? 'bg-white text-primary-dark shadow-sm' : 'text-white/70'}`}>Sem</button>
-                <button onClick={() => setViewMode('day')} className={`flex-1 py-1.5 text-[10px] font-bold rounded md:rounded-md transition-all ${viewMode === 'day' ? 'bg-white text-primary-dark shadow-sm' : 'text-white/70'}`}>Dia</button>
+                <button onClick={() => changeViewMode('month')} className={`flex-1 py-1.5 text-[10px] font-bold rounded md:rounded-md transition-all ${viewMode === 'month' ? 'bg-white text-primary-dark shadow-sm' : 'text-white/70'}`}>Mês</button>
+                <button onClick={() => changeViewMode('week')} className={`flex-1 py-1.5 text-[10px] font-bold rounded md:rounded-md transition-all ${viewMode === 'week' ? 'bg-white text-primary-dark shadow-sm' : 'text-white/70'}`}>Sem</button>
+                <button onClick={() => changeViewMode('day')} className={`flex-1 py-1.5 text-[10px] font-bold rounded md:rounded-md transition-all ${viewMode === 'day' ? 'bg-white text-primary-dark shadow-sm' : 'text-white/70'}`}>Dia</button>
               </div>
               <select
                 value={filterEventType}
