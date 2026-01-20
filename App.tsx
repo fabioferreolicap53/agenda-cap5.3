@@ -33,6 +33,7 @@ const App: React.FC = () => {
   const [chatTargetUserId, setChatTargetUserId] = useState<string | null>(null);
   const [unreadCount, setUnreadCount] = useState(0);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [previousView, setPreviousView] = useState<ViewState | null>(null);
 
   const fetchData = useCallback(async (uid?: string) => {
     const userId = uid || session?.user.id;
@@ -168,6 +169,7 @@ const App: React.FC = () => {
   };
 
   const handleNavigateToChat = (userId: string) => {
+    setPreviousView(currentView);
     setChatTargetUserId(userId);
     setCurrentView('messages');
   };
@@ -250,6 +252,7 @@ const App: React.FC = () => {
               setIsModalOpen(true);
             }}
             onToggleSidebar={() => setIsSidebarOpen(true)}
+            onBack={previousView ? () => setCurrentView(previousView) : undefined}
           />
         );
       default:

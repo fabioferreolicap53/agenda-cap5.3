@@ -8,9 +8,10 @@ interface MessagesViewProps {
     initialSelectedUserId?: string | null;
     onOpenModal: (userId?: string) => void;
     onToggleSidebar?: () => void;
+    onBack?: () => void;
 }
 
-export const MessagesView: React.FC<MessagesViewProps> = ({ currentUser, initialSelectedUserId, onOpenModal, onToggleSidebar }) => {
+export const MessagesView: React.FC<MessagesViewProps> = ({ currentUser, initialSelectedUserId, onOpenModal, onToggleSidebar, onBack }) => {
     const [users, setUsers] = useState<User[]>([]);
     const [messages, setMessages] = useState<Message[]>([]);
     const [unreadCounts, setUnreadCounts] = useState<{ [key: string]: number }>({});
@@ -176,6 +177,15 @@ export const MessagesView: React.FC<MessagesViewProps> = ({ currentUser, initial
             {/* Sidebar: Users List */}
             <div className="w-80 bg-white border-r border-slate-200 flex flex-col">
                 <div className="p-6 border-b border-slate-100 flex items-center gap-3">
+                    {onBack && (
+                        <button
+                            onClick={onBack}
+                            className="size-8 flex items-center justify-center rounded-lg bg-slate-100 text-slate-500 hover:bg-slate-200 hover:text-slate-700 transition-colors mr-2"
+                            title="Voltar"
+                        >
+                            <span className="material-symbols-outlined text-lg">arrow_back</span>
+                        </button>
+                    )}
                     <button
                         onClick={onToggleSidebar}
                         className="md:hidden size-10 flex items-center justify-center rounded-xl bg-primary-dark text-white shadow-lg active:scale-90 transition-all"
