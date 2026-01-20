@@ -19,28 +19,37 @@ export const NotificationsView: React.FC<NotificationsViewProps> = ({ user, onVi
         if (!user) return;
         setLoading(true);
 
-        // 1. Fetch invitations (where I am invited)
-        const { data: invData } = await supabase
-            .from('appointment_attendees')
-            .select('*, appointments(title, date, created_by)')
-            .eq('user_id', user.id)
-            .eq('status', 'pending');
+        try {
+            // 1. Fetch invitations (where I am invited)
+            const { data: invData, error: invError } = await supabase
+                .from('appointment_attendees')
+                .select('*, appointments(title, date, created_by)')
+                .eq('user_id', user.id)
+                .eq('status', 'pending');
 
-        if (invData) {
-            setInvitations(invData as any);
+            if (invError) throw invError;
+            if (invData) {
+                setInvitations(invData as any);
+            }
+
+            // 2. Fetch pending requests (where I am the organizer)
+            // Fetch all specific requests visible due to RLS, then filter in memory for safety
+            const { data: reqData, error: reqError } = await supabase
+                .from('appointment_attendees')
+                .select('*, appointments(title, date, created_by), profiles:user_id(full_name, avatar)')
+                .eq('status', 'requested');
+
+            if (reqError) throw reqError;
+            if (reqData) {
+                // Filter: only keep requests where I am the creator of the appointment
+                const myRequests = reqData.filter((r: any) => r.appointments?.created_by === user.id);
+                setPendingRequests(myRequests);
+            }
+        } catch (err: any) {
+            console.error('Error fetching notifications:', err.message);
+        } finally {
+            setLoading(false);
         }
-
-        // 2. Fetch pending requests (where I am the organizer)
-        const { data: reqData } = await supabase
-            .from('appointment_attendees')
-            .select('*, appointments!inner(title, date, created_by), profiles:user_id(full_name, avatar)')
-            .eq('status', 'requested')
-            .eq('appointments.created_by', user.id);
-
-        if (reqData) {
-            setPendingRequests(reqData);
-        }
-        setLoading(false);
     };
 
     useEffect(() => {

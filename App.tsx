@@ -94,11 +94,12 @@ const App: React.FC = () => {
 
     const { data: requests } = await supabase
       .from('appointment_attendees')
-      .select('*, appointments!inner(created_by)')
-      .eq('status', 'requested')
-      .eq('appointments.created_by', userId);
+      .select('*, appointments(created_by)')
+      .eq('status', 'requested');
 
-    const totalNotifications = (invitations?.length || 0) + (requests?.length || 0);
+    const myRequestsCount = requests?.filter((r: any) => r.appointments?.created_by === userId).length || 0;
+
+    const totalNotifications = (invitations?.length || 0) + myRequestsCount;
     setPendingNotificationsCount(totalNotifications);
   }, [session?.user.id, session?.user.email]);
 
