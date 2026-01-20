@@ -88,6 +88,8 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
     return {};
   };
 
+  const [hoverInfo, setHoverInfo] = useState<{ app: Appointment; x: number; y: number } | null>(null);
+
   const fetchData = async () => {
     // Fetch locations
     const { data: locData } = await supabase.from('locations').select('*').order('name');
@@ -363,7 +365,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
           </div>
         ))}
       </div>
-      <div className="grid grid-cols-7 grid-rows-5 flex-grow divide-x divide-y divide-slate-200 min-h-[600px] overflow-visible">
+      <div className="grid grid-cols-7 grid-rows-5 flex-grow divide-x divide-y divide-slate-200 min-h-[600px]">
         {monthDays.map((date, idx) => {
           const apps = date.month === 'current'
             ? filteredAppointments.filter(app => {
@@ -414,11 +416,16 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
                 {isToday && <span className="text-[8px] font-black text-emerald-600 uppercase tracking-widest mr-1 opacity-80">Hoje</span>}
               </div>
 
-              <div className="space-y-1 flex-1 overflow-visible custom-scrollbar pr-0.5 max-h-[80px] lg:max-h-[100px]">
+              <div className="space-y-1 flex-1 overflow-y-auto custom-scrollbar pr-0.5 max-h-[80px] lg:max-h-[100px]">
                 {apps.map(app => (
                   <div
                     key={app.id}
                     onClick={(e) => { e.stopPropagation(); onOpenDetails(app); }}
+                    onMouseEnter={(e) => {
+                      const rect = e.currentTarget.getBoundingClientRect();
+                      setHoverInfo({ app, x: rect.left, y: rect.bottom + 5 });
+                    }}
+                    onMouseLeave={() => setHoverInfo(null)}
                     style={getStyleObj(app.type)}
                     className="group/event relative px-2 py-1 border-l-2 rounded-r text-[10px] lg:text-[11px] font-bold cursor-pointer hover:opacity-90 transition-opacity truncate shadow-sm mb-1 flex items-center gap-1"
                   >
@@ -428,21 +435,6 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
                       </span>
                     )}
                     <span className="truncate">{app.startTime} - {app.title}</span>
-
-                    {/* Hover Preview Tooltip */}
-                    <div className="absolute left-0 top-full mt-2 w-56 p-3 bg-slate-900 text-white rounded-xl shadow-2xl opacity-0 invisible group-hover/event:opacity-100 group-hover/event:visible transition-all z-[100] pointer-events-none -translate-y-2 group-hover/event:translate-y-0">
-                      <div className="flex items-center gap-2 mb-2">
-                        <span className="p-1 rounded bg-white/10">
-                          <span className="material-symbols-outlined text-[14px]">event</span>
-                        </span>
-                        <p className="text-[10px] font-bold text-primary-light">{app.startTime}{app.endTime ? ` - ${app.endTime}` : ''}</p>
-                      </div>
-                      <p className="text-xs font-bold mb-1.5 leading-tight">{app.title}</p>
-                      {app.description && (
-                        <p className="text-[10px] text-slate-300 line-clamp-3 leading-relaxed border-t border-white/10 pt-1.5 mt-1.5">{app.description}</p>
-                      )}
-                      <div className="absolute bottom-full left-6 -mb-1 border-[6px] border-transparent border-b-slate-900"></div>
-                    </div>
                   </div>
                 ))}
               </div>
@@ -924,6 +916,33 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
           </div>
         </div>
       </aside>
+
+      {/* Global Tooltip Portal */}
+      {hoverInfo && (
+        <div
+          className="fixed w-56 p-3 bg-slate-900 text-white rounded-xl shadow-2xl z-[9999] pointer-events-none animate-[fadeIn_0.1s_ease-out]"
+          style={{
+            left: Math.min(hoverInfo.x, window.innerWidth - 240), // Prevent overflow right
+            top: Math.min(hoverInfo.y, window.innerHeight - 150) // Prevent overflow bottom (simple check)
+          }}
+        >
+          <div className="flex items-center gap-2 mb-2">
+            <span className="p-1 rounded bg-white/10">
+              <span className="material-symbols-outlined text-[14px]">event</span>
+            </span>
+            <p className="text-[10px] font-bold text-primary-light">
+              {hoverInfo.app.startTime}{hoverInfo.app.endTime ? ` - ${hoverInfo.app.endTime}` : ''}
+            </p>
+          </div>
+          <p className="text-xs font-bold mb-1.5 leading-tight">{hoverInfo.app.title}</p>
+          {hoverInfo.app.description && (
+            <p className="text-[10px] text-slate-300 line-clamp-3 leading-relaxed border-t border-white/10 pt-1.5 mt-1.5">
+              {hoverInfo.app.description}
+            </p>
+          )}
+          {/* Optional: Arrow (tricky to position dynamically, ommitted for simpler robust floating) */}
+        </div>
+      )}
     </div>
   );
 };
