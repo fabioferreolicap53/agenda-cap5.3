@@ -288,11 +288,42 @@ export const AppointmentDetailView: React.FC<AppointmentDetailViewProps> = ({
   const myAttendeeRecord = attendees.find(a => a.user_id === user?.id);
 
   const getTypeLabel = (type: string) => {
-    return appointmentTypes.find(t => t.value.toLowerCase() === type.toLowerCase())?.label || type;
+    const normalize = (str: string) => str.toLowerCase().trim();
+    const normalizedType = normalize(type);
+
+    // 1. Direct match
+    const match = appointmentTypes.find(t => normalize(t.value) === normalizedType);
+    if (match) return match.label;
+
+    // 2. Legacy/Fallback mapping
+    if (normalizedType === 'planning') {
+      const planningMatch = appointmentTypes.find(t =>
+        normalize(t.value).includes('planej') || normalize(t.label).includes('planej')
+      );
+      if (planningMatch) return planningMatch.label;
+      return 'Planejamento';
+    }
+
+    return type;
   };
 
   const getTypeColor = (type: string) => {
-    return appointmentTypes.find(t => t.value.toLowerCase() === type.toLowerCase())?.color || '#1e293b';
+    const normalize = (str: string) => str.toLowerCase().trim();
+    const normalizedType = normalize(type);
+
+    // 1. Direct match
+    const match = appointmentTypes.find(t => normalize(t.value) === normalizedType);
+    if (match) return match.color;
+
+    // 2. Legacy/Fallback mapping
+    if (normalizedType === 'planning') {
+      const planningMatch = appointmentTypes.find(t =>
+        normalize(t.value).includes('planej') || normalize(t.label).includes('planej')
+      );
+      if (planningMatch) return planningMatch.color;
+    }
+
+    return '#1e293b';
   };
 
   const formatDate = (dateStr: string) => {
