@@ -5,9 +5,10 @@ import { Footer } from '../components/Footer';
 
 interface LoginViewProps {
   onLogin?: () => void;
+  externalError?: string | null;
 }
 
-export const LoginView: React.FC<LoginViewProps> = () => {
+export const LoginView: React.FC<LoginViewProps> = ({ externalError }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [fullName, setFullName] = useState('');
@@ -25,6 +26,12 @@ export const LoginView: React.FC<LoginViewProps> = () => {
     };
     fetchSectors();
   }, []);
+
+  useEffect(() => {
+    if (externalError) {
+      setMessage({ type: 'error', text: externalError });
+    }
+  }, [externalError]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

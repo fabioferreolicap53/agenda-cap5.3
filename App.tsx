@@ -37,6 +37,7 @@ const App: React.FC = () => {
   const [pendingNotificationsCount, setPendingNotificationsCount] = useState(0);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [previousView, setPreviousView] = useState<ViewState | null>(null);
+  const [authError, setAuthError] = useState<string | null>(null);
 
   const fetchData = useCallback(async (uid?: string) => {
     const userId = uid || session?.user.id;
@@ -106,6 +107,23 @@ const App: React.FC = () => {
   }, [session?.user.id, session?.user.email]);
 
   useEffect(() => {
+    // Check for errors in URL hash (e.g., from failed password reset)
+    const hash = window.location.hash;
+    if (hash && hash.includes('error=')) {
+      try {
+        const hashContent = hash.startsWith('#') ? hash.substring(1) : hash;
+        const params = new URLSearchParams(hashContent);
+        const errorMsg = params.get('error_description') || params.get('error');
+        if (errorMsg) {
+          setAuthError(decodeURIComponent(errorMsg).replace(/\+/g, ' '));
+          // Clear hash to prevent repeated error messages
+          window.history.replaceState(null, '', window.location.pathname + window.location.search);
+        }
+      } catch (e) {
+        console.error('Error parsing hash:', e);
+      }
+    }
+
     // Check active session on mount
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
@@ -381,7 +399,7 @@ const App: React.FC = () => {
   }
 
   if (currentView === 'login' && !session) {
-    return <LoginView />;
+    return <LoginView externalError={authError} />;
   }
 
   if (currentView === 'reset_password') {
