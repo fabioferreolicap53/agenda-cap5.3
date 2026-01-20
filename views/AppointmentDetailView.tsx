@@ -393,10 +393,12 @@ export const AppointmentDetailView: React.FC<AppointmentDetailViewProps> = ({
             >
               {getTypeLabel(appointment.type)}
             </span>
-            <span className="text-xs font-bold uppercase tracking-widest text-emerald-700 bg-emerald-50 border border-emerald-100 px-3 py-1 rounded-full flex items-center gap-1.5">
-              <span className="size-2 bg-emerald-500 rounded-full"></span>
-              {isOwner ? 'Organizador' : (myAttendeeRecord?.status === 'accepted' ? 'Confirmado' : (myAttendeeRecord?.status === 'declined' ? 'Recusado' : 'Convidado'))}
-            </span>
+            {(isOwner || myAttendeeRecord) && (
+              <span className="text-xs font-bold uppercase tracking-widest text-emerald-700 bg-emerald-50 border border-emerald-100 px-3 py-1 rounded-full flex items-center gap-1.5">
+                <span className="size-2 bg-emerald-500 rounded-full"></span>
+                {isOwner ? 'Organizador' : (myAttendeeRecord?.status === 'accepted' ? 'Confirmado' : (myAttendeeRecord?.status === 'declined' ? 'Recusado' : (myAttendeeRecord?.status === 'requested' ? 'Solicitado' : 'Convidado')))}
+              </span>
+            )}
           </div>
           {!isEditing ? (
             <h1 className="text-3xl md:text-4xl font-extrabold leading-tight text-primary-dark mb-2">{appointment.title}</h1>
