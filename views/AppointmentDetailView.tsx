@@ -288,11 +288,11 @@ export const AppointmentDetailView: React.FC<AppointmentDetailViewProps> = ({
   const myAttendeeRecord = attendees.find(a => a.user_id === user?.id);
 
   const getTypeLabel = (type: string) => {
-    return appointmentTypes.find(t => t.value === type)?.label || type;
+    return appointmentTypes.find(t => t.value.toLowerCase() === type.toLowerCase())?.label || type;
   };
 
   const getTypeColor = (type: string) => {
-    return appointmentTypes.find(t => t.value === type)?.color || '#1e293b';
+    return appointmentTypes.find(t => t.value.toLowerCase() === type.toLowerCase())?.color || '#1e293b';
   };
 
   const formatDate = (dateStr: string) => {
