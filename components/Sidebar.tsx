@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { ViewState, User, Sector } from '../types';
-import { NotificationCenter } from './NotificationCenter';
+
 import { supabase } from '../lib/supabase';
 import { STATUS_OPTIONS } from '../constants';
 
@@ -243,7 +243,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
             </button>
           </nav>
 
-          <NotificationCenter user={user || null} onViewAppointment={onViewAppointment} onNavigateToChat={onNavigateToChat} />
+
 
           {isFilterableView && (
             <div className="mb-4 animate-[fadeIn_0.5s] border-t border-slate-50 pt-3">
