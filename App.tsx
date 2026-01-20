@@ -108,14 +108,15 @@ const App: React.FC = () => {
   }, [session?.user.id, session?.user.email]);
 
   useEffect(() => {
-    // Check for errors in URL hash (e.g., from failed password reset)
-    const hash = window.location.hash;
-
-    // Check for recovery type in hash as a fallback
-    if (hash && hash.includes('type=recovery')) {
+    // Check for recovery type in hash early
+    const isInitialRecovery = window.location.hash.includes('type=recovery');
+    if (isInitialRecovery) {
       setIsRecovering(true);
       setCurrentView('reset_password');
     }
+
+    // Check for errors in URL hash (e.g., from failed password reset)
+    const hash = window.location.hash;
 
     if (hash && hash.includes('error=')) {
       try {
@@ -137,9 +138,9 @@ const App: React.FC = () => {
       setSession(session);
       if (session) {
         fetchData(session.user.id);
-        // Não redirecionar para o calendário se for uma sessão de recuperação
-        const isRecovery = window.location.hash.includes('type=recovery');
-        if (!isRecovery) {
+
+        // IMPORTANT: DO NOT redirect to calendar if we are in recovery mode
+        if (!isInitialRecovery && !window.location.hash.includes('type=recovery')) {
           setCurrentView('calendar');
         } else {
           setIsRecovering(true);
@@ -153,17 +154,20 @@ const App: React.FC = () => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       setSession(session);
 
+      const isRecoverySession = event === 'PASSWORD_RECOVERY' || window.location.hash.includes('type=recovery');
+
       if (event === 'PASSWORD_RECOVERY') {
         setIsRecovering(true);
         setCurrentView('reset_password');
       } else if (session) {
         fetchData(session.user.id);
 
-        // Verifica o hash novamente para ter certeza absoluta de não sobrescrever a recuperação
-        const isRecovery = window.location.hash.includes('type=recovery') || event === 'PASSWORD_RECOVERY';
-
-        if (!isRecovery && (currentView === 'login' || currentView === 'reset_password')) {
+        // Only redirect to calendar if NOT in the middle of a password recovery
+        if (!isRecovering && !isRecoverySession && (currentView === 'login' || currentView === 'reset_password')) {
           setCurrentView('calendar');
+        } else if (isRecoverySession) {
+          setIsRecovering(true);
+          setCurrentView('reset_password');
         }
       } else {
         setCurrentUser(null);
