@@ -38,6 +38,7 @@ const App: React.FC = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [previousView, setPreviousView] = useState<ViewState | null>(null);
   const [authError, setAuthError] = useState<string | null>(null);
+  const [isRecovering, setIsRecovering] = useState(false);
 
   const fetchData = useCallback(async (uid?: string) => {
     const userId = uid || session?.user.id;
@@ -109,6 +110,13 @@ const App: React.FC = () => {
   useEffect(() => {
     // Check for errors in URL hash (e.g., from failed password reset)
     const hash = window.location.hash;
+
+    // Check for recovery type in hash as a fallback
+    if (hash && hash.includes('type=recovery')) {
+      setIsRecovering(true);
+      setCurrentView('reset_password');
+    }
+
     if (hash && hash.includes('error=')) {
       try {
         const hashContent = hash.startsWith('#') ? hash.substring(1) : hash;
@@ -137,16 +145,20 @@ const App: React.FC = () => {
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       setSession(session);
+
       if (event === 'PASSWORD_RECOVERY') {
+        setIsRecovering(true);
         setCurrentView('reset_password');
       } else if (session) {
         fetchData(session.user.id);
-        if (currentView === 'login' || currentView === 'reset_password') {
+        // Only redirect to calendar if NOT in the middle of a password recovery
+        if (!isRecovering && (currentView === 'login' || currentView === 'reset_password')) {
           setCurrentView('calendar');
         }
       } else {
         setCurrentUser(null);
         setCurrentView('login');
+        setIsRecovering(false);
       }
     });
 
@@ -361,8 +373,14 @@ const App: React.FC = () => {
       case 'reset_password':
         return (
           <ResetPasswordView
-            onSuccess={() => setCurrentView('calendar')}
+            onSuccess={() => {
+              setIsRecovering(false);
+              setAuthError(null);
+              setCurrentView('calendar');
+            }}
             onCancel={() => {
+              setIsRecovering(false);
+              setAuthError(null);
               supabase.auth.signOut();
               setCurrentView('login');
             }}
@@ -405,8 +423,14 @@ const App: React.FC = () => {
   if (currentView === 'reset_password') {
     return (
       <ResetPasswordView
-        onSuccess={() => setCurrentView('calendar')}
+        onSuccess={() => {
+          setIsRecovering(false);
+          setAuthError(null);
+          setCurrentView('calendar');
+        }}
         onCancel={() => {
+          setIsRecovering(false);
+          setAuthError(null);
           supabase.auth.signOut();
           setCurrentView('login');
         }}
