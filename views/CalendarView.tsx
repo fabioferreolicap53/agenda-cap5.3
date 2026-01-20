@@ -554,7 +554,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
               <p className="font-bold uppercase tracking-widest text-sm text-center px-4">Nenhum compromisso agendado</p>
             </div>
           ) : (
-            <div className="max-w-3xl space-y-4 md:space-y-6">
+            <div className="space-y-4 md:space-y-6">
               {apps.map(app => (
                 <div
                   key={app.id}
