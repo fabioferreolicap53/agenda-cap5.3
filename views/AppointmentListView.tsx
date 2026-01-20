@@ -34,6 +34,7 @@ export const AppointmentListView: React.FC<AppointmentListViewProps> = ({
     const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
     const [filterUserId, setFilterUserId] = useState<string>('all');
     const [allUsers, setAllUsers] = useState<User[]>([]);
+    const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
 
     useEffect(() => {
         if (user?.id && filterUserId === 'all') {
@@ -177,18 +178,25 @@ export const AppointmentListView: React.FC<AppointmentListViewProps> = ({
 
             <div className="p-4 md:p-8 flex flex-col h-full overflow-hidden">
                 <DashboardNotifications user={user} onViewAppointment={onOpenDetails} />
-                <div className="mb-8 space-y-4 shrink-0">
-                    <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
+                <div className="mb-4 md:mb-8 shrink-0">
+                    <div className="flex flex-col md:flex-row gap-4 items-center justify-between mb-4">
                         <div className="flex items-center gap-3 w-full md:w-auto">
                             <button
                                 onClick={onToggleSidebar}
-                                className="md:hidden size-10 flex items-center justify-center rounded-xl bg-primary-dark text-white shadow-lg active:scale-90 transition-all"
+                                className="md:hidden size-10 flex items-center justify-center rounded-xl bg-primary-dark text-white shadow-lg active:scale-90 transition-all shrink-0"
                             >
                                 <span className="material-symbols-outlined">menu</span>
                             </button>
-                            <h1 className="text-xl md:text-2xl font-bold text-slate-900">Lista de Compromissos</h1>
+                            <h1 className="text-lg md:text-2xl font-bold text-slate-900 truncate flex-1">Lista de Compromissos</h1>
+                            <button
+                                onClick={() => setMobileFiltersOpen(!mobileFiltersOpen)}
+                                className="md:hidden size-10 flex items-center justify-center rounded-xl bg-white border border-slate-200 text-slate-500 shadow-sm active:scale-95 transition-all shrink-0"
+                            >
+                                <span className="material-symbols-outlined">{mobileFiltersOpen ? 'filter_list_off' : 'filter_list'}</span>
+                            </button>
                         </div>
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2 hidden md:flex">
+                            {/* Desktop Sort Button */}
                             <button
                                 onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
                                 className="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 rounded-xl text-xs font-black uppercase tracking-widest text-slate-600 hover:border-primary-dark transition-all shadow-sm active:scale-95"
@@ -201,8 +209,57 @@ export const AppointmentListView: React.FC<AppointmentListViewProps> = ({
                         </div>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
-                        <div className="relative group md:col-span-2">
+                    {/* Mobile Filters Collapsible */}
+                    <div className={`md:hidden overflow-hidden transition-all duration-300 ${mobileFiltersOpen ? 'max-h-[400px] opacity-100 mb-4' : 'max-h-0 opacity-0'}`}>
+                        <div className="grid grid-cols-1 gap-3 bg-white p-3 rounded-xl border border-slate-100 shadow-sm">
+                            <div className="relative group">
+                                <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">search</span>
+                                <input
+                                    value={searchTerm}
+                                    onChange={(e) => setSearchTerm(e.target.value)}
+                                    className="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-lg outline-none text-sm"
+                                    placeholder="Buscar..."
+                                />
+                            </div>
+                            <select
+                                value={filterUserId}
+                                onChange={(e) => setFilterUserId(e.target.value)}
+                                className="w-full p-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-bold uppercase"
+                            >
+                                <option value="all">Usuários (Todos)</option>
+                                {allUsers.map(u => <option key={u.id} value={u.id}>{u.full_name}</option>)}
+                            </select>
+                            <div className="grid grid-cols-2 gap-2">
+                                <select
+                                    value={filterType}
+                                    onChange={(e) => setFilterType(e.target.value)}
+                                    className="w-full p-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-bold uppercase"
+                                >
+                                    <option value="all">Tipos</option>
+                                    {appointmentTypes.map(t => <option key={t.id} value={t.value}>{t.label}</option>)}
+                                </select>
+                                <select
+                                    value={filterLocation}
+                                    onChange={(e) => setFilterLocation(e.target.value)}
+                                    className="w-full p-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-bold uppercase"
+                                >
+                                    <option value="all">Locais</option>
+                                    {locations.map(l => <option key={l.id} value={l.id}>{l.name}</option>)}
+                                </select>
+                            </div>
+                            <button
+                                onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
+                                className="w-full py-2 bg-slate-100 hover:bg-slate-200 rounded-lg text-xs font-bold uppercase text-slate-600 flex items-center justify-center gap-2"
+                            >
+                                <span className="material-symbols-outlined text-sm">{sortOrder === 'asc' ? 'south' : 'north'}</span>
+                                Ordenar: {sortOrder === 'asc' ? 'Recentes' : 'Antigos'}
+                            </button>
+                        </div>
+                    </div>
+
+                    {/* Desktop Filters */}
+                    <div className="hidden md:grid grid-cols-5 gap-4">
+                        <div className="relative group col-span-2">
                             <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-primary-dark transition-colors">search</span>
                             <input
                                 value={searchTerm}

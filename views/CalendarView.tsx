@@ -38,6 +38,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
   const [filterLocation, setFilterLocation] = useState('all');
   const [filterUserId, setFilterUserId] = useState<string>('all');
   const [allUsers, setAllUsers] = useState<User[]>([]);
+  const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
 
   useEffect(() => {
     if (user?.id && filterUserId === 'all') {
@@ -558,125 +559,188 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
     <div className="flex flex-1 h-full overflow-hidden bg-white">
       <div className="flex-1 flex flex-col min-w-0 h-full">
         {/* Header */}
-        <header className="h-16 bg-primary-dark text-white flex items-center justify-between px-4 md:px-8 sticky top-0 z-10 shadow-md shrink-0">
-          <div className="flex items-center gap-2 md:gap-12">
-            {/* Mobile Menu Toggle */}
-            <button
-              onClick={onToggleSidebar}
-              className="md:hidden size-10 flex items-center justify-center rounded-xl hover:bg-white/10 active:scale-90 transition-all"
-            >
-              <span className="material-symbols-outlined">menu</span>
-            </button>
-
-            <div className="flex items-center gap-2 md:gap-4 text-white/90">
+        {/* Header */}
+        <header className="bg-primary-dark text-white flex flex-col px-4 md:px-8 sticky top-0 z-10 shadow-md shrink-0 transition-all duration-300">
+          <div className="h-16 flex items-center justify-between">
+            <div className="flex items-center gap-2 md:gap-12 w-full md:w-auto">
+              {/* Mobile Menu Toggle */}
               <button
-                onClick={goToToday}
-                className="px-3 py-1.5 text-xs font-bold border border-white/20 rounded-lg hover:bg-white/10 transition-all"
+                onClick={onToggleSidebar}
+                className="md:hidden size-10 flex items-center justify-center rounded-xl hover:bg-white/10 active:scale-90 transition-all shrink-0"
               >
-                Hoje
+                <span className="material-symbols-outlined">menu</span>
               </button>
-              <div className="flex items-center gap-2">
+
+              <div className="flex items-center gap-2 md:gap-4 text-white/90 flex-1 md:flex-none justify-center md:justify-start">
                 <button
-                  onClick={() => {
-                    const d = new Date(currentDate);
-                    if (viewMode === 'month') d.setMonth(d.getMonth() - 1);
-                    else if (viewMode === 'week') d.setDate(d.getDate() - 7);
-                    else d.setDate(d.getDate() - 1);
-                    setCurrentDate(d);
-                  }}
-                  className="p-1 hover:bg-white/10 rounded transition-colors"
+                  onClick={goToToday}
+                  className="hidden md:block px-3 py-1.5 text-xs font-bold border border-white/20 rounded-lg hover:bg-white/10 transition-all"
                 >
-                  <span className="material-symbols-outlined">chevron_left</span>
+                  Hoje
                 </button>
-                <h2 className="text-sm md:text-md font-semibold min-w-[140px] md:min-w-[200px] text-center capitalize truncate">
-                  {viewMode === 'month'
-                    ? currentDate.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })
-                    : viewMode === 'week'
-                      ? `Semana de ${weekDays[0].fullDate.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' })}`
-                      : currentDate.toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' })
-                  }
-                </h2>
-                <button
-                  onClick={() => {
-                    const d = new Date(currentDate);
-                    if (viewMode === 'month') d.setMonth(d.getMonth() + 1);
-                    else if (viewMode === 'week') d.setDate(d.getDate() + 7);
-                    else d.setDate(d.getDate() + 1);
-                    setCurrentDate(d);
-                  }}
-                  className="p-1 hover:bg-white/10 rounded transition-colors"
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => {
+                      const d = new Date(currentDate);
+                      if (viewMode === 'month') d.setMonth(d.getMonth() - 1);
+                      else if (viewMode === 'week') d.setDate(d.getDate() - 7);
+                      else d.setDate(d.getDate() - 1);
+                      setCurrentDate(d);
+                    }}
+                    className="p-1 hover:bg-white/10 rounded transition-colors"
+                  >
+                    <span className="material-symbols-outlined">chevron_left</span>
+                  </button>
+                  <h2 className="text-sm md:text-md font-semibold min-w-[120px] md:min-w-[200px] text-center capitalize truncate">
+                    {viewMode === 'month'
+                      ? currentDate.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })
+                      : viewMode === 'week'
+                        ? `Semana de ${weekDays[0].fullDate.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' })}`
+                        : currentDate.toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' })
+                    }
+                  </h2>
+                  <button
+                    onClick={() => {
+                      const d = new Date(currentDate);
+                      if (viewMode === 'month') d.setMonth(d.getMonth() + 1);
+                      else if (viewMode === 'week') d.setDate(d.getDate() + 7);
+                      else d.setDate(d.getDate() + 1);
+                      setCurrentDate(d);
+                    }}
+                    className="p-1 hover:bg-white/10 rounded transition-colors"
+                  >
+                    <span className="material-symbols-outlined">chevron_right</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Mobile Filter Toggle */}
+              <button
+                onClick={() => setMobileFiltersOpen(!mobileFiltersOpen)}
+                className="md:hidden size-10 flex items-center justify-center rounded-xl hover:bg-white/10 active:scale-90 transition-all shrink-0"
+              >
+                <span className="material-symbols-outlined">{mobileFiltersOpen ? 'filter_list_off' : 'filter_list'}</span>
+              </button>
+
+              {/* Filters - Desktop */}
+              <div className="hidden md:flex items-center gap-2 md:gap-3">
+                <select
+                  value={filterUserId}
+                  onChange={(e) => setFilterUserId(e.target.value)}
+                  className="bg-white/10 text-white border border-white/20 rounded-lg px-2 py-1.5 text-[10px] md:text-xs font-bold focus:outline-none focus:bg-white/20 option:bg-slate-800 max-w-[120px] md:max-w-[150px]"
                 >
-                  <span className="material-symbols-outlined">chevron_right</span>
-                </button>
+                  <option value="all" className="text-slate-800">Todos os Usuários</option>
+                  {allUsers.map(u => (
+                    <option key={u.id} value={u.id} className="text-slate-800">{u.full_name}</option>
+                  ))}
+                </select>
+
+                <select
+                  value={filterEventType}
+                  onChange={(e) => setFilterEventType(e.target.value)}
+                  className="bg-white/10 text-white border border-white/20 rounded-lg px-2 py-1.5 text-[10px] md:text-xs font-bold focus:outline-none focus:bg-white/20 option:bg-slate-800 max-w-[100px] md:max-w-none"
+                >
+                  <option value="all" className="text-slate-800">Tipos</option>
+                  {appointmentTypes.map(t => (
+                    <option key={t.id} value={t.value} className="text-slate-800">{t.label}</option>
+                  ))}
+                </select>
+
+                <select
+                  value={filterLocation}
+                  onChange={(e) => setFilterLocation(e.target.value)}
+                  className="bg-white/10 text-white border border-white/20 rounded-lg px-2 py-1.5 text-[10px] md:text-xs font-bold focus:outline-none focus:bg-white/20 option:bg-slate-800 max-w-[100px] md:max-w-none"
+                >
+                  <option value="all" className="text-slate-800">Locais</option>
+                  {locations.map(l => (
+                    <option key={l.id} value={l.id} className="text-slate-800">{l.name}</option>
+                  ))}
+                </select>
               </div>
             </div>
 
-            {/* Filters - Hidden on small mobile */}
-            <div className="hidden sm:flex items-center gap-2 md:gap-3">
+            <div className="hidden md:flex items-center gap-4">
+              <div className="flex bg-white/10 p-1 rounded-lg">
+                <button
+                  onClick={() => setViewMode('month')}
+                  className={`px-4 py-1.5 text-xs font-bold rounded-md transition-all ${viewMode === 'month' ? 'bg-white text-primary-dark shadow-sm' : 'text-white/70 hover:text-white'}`}
+                >
+                  Mês
+                </button>
+                <button
+                  onClick={() => setViewMode('week')}
+                  className={`px-4 py-1.5 text-xs font-bold rounded-md transition-all ${viewMode === 'week' ? 'bg-white text-primary-dark shadow-sm' : 'text-white/70 hover:text-white'}`}
+                >
+                  Semana
+                </button>
+                <button
+                  onClick={() => setViewMode('day')}
+                  className={`px-4 py-1.5 text-xs font-bold rounded-md transition-all ${viewMode === 'day' ? 'bg-white text-primary-dark shadow-sm' : 'text-white/70 hover:text-white'}`}
+                >
+                  Dia
+                </button>
+              </div>
+              <div className="h-8 w-px bg-white/20 mx-2"></div>
+              <button
+                onClick={onOpenModal}
+                className="flex items-center gap-2 px-5 py-2 bg-white text-primary-dark hover:bg-slate-100 rounded-lg font-bold text-sm transition-all shadow-lg shadow-black/5"
+              >
+                <span className="material-symbols-outlined text-[20px]">add_circle</span>
+                <span className="hidden sm:inline">Adicionar</span>
+              </button>
+            </div>
+            {/* Mobile Add Button - Floating or Header? Keeping header action simple for now, using existing add logic or separate button if needed. 
+                Wait, if 'md:flex' hidden, then mobile user has no Add button? The original had 'hidden md:flex' for the whole block.
+                I need to make sure 'onOpenModal' is accessible on mobile.
+            */}
+            <button
+              onClick={onOpenModal}
+              className="md:hidden size-10 flex items-center justify-center bg-white text-primary-dark rounded-xl shadow-lg ml-2 active:scale-95 transition-all shrink-0"
+            >
+              <span className="material-symbols-outlined">add</span>
+            </button>
+          </div>
+
+          {/* Mobile Filters Dropdown */}
+          <div className={`md:hidden overflow-hidden transition-all duration-300 ease-in-out ${mobileFiltersOpen ? 'max-h-64 opacity-100 pb-4' : 'max-h-0 opacity-0'}`}>
+            <div className="grid grid-cols-2 gap-2 pt-2 border-t border-white/10">
               <select
                 value={filterUserId}
                 onChange={(e) => setFilterUserId(e.target.value)}
-                className="bg-white/10 text-white border border-white/20 rounded-lg px-2 py-1.5 text-[10px] md:text-xs font-bold focus:outline-none focus:bg-white/20 option:bg-slate-800 max-w-[120px] md:max-w-[150px]"
+                className="bg-white/10 text-white border border-white/20 rounded-lg px-2 py-2 text-xs font-bold focus:outline-none focus:bg-white/20 option:bg-slate-800 w-full"
               >
                 <option value="all" className="text-slate-800">Todos os Usuários</option>
                 {allUsers.map(u => (
                   <option key={u.id} value={u.id} className="text-slate-800">{u.full_name}</option>
                 ))}
               </select>
-
+              <div className="flex bg-white/10 p-1 rounded-lg col-span-2 justify-between">
+                {/* View Mode Toggle Mobile */}
+                <button onClick={() => setViewMode('month')} className={`flex-1 py-1.5 text-[10px] font-bold rounded md:rounded-md transition-all ${viewMode === 'month' ? 'bg-white text-primary-dark shadow-sm' : 'text-white/70'}`}>Mês</button>
+                <button onClick={() => setViewMode('week')} className={`flex-1 py-1.5 text-[10px] font-bold rounded md:rounded-md transition-all ${viewMode === 'week' ? 'bg-white text-primary-dark shadow-sm' : 'text-white/70'}`}>Sem</button>
+                <button onClick={() => setViewMode('day')} className={`flex-1 py-1.5 text-[10px] font-bold rounded md:rounded-md transition-all ${viewMode === 'day' ? 'bg-white text-primary-dark shadow-sm' : 'text-white/70'}`}>Dia</button>
+              </div>
               <select
                 value={filterEventType}
                 onChange={(e) => setFilterEventType(e.target.value)}
-                className="bg-white/10 text-white border border-white/20 rounded-lg px-2 py-1.5 text-[10px] md:text-xs font-bold focus:outline-none focus:bg-white/20 option:bg-slate-800 max-w-[100px] md:max-w-none"
+                className="bg-white/10 text-white border border-white/20 rounded-lg px-2 py-2 text-xs font-bold focus:outline-none focus:bg-white/20 option:bg-slate-800 w-full"
               >
-                <option value="all" className="text-slate-800">Tipos</option>
+                <option value="all" className="text-slate-800">Tipos (Todos)</option>
                 {appointmentTypes.map(t => (
                   <option key={t.id} value={t.value} className="text-slate-800">{t.label}</option>
                 ))}
               </select>
-
               <select
                 value={filterLocation}
                 onChange={(e) => setFilterLocation(e.target.value)}
-                className="bg-white/10 text-white border border-white/20 rounded-lg px-2 py-1.5 text-[10px] md:text-xs font-bold focus:outline-none focus:bg-white/20 option:bg-slate-800 max-w-[100px] md:max-w-none"
+                className="bg-white/10 text-white border border-white/20 rounded-lg px-2 py-2 text-xs font-bold focus:outline-none focus:bg-white/20 option:bg-slate-800 w-full"
               >
-                <option value="all" className="text-slate-800">Locais</option>
+                <option value="all" className="text-slate-800">Locais (Todos)</option>
                 {locations.map(l => (
                   <option key={l.id} value={l.id} className="text-slate-800">{l.name}</option>
                 ))}
               </select>
             </div>
-          </div>
-
-          <div className="flex items-center gap-4">
-            <div className="hidden md:flex bg-white/10 p-1 rounded-lg">
-              <button
-                onClick={() => setViewMode('month')}
-                className={`px-4 py-1.5 text-xs font-bold rounded-md transition-all ${viewMode === 'month' ? 'bg-white text-primary-dark shadow-sm' : 'text-white/70 hover:text-white'}`}
-              >
-                Mês
-              </button>
-              <button
-                onClick={() => setViewMode('week')}
-                className={`px-4 py-1.5 text-xs font-bold rounded-md transition-all ${viewMode === 'week' ? 'bg-white text-primary-dark shadow-sm' : 'text-white/70 hover:text-white'}`}
-              >
-                Semana
-              </button>
-              <button
-                onClick={() => setViewMode('day')}
-                className={`px-4 py-1.5 text-xs font-bold rounded-md transition-all ${viewMode === 'day' ? 'bg-white text-primary-dark shadow-sm' : 'text-white/70 hover:text-white'}`}
-              >
-                Dia
-              </button>
-            </div>
-            <div className="hidden md:block h-8 w-px bg-white/20 mx-2"></div>
-            <button
-              onClick={onOpenModal}
-              className="flex items-center gap-2 px-5 py-2 bg-white text-primary-dark hover:bg-slate-100 rounded-lg font-bold text-sm transition-all shadow-lg shadow-black/5"
-            >
-              <span className="material-symbols-outlined text-[20px]">add_circle</span>
-              <span className="hidden sm:inline">Adicionar</span>
-            </button>
           </div>
         </header>
 
