@@ -672,7 +672,7 @@ export const AppointmentDetailView: React.FC<AppointmentDetailViewProps> = ({
                         </div>
                         <div className="relative group">
                           <div className="absolute -inset-0.5 bg-gradient-to-r from-primary-dark to-slate-800 rounded-3xl blur opacity-20 group-hover:opacity-30 transition duration-1000 group-hover:duration-200"></div>
-                          <div className="relative flex items-center gap-4 p-4 rounded-2xl bg-white border border-slate-100 shadow-sm transition-all hover:shadow-md">
+                          <div className="relative flex items-start gap-4 p-4 rounded-2xl bg-white border border-slate-100 shadow-sm transition-all hover:shadow-md">
                             <div className="relative shrink-0">
                               <div
                                 className="size-14 rounded-2xl bg-cover bg-center border-2 border-primary-dark shadow-inner flex items-center justify-center text-lg font-black text-primary-dark uppercase bg-slate-50"
@@ -684,19 +684,21 @@ export const AppointmentDetailView: React.FC<AppointmentDetailViewProps> = ({
                                 <span className="material-symbols-outlined text-[12px] font-bold">verified</span>
                               </div>
                             </div>
-                            <div className="flex-1 min-w-0">
-                              <h4 className="text-base font-black text-slate-900 truncate tracking-tight mb-0.5 capitalize">{organizer?.full_name}</h4>
-                              <p className="text-[11px] text-slate-400 font-bold uppercase tracking-widest">{organizer?.role || 'Membro da Equipe'}</p>
+                            <div className="flex-1 min-w-0 flex flex-col gap-2.5">
+                              <div>
+                                <h4 className="text-base font-black text-slate-900 truncate tracking-tight mb-0.5 capitalize">{organizer?.full_name}</h4>
+                                <p className="text-[11px] text-slate-400 font-bold uppercase tracking-widest">{organizer?.role || 'Membro da Equipe'}</p>
+                              </div>
+                              {user?.id !== organizer?.id && (
+                                <button
+                                  onClick={() => organizer && onNavigateToChat?.(organizer.id)}
+                                  className="flex items-center justify-center gap-2 w-full px-4 py-2 bg-primary-dark text-white rounded-xl hover:bg-slate-900 transition-all text-xs font-black uppercase tracking-widest shadow-lg shadow-primary-dark/20 active:scale-95"
+                                >
+                                  <span className="material-symbols-outlined text-[16px]">chat</span>
+                                  Mensagem
+                                </button>
+                              )}
                             </div>
-                            {user?.id !== organizer?.id && (
-                              <button
-                                onClick={() => organizer && onNavigateToChat?.(organizer.id)}
-                                className="flex items-center gap-2 px-4 py-2.5 bg-primary-dark text-white rounded-xl hover:bg-slate-900 transition-all text-xs font-black uppercase tracking-widest shadow-lg shadow-primary-dark/20 active:scale-95 shrink-0"
-                              >
-                                <span className="material-symbols-outlined text-[16px]">chat</span>
-                                Mensagem
-                              </button>
-                            )}
                           </div>
                         </div>
                       </div>
