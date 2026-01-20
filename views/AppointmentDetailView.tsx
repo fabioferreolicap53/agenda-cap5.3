@@ -705,33 +705,33 @@ export const AppointmentDetailView: React.FC<AppointmentDetailViewProps> = ({
 
                       {/* Organizer Management for Requests */}
                       {isOwner && attendees.some(a => a.status === 'requested') && (
-                        <div className="mb-8 p-4 rounded-2xl bg-indigo-50 border border-indigo-100">
-                          <div className="flex items-center gap-3 mb-3">
+                        <div className="mb-8 p-5 rounded-2xl bg-indigo-50 border border-indigo-100">
+                          <div className="flex items-center gap-3 mb-4">
                             <div className="size-1.5 rounded-full bg-indigo-500 shadow-[0_0_8px_rgba(99,102,241,0.5)]"></div>
                             <p className="text-[10px] font-black text-indigo-600 uppercase tracking-[0.2em]">Solicitações de Participação</p>
                           </div>
-                          <div className="grid gap-3">
+                          <div className="space-y-3">
                             {attendees.filter(a => a.status === 'requested').map(attendee => {
                               const profile = allProfiles.find(p => p.id === attendee.user_id);
                               return (
-                                <div key={attendee.id} className="flex items-center gap-3 p-3 rounded-xl bg-white border border-indigo-100 shadow-sm">
-                                  <div className="size-10 rounded-xl bg-indigo-100 flex items-center justify-center text-xs font-black text-indigo-500 uppercase bg-cover bg-center" style={{ backgroundImage: profile?.avatar ? `url(${profile.avatar})` : 'none' }}>
+                                <div key={attendee.id} className="flex items-center gap-4 p-4 rounded-xl bg-white border border-indigo-100 shadow-sm">
+                                  <div className="size-11 rounded-xl bg-indigo-100 flex items-center justify-center text-sm font-black text-indigo-500 uppercase bg-cover bg-center shrink-0" style={{ backgroundImage: profile?.avatar ? `url(${profile.avatar})` : 'none' }}>
                                     {!profile?.avatar && profile?.full_name?.charAt(0)}
                                   </div>
                                   <div className="flex-1 min-w-0">
-                                    <p className="text-sm font-bold text-slate-800 truncate">{profile?.full_name}</p>
-                                    <p className="text-[10px] text-indigo-400 font-bold uppercase">Solicitou participar</p>
+                                    <p className="text-sm font-bold text-slate-800 truncate mb-0.5">{profile?.full_name}</p>
+                                    <p className="text-[10px] text-indigo-500 font-bold uppercase tracking-wide">Solicitou participar</p>
                                   </div>
-                                  <div className="flex items-center gap-1">
+                                  <div className="flex items-center gap-2 shrink-0">
                                     <button
                                       onClick={() => handleManageRequest(attendee.user_id, 'accepted')}
-                                      className="px-3 py-1.5 bg-emerald-500 hover:bg-emerald-600 text-white text-[10px] font-bold rounded-lg transition-colors shadow-sm"
+                                      className="px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-bold rounded-lg transition-all shadow-sm active:scale-95"
                                     >
                                       Aceitar
                                     </button>
                                     <button
                                       onClick={() => handleManageRequest(attendee.user_id, 'declined')}
-                                      className="px-3 py-1.5 bg-rose-100 text-rose-600 hover:bg-rose-200 text-[10px] font-bold rounded-lg transition-colors"
+                                      className="px-4 py-2 bg-rose-500 hover:bg-rose-600 text-white text-xs font-bold rounded-lg transition-all shadow-sm active:scale-95"
                                     >
                                       Negar
                                     </button>
