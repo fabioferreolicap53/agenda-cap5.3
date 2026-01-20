@@ -430,13 +430,18 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
                     <span className="truncate">{app.startTime} - {app.title}</span>
 
                     {/* Hover Preview Tooltip */}
-                    <div className="absolute left-0 bottom-full mb-2 w-48 p-2 bg-slate-900 text-white rounded-lg shadow-xl opacity-0 invisible group-hover/event:opacity-100 group-hover/event:visible transition-all z-50 pointer-events-none">
-                      <p className="text-[10px] font-bold text-primary-light mb-1">{app.startTime}{app.endTime ? ` - ${app.endTime}` : ''}</p>
-                      <p className="text-xs font-bold mb-1 leading-tight">{app.title}</p>
+                    <div className="absolute left-0 bottom-full mb-3 w-56 p-3 bg-slate-900 text-white rounded-xl shadow-2xl opacity-0 invisible group-hover/event:opacity-100 group-hover/event:visible transition-all z-50 pointer-events-none translate-y-2 group-hover/event:translate-y-0">
+                      <div className="flex items-center gap-2 mb-2">
+                        <span className="p-1 rounded bg-white/10">
+                          <span className="material-symbols-outlined text-[14px]">event</span>
+                        </span>
+                        <p className="text-[10px] font-bold text-primary-light">{app.startTime}{app.endTime ? ` - ${app.endTime}` : ''}</p>
+                      </div>
+                      <p className="text-xs font-bold mb-1.5 leading-tight">{app.title}</p>
                       {app.description && (
-                        <p className="text-[9px] text-slate-300 line-clamp-2 leading-relaxed">{app.description}</p>
+                        <p className="text-[10px] text-slate-300 line-clamp-3 leading-relaxed border-t border-white/10 pt-1.5 mt-1.5">{app.description}</p>
                       )}
-                      <div className="absolute top-full left-4 -mt-1 border-4 border-transparent border-t-slate-900"></div>
+                      <div className="absolute top-full left-6 -mt-1 border-[6px] border-transparent border-t-slate-900"></div>
                     </div>
                   </div>
                 ))}
