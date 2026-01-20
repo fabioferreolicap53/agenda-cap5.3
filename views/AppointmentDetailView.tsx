@@ -246,6 +246,45 @@ export const AppointmentDetailView: React.FC<AppointmentDetailViewProps> = ({
     }
   };
 
+  const handleRequestParticipation = async () => {
+    if (!user) return;
+    setLoading(true);
+    try {
+      const { error } = await supabase.from('appointment_attendees').insert({
+        appointment_id: appointment.id,
+        user_id: user.id,
+        status: 'requested'
+      });
+
+      if (error) throw error;
+
+      alert('Solicitação enviada com sucesso! O organizador será notificado.');
+      await fetchOrganizerAndAttendees();
+    } catch (err: any) {
+      alert('Erro ao solicitar participação: ' + err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleManageRequest = async (userId: string, status: 'accepted' | 'declined') => {
+    setLoading(true);
+    try {
+      const { error } = await supabase
+        .from('appointment_attendees')
+        .update({ status })
+        .eq('appointment_id', appointment.id)
+        .eq('user_id', userId);
+
+      if (error) throw error;
+      await fetchOrganizerAndAttendees();
+    } catch (err: any) {
+      alert('Erro ao gerenciar solicitação: ' + err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const myAttendeeRecord = attendees.find(a => a.user_id === user?.id);
 
   const getTypeLabel = (type: string) => {
@@ -384,6 +423,32 @@ export const AppointmentDetailView: React.FC<AppointmentDetailViewProps> = ({
                   <option key={t.id} value={t.value}>{t.label}</option>
                 ))}
               </select>
+            </div>
+          )}
+
+          {!isOwner && !myAttendeeRecord && (
+            <div className="mt-6 flex items-center gap-4 p-4 bg-primary-dark/5 rounded-2xl border border-primary-dark/10">
+              <div className="flex-1">
+                <p className="text-sm font-bold text-primary-dark">Gostaria de participar deste evento?</p>
+                <p className="text-xs text-slate-500 mt-1">Solicite ao organizador para ser incluído.</p>
+              </div>
+              <button
+                onClick={handleRequestParticipation}
+                disabled={loading}
+                className="px-4 py-2 bg-primary-dark hover:bg-primary-light text-white text-xs font-bold rounded-lg transition-all shadow-sm"
+              >
+                Solicitar Participação
+              </button>
+            </div>
+          )}
+
+          {!isOwner && myAttendeeRecord?.status === 'requested' && (
+            <div className="mt-6 flex items-center gap-4 p-4 bg-amber-50 rounded-2xl border border-amber-100">
+              <span className="material-symbols-outlined text-amber-500">hourglass_top</span>
+              <div>
+                <p className="text-sm font-bold text-amber-700">Solicitação enviada</p>
+                <p className="text-xs text-amber-600">Aguardando aprovação do organizador.</p>
+              </div>
             </div>
           )}
 
@@ -633,6 +698,46 @@ export const AppointmentDetailView: React.FC<AppointmentDetailViewProps> = ({
                           </div>
                         </div>
                       </div>
+
+                      {/* Organizer Management for Requests */}
+                      {isOwner && attendees.some(a => a.status === 'requested') && (
+                        <div className="mb-8 p-4 rounded-2xl bg-indigo-50 border border-indigo-100">
+                          <div className="flex items-center gap-3 mb-3">
+                            <div className="size-1.5 rounded-full bg-indigo-500 shadow-[0_0_8px_rgba(99,102,241,0.5)]"></div>
+                            <p className="text-[10px] font-black text-indigo-600 uppercase tracking-[0.2em]">Solicitações de Participação</p>
+                          </div>
+                          <div className="grid gap-3">
+                            {attendees.filter(a => a.status === 'requested').map(attendee => {
+                              const profile = allProfiles.find(p => p.id === attendee.user_id);
+                              return (
+                                <div key={attendee.id} className="flex items-center gap-3 p-3 rounded-xl bg-white border border-indigo-100 shadow-sm">
+                                  <div className="size-10 rounded-xl bg-indigo-100 flex items-center justify-center text-xs font-black text-indigo-500 uppercase bg-cover bg-center" style={{ backgroundImage: profile?.avatar ? `url(${profile.avatar})` : 'none' }}>
+                                    {!profile?.avatar && profile?.full_name?.charAt(0)}
+                                  </div>
+                                  <div className="flex-1 min-w-0">
+                                    <p className="text-sm font-bold text-slate-800 truncate">{profile?.full_name}</p>
+                                    <p className="text-[10px] text-indigo-400 font-bold uppercase">Solicitou participar</p>
+                                  </div>
+                                  <div className="flex items-center gap-1">
+                                    <button
+                                      onClick={() => handleManageRequest(attendee.user_id, 'accepted')}
+                                      className="px-3 py-1.5 bg-emerald-500 hover:bg-emerald-600 text-white text-[10px] font-bold rounded-lg transition-colors shadow-sm"
+                                    >
+                                      Aceitar
+                                    </button>
+                                    <button
+                                      onClick={() => handleManageRequest(attendee.user_id, 'declined')}
+                                      className="px-3 py-1.5 bg-rose-100 text-rose-600 hover:bg-rose-200 text-[10px] font-bold rounded-lg transition-colors"
+                                    >
+                                      Negar
+                                    </button>
+                                  </div>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      )}
 
                       {/* 2. Attendees Groups */}
                       <div className="space-y-8">

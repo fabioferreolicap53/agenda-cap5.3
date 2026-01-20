@@ -39,7 +39,7 @@ export interface Attendee {
   id: string;
   appointment_id: string;
   user_id: string;
-  status: 'pending' | 'accepted' | 'declined';
+  status: 'pending' | 'accepted' | 'declined' | 'requested';
   full_name?: string;
   avatar?: string;
 }
