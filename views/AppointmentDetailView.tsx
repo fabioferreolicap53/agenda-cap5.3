@@ -714,24 +714,26 @@ export const AppointmentDetailView: React.FC<AppointmentDetailViewProps> = ({
                             {attendees.filter(a => a.status === 'requested').map(attendee => {
                               const profile = allProfiles.find(p => p.id === attendee.user_id);
                               return (
-                                <div key={attendee.id} className="flex items-center gap-4 p-4 rounded-xl bg-white border border-indigo-100 shadow-sm">
-                                  <div className="size-11 rounded-xl bg-indigo-100 flex items-center justify-center text-sm font-black text-indigo-500 uppercase bg-cover bg-center shrink-0" style={{ backgroundImage: profile?.avatar ? `url(${profile.avatar})` : 'none' }}>
-                                    {!profile?.avatar && profile?.full_name?.charAt(0)}
+                                <div key={attendee.id} className="flex flex-col gap-3 p-4 rounded-xl bg-white border border-indigo-100 shadow-sm">
+                                  <div className="flex items-center gap-4">
+                                    <div className="size-11 rounded-xl bg-indigo-100 flex items-center justify-center text-sm font-black text-indigo-500 uppercase bg-cover bg-center shrink-0" style={{ backgroundImage: profile?.avatar ? `url(${profile.avatar})` : 'none' }}>
+                                      {!profile?.avatar && profile?.full_name?.charAt(0)}
+                                    </div>
+                                    <div className="flex-1 min-w-0">
+                                      <p className="text-sm font-bold text-slate-800 truncate mb-0.5">{profile?.full_name}</p>
+                                      <p className="text-[10px] text-indigo-500 font-bold uppercase tracking-wide">Solicitou participar</p>
+                                    </div>
                                   </div>
-                                  <div className="flex-1 min-w-0">
-                                    <p className="text-sm font-bold text-slate-800 truncate mb-0.5">{profile?.full_name}</p>
-                                    <p className="text-[10px] text-indigo-500 font-bold uppercase tracking-wide">Solicitou participar</p>
-                                  </div>
-                                  <div className="flex items-center gap-2 shrink-0">
+                                  <div className="flex items-center gap-2 w-full">
                                     <button
                                       onClick={() => handleManageRequest(attendee.user_id, 'accepted')}
-                                      className="px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-bold rounded-lg transition-all shadow-sm active:scale-95"
+                                      className="flex-1 px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-bold rounded-lg transition-all shadow-sm active:scale-95"
                                     >
                                       Aceitar
                                     </button>
                                     <button
                                       onClick={() => handleManageRequest(attendee.user_id, 'declined')}
-                                      className="px-4 py-2 bg-rose-500 hover:bg-rose-600 text-white text-xs font-bold rounded-lg transition-all shadow-sm active:scale-95"
+                                      className="flex-1 px-4 py-2 bg-rose-500 hover:bg-rose-600 text-white text-xs font-bold rounded-lg transition-all shadow-sm active:scale-95"
                                     >
                                       Negar
                                     </button>
