@@ -429,9 +429,14 @@ export const NotificationsView: React.FC<NotificationsViewProps> = ({ user, onVi
                                     {invitations.map(inv => (
                                         <div key={inv.id} className="bg-white/80 backdrop-blur-sm border border-slate-200/60 rounded-2xl p-4 shadow-sm hover:shadow-md transition-all group relative overflow-hidden">
                                             <div className="flex items-start justify-between gap-4 mb-3">
-                                                <span className="text-[8px] font-black text-primary-dark uppercase tracking-widest bg-primary-dark/5 px-2.5 py-1.5 rounded-lg border border-primary-dark/10 leading-relaxed flex-1 shadow-sm/5">
-                                                    CONVITE PARA PARTICIPAR DE UM EVENTO/COMPROMISSO CRIADO POR OUTRO USUÁRIO
-                                                </span>
+                                                <div className="flex flex-col gap-0.5 flex-1">
+                                                    <span className="text-[10px] font-black text-primary-dark uppercase tracking-widest leading-none">
+                                                        CONVITE
+                                                    </span>
+                                                    <span className="text-[9px] font-medium text-slate-500 italic leading-tight">
+                                                        Para participar de um evento ou compromisso criado por outro usuário
+                                                    </span>
+                                                </div>
                                                 <span className="text-[9px] font-bold text-slate-400 flex items-center gap-1 pt-1.5 shrink-0 bg-slate-50/50 px-2 py-0.5 rounded-md border border-slate-100">
                                                     <span className="material-symbols-outlined text-[12px]">calendar_today</span>
                                                     {new Date(inv.appointments.date + 'T12:00:00').toLocaleDateString('pt-BR')}
@@ -456,9 +461,14 @@ export const NotificationsView: React.FC<NotificationsViewProps> = ({ user, onVi
                                     {pendingRequests.map(req => (
                                         <div key={req.id} className="bg-white/80 backdrop-blur-sm border border-slate-200/60 rounded-2xl p-4 shadow-sm hover:shadow-md transition-all group relative overflow-hidden">
                                             <div className="flex items-start justify-between gap-4 mb-3">
-                                                <span className="text-[8px] font-black text-indigo-600 uppercase tracking-widest bg-indigo-50/50 px-2.5 py-1.5 rounded-lg border border-indigo-100 leading-relaxed flex-1 shadow-sm/5">
-                                                    SOLICITAÇÃO PARA PARTICIPAR DE UM EVENTO/COMPROMISSO CRIADO POR VOCÊ
-                                                </span>
+                                                <div className="flex flex-col gap-0.5 flex-1">
+                                                    <span className="text-[10px] font-black text-indigo-600 uppercase tracking-widest leading-none">
+                                                        SOLICITAÇÃO
+                                                    </span>
+                                                    <span className="text-[9px] font-medium text-slate-500 italic leading-tight">
+                                                        Para participar de um evento ou compromisso criado por você
+                                                    </span>
+                                                </div>
                                                 <span className="text-[9px] font-bold text-slate-400 flex items-center gap-1 pt-1.5 shrink-0 bg-slate-50/50 px-2 py-0.5 rounded-md border border-slate-100">
                                                     <span className="material-symbols-outlined text-[12px]">calendar_today</span>
                                                     {new Date(req.appointments.date + 'T12:00:00').toLocaleDateString('pt-BR')}
