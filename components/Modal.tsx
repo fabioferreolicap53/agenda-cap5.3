@@ -72,6 +72,7 @@ export const Modal: React.FC<ModalProps> = ({ isOpen, onClose, user, appointment
         setDate(initialDate ? initialDate.split('T')[0] : '');
         setStartTime('');
         setEndTime('');
+        setType(appointmentTypes[0]?.value || '');
         setDescription('');
         setSelectedUserIds(initialSelectedUsers || []);
         setSelectedLocationId('');
@@ -487,10 +488,12 @@ export const Modal: React.FC<ModalProps> = ({ isOpen, onClose, user, appointment
             <div className="space-y-1.5">
               <label className="text-xs font-bold uppercase tracking-wider text-primary-dark">Tipo de Evento</label>
               <select
+                required
                 value={type}
                 onChange={(e) => setType(e.target.value)}
                 className="w-full px-4 py-2.5 rounded-lg border border-slate-200 bg-white focus:ring-2 focus:ring-primary-dark focus:border-transparent text-sm transition-all outline-none appearance-none"
               >
+                {appointmentTypes.length === 0 && <option value="">Carregando tipos...</option>}
                 {appointmentTypes.map(t => (
                   <option key={t.id} value={t.value}>{t.label}</option>
                 ))}
