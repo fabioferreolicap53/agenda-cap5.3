@@ -446,14 +446,15 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
                     }}
                     onMouseLeave={() => setHoverInfo(null)}
                     style={getStyleObj(app.type)}
-                    className="group/event relative px-2 py-1 border-l-2 rounded-r text-[10px] lg:text-[11px] font-bold cursor-pointer hover:opacity-90 transition-opacity truncate shadow-sm mb-1 flex items-center gap-1"
+                    className="group/event relative px-1.5 py-0.5 border-l-[3px] rounded-r text-[10px] lg:text-[11px] cursor-pointer hover:brightness-95 transition-all truncate shadow-sm mb-1 flex items-center gap-1.5 leading-tight"
                   >
                     {appointmentTypes.find(t => t.value === app.type)?.icon && (
-                      <span className="material-symbols-outlined text-[12px] shrink-0">
+                      <span className="material-symbols-outlined text-[10px] shrink-0 opacity-70">
                         {appointmentTypes.find(t => t.value === app.type)?.icon}
                       </span>
                     )}
-                    <span className="truncate">{app.startTime} - {app.title}</span>
+                    <span className="font-black opacity-80 shrink-0">{app.startTime}</span>
+                    <span className="font-bold truncate opacity-100">{app.title}</span>
                   </div>
                 ))}
               </div>
