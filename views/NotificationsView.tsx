@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 import { User, Attendee, Appointment } from '../types';
+import { UserProfileModal } from '../components/UserProfileModal';
 
 interface NotificationsViewProps {
     user: User | null;
@@ -15,6 +16,8 @@ export const NotificationsView: React.FC<NotificationsViewProps> = ({ user, onVi
     const [loading, setLoading] = useState(true);
     const [actionLoading, setActionLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [selectedUserProfile, setSelectedUserProfile] = useState<User | null>(null);
+    const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
 
     const fetchNotifications = async () => {
         const userId = user?.id;
@@ -251,7 +254,33 @@ export const NotificationsView: React.FC<NotificationsViewProps> = ({ user, onVi
                                             {!req.profiles?.avatar && <span className="flex items-center justify-center h-full text-lg font-black text-slate-400">{req.profiles?.full_name?.charAt(0)}</span>}
                                         </div>
                                         <div className="flex-1 min-w-0">
-                                            <h4 className="text-base font-black text-slate-900 group-hover:text-indigo-600 transition-colors uppercase tracking-tight line-clamp-1">{req.profiles?.full_name}</h4>
+                                            <h4
+                                                onClick={async () => {
+                                                    // Fetch full user profile
+                                                    const { data: fullProfile } = await supabase
+                                                        .from('profiles')
+                                                        .select('*')
+                                                        .eq('id', req.user_id)
+                                                        .single();
+
+                                                    if (fullProfile) {
+                                                        setSelectedUserProfile({
+                                                            id: fullProfile.id,
+                                                            full_name: fullProfile.full_name,
+                                                            role: fullProfile.role,
+                                                            email: '',
+                                                            observations: fullProfile.observations,
+                                                            avatar: fullProfile.avatar,
+                                                            username: fullProfile.username,
+                                                            phone: fullProfile.phone
+                                                        });
+                                                        setIsProfileModalOpen(true);
+                                                    }
+                                                }}
+                                                className="text-base font-black text-slate-900 hover:text-indigo-600 transition-colors uppercase tracking-tight line-clamp-1 cursor-pointer"
+                                            >
+                                                {req.profiles?.full_name}
+                                            </h4>
                                             <p className="text-xs text-slate-500 font-medium truncate">Quer participar de: <span className="font-black text-slate-900">{req.appointments?.title}</span></p>
                                         </div>
                                     </div>
@@ -298,6 +327,13 @@ export const NotificationsView: React.FC<NotificationsViewProps> = ({ user, onVi
                     )}
                 </div>
             </div>
+
+            <UserProfileModal
+                isOpen={isProfileModalOpen}
+                onClose={() => setIsProfileModalOpen(false)}
+                user={selectedUserProfile}
+                onNavigateToChat={onNavigateToChat}
+            />
         </div>
     );
 };
