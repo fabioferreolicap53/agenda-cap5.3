@@ -429,7 +429,7 @@ export const NotificationsView: React.FC<NotificationsViewProps> = ({ user, onVi
                                     {invitations.map(inv => (
                                         <div key={inv.id} className="bg-white/80 backdrop-blur-sm border border-slate-200/60 rounded-2xl p-4 shadow-sm hover:shadow-md transition-all group relative overflow-hidden">
                                             <div className="flex items-center justify-between mb-2">
-                                                <span className="text-[9px] font-black text-primary-dark uppercase tracking-tight bg-primary-dark/5 px-2 py-0.5 rounded-md border border-primary-dark/10">Convite Recebido</span>
+                                                <span className="text-[9px] font-black text-primary-dark uppercase tracking-tight bg-primary-dark/5 px-2 py-1 rounded-md border border-primary-dark/10 leading-tight">CONVITE PARA PARTICIPAR DE UM EVENTO/COMPROMISSO CRIADO POR OUTRO USUÁRIO</span>
                                                 <span className="text-[9px] font-bold text-slate-400 flex items-center gap-1">
                                                     <span className="material-symbols-outlined text-[12px]">calendar_today</span>
                                                     {new Date(inv.appointments.date + 'T12:00:00').toLocaleDateString('pt-BR')}
@@ -454,7 +454,7 @@ export const NotificationsView: React.FC<NotificationsViewProps> = ({ user, onVi
                                     {pendingRequests.map(req => (
                                         <div key={req.id} className="bg-white/80 backdrop-blur-sm border border-slate-200/60 rounded-2xl p-4 shadow-sm hover:shadow-md transition-all group relative overflow-hidden">
                                             <div className="flex items-center justify-between mb-3">
-                                                <span className="text-[9px] font-black text-indigo-600 uppercase tracking-tight bg-indigo-50 px-2 py-0.5 rounded-md border border-indigo-100">Pedido de Entrada</span>
+                                                <span className="text-[9px] font-black text-indigo-600 uppercase tracking-tight bg-indigo-50 px-2 py-1 rounded-md border border-indigo-100 leading-tight">SOLICITAÇÃO PARA PARTICIPAR DE UM EVENTO/COMPROMISSO CRIADO POR VOCÊ</span>
                                                 <span className="text-[9px] font-bold text-slate-400">{new Date(req.appointments.date + 'T12:00:00').toLocaleDateString('pt-BR')}</span>
                                             </div>
 
