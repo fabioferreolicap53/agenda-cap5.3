@@ -653,23 +653,25 @@ export const AppointmentDetailView: React.FC<AppointmentDetailViewProps> = ({
                 ) : (
                   attendees.filter(a => a.status !== 'requested').map(att => {
                     const p = allProfiles.find(u => u.id === att.user_id);
-                    const statusColor = att.status === 'accepted' ? 'text-emerald-500' : att.status === 'declined' ? 'text-rose-500' : 'text-amber-500';
+                    const statusColor = att.status === 'accepted' ? 'text-emerald-600' : att.status === 'declined' ? 'text-rose-600' : 'text-amber-600';
                     const statusIcon = att.status === 'accepted' ? 'check_circle' : att.status === 'declined' ? 'cancel' : 'schedule';
-                    const statusBg = att.status === 'accepted' ? 'bg-emerald-50' : att.status === 'declined' ? 'bg-rose-50' : 'bg-amber-50';
+                    const statusBg = att.status === 'accepted' ? 'bg-emerald-50 border-emerald-100' : att.status === 'declined' ? 'bg-rose-50 border-rose-100' : 'bg-amber-50 border-amber-100';
+                    const statusText = att.status === 'accepted' ? 'Aceito' : att.status === 'declined' ? 'Recusado' : 'Aguardando';
 
                     return (
-                      <div key={att.id} className="flex items-center justify-between p-2 hover:bg-slate-50 rounded-lg transition-colors group">
+                      <div key={att.id} className="flex items-center justify-between p-2.5 hover:bg-slate-50 rounded-xl transition-all group border border-transparent hover:border-slate-100 hover:shadow-sm">
                         <div className="flex items-center gap-3 min-w-0">
-                          <div className="size-9 rounded-full bg-slate-200 border-2 border-white shadow-sm bg-cover bg-center shrink-0" style={{ backgroundImage: p?.avatar ? `url(${p.avatar})` : 'none' }}>
-                            {!p?.avatar && (p?.full_name ? p.full_name[0] : 'U')}
+                          <div className="size-10 rounded-full bg-slate-100 border-2 border-white shadow-sm bg-cover bg-center shrink-0 flex items-center justify-center text-xs font-black text-slate-400 uppercase" style={{ backgroundImage: p?.avatar ? `url(${p.avatar})` : 'none' }}>
+                            {!p?.avatar && (p?.full_name ? p.full_name.split(' ').map(n => n[0]).slice(0, 2).join('') : 'U')}
                           </div>
                           <div className="min-w-0">
                             <p className="text-xs font-bold text-slate-700 truncate">{p?.full_name}</p>
-                            <p className="text-[10px] text-slate-500 truncate italic">{p?.observations || 'Sem observações'}</p>
+                            <p className="text-[10px] text-slate-400 truncate italic">{p?.observations || 'Sem observações'}</p>
                           </div>
                         </div>
-                        <div className={`size-6 rounded-full flex items-center justify-center ${statusBg} ${statusColor}`} title={att.status}>
+                        <div className={`px-2 py-1 rounded-lg border flex items-center gap-1.5 ${statusBg} ${statusColor}`} title={statusText}>
                           <span className="material-symbols-outlined text-[14px]">{statusIcon}</span>
+                          <span className="text-[9px] font-bold uppercase tracking-wider">{statusText}</span>
                         </div>
                       </div>
                     );
