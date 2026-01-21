@@ -14,6 +14,8 @@ export const NotificationsView: React.FC<NotificationsViewProps> = ({ user, onVi
     const [invitations, setInvitations] = useState<(Attendee & { appointments: { title: string, date: string, created_by: string } })[]>([]);
     const [pendingRequests, setPendingRequests] = useState<any[]>([]);
     const [historyItems, setHistoryItems] = useState<any[]>([]);
+    const [sentRequests, setSentRequests] = useState<any[]>([]);
+    const [sentInvitations, setSentInvitations] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [actionLoading, setActionLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -150,6 +152,41 @@ export const NotificationsView: React.FC<NotificationsViewProps> = ({ user, onVi
             }
             setHistoryItems(myHistory);
 
+            // ---------------------------------------------------------
+            // 4. SENT REQUESTS (Made by me)
+            // ---------------------------------------------------------
+            const { data: myRequests, error: sentReqError } = await supabase
+                .from('appointment_attendees')
+                .select('*, appointments(title, date, created_by)')
+                .eq('user_id', userId)
+                .eq('status', 'requested');
+
+            if (sentReqError) throw sentReqError;
+            setSentRequests(myRequests || []);
+
+            // ---------------------------------------------------------
+            // 5. SENT INVITATIONS (Invitations I sent to others)
+            // ---------------------------------------------------------
+            // We need to find all appointments created by me first
+            const { data: myApps } = await supabase
+                .from('appointments')
+                .select('id')
+                .eq('created_by', userId);
+
+            if (myApps && myApps.length > 0) {
+                const myAppIds = myApps.map(a => a.id);
+                const { data: myInvs, error: sentInvError } = await supabase
+                    .from('appointment_attendees')
+                    .select('*, appointments(title, date), profiles(full_name, avatar)')
+                    .in('appointment_id', myAppIds)
+                    .eq('status', 'pending');
+
+                if (sentInvError) throw sentInvError;
+                setSentInvitations(myInvs || []);
+            } else {
+                setSentInvitations([]);
+            }
+
         } catch (err: any) {
             console.error('Error fetching notifications:', err.message);
             setError(err.message);
@@ -188,6 +225,24 @@ export const NotificationsView: React.FC<NotificationsViewProps> = ({ user, onVi
             await fetchNotifications();
         } catch (err: any) {
             alert('Erro ao processar: ' + err.message);
+        } finally {
+            setActionLoading(false);
+        }
+    };
+
+    const handleCancelAction = async (itemId: string) => {
+        if (!window.confirm('Tem certeza que deseja cancelar esta solicitação/convite?')) return;
+        setActionLoading(true);
+        try {
+            const { error } = await supabase
+                .from('appointment_attendees')
+                .delete()
+                .eq('id', itemId);
+
+            if (error) throw error;
+            await fetchNotifications();
+        } catch (err: any) {
+            alert('Erro ao cancelar: ' + err.message);
         } finally {
             setActionLoading(false);
         }
@@ -386,6 +441,89 @@ export const NotificationsView: React.FC<NotificationsViewProps> = ({ user, onVi
                         </div>
                     )}
                 </div>
+
+                {/* Sent Items Section */}
+                {(sentRequests.length > 0 || sentInvitations.length > 0) && (
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                        {/* My Requests */}
+                        <div>
+                            <div className="flex items-center gap-2 mb-4">
+                                <span className="material-symbols-outlined text-amber-500">outbox</span>
+                                <h3 className="text-sm font-black text-slate-800 uppercase tracking-widest">Suas Solicitações Enviadas ({sentRequests.length})</h3>
+                            </div>
+                            <div className="space-y-3">
+                                {sentRequests.map(req => (
+                                    <div key={req.id} className="bg-white border border-slate-200 rounded-xl p-4 flex flex-col gap-3 group">
+                                        <div className="flex-1 min-w-0">
+                                            <div className="flex items-center gap-2 mb-1">
+                                                <span className="text-[9px] font-black text-amber-600 uppercase tracking-widest bg-amber-50 px-2 py-0.5 rounded border border-amber-100">Pendente</span>
+                                                <span className="text-[10px] font-bold text-slate-400">{req.appointments?.date ? new Date(req.appointments.date + 'T12:00:00').toLocaleDateString('pt-BR') : 'Sem data'}</span>
+                                            </div>
+                                            <h4 className="text-sm font-bold text-slate-900 truncate group-hover:text-amber-600 transition-colors">{req.appointments?.title}</h4>
+                                        </div>
+                                        <div className="flex gap-2">
+                                            <button
+                                                onClick={() => onViewAppointment(req.appointment_id)}
+                                                className="flex-1 py-2 bg-slate-50 text-slate-600 rounded-lg text-xs font-black hover:bg-slate-100 transition-all flex items-center justify-center gap-1.5 border border-slate-100"
+                                            >
+                                                <span className="material-symbols-outlined text-[16px]">visibility</span>
+                                                Ver
+                                            </button>
+                                            <button
+                                                onClick={() => handleCancelAction(req.id)}
+                                                disabled={actionLoading}
+                                                className="flex-1 py-2 bg-rose-50 text-rose-600 rounded-lg text-xs font-black hover:bg-rose-100 transition-all flex items-center justify-center gap-1.5 border border-rose-100"
+                                            >
+                                                <span className="material-symbols-outlined text-[16px]">delete</span>
+                                                Cancelar
+                                            </button>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+
+                        {/* Sent Invitations */}
+                        <div>
+                            <div className="flex items-center gap-2 mb-4">
+                                <span className="material-symbols-outlined text-blue-500">rocket_launch</span>
+                                <h3 className="text-sm font-black text-slate-800 uppercase tracking-widest">Convites Enviados ({sentInvitations.length})</h3>
+                            </div>
+                            <div className="space-y-3">
+                                {sentInvitations.map(inv => (
+                                    <div key={inv.id} className="bg-white border border-slate-200 rounded-xl p-4 flex flex-col gap-3 group">
+                                        <div className="flex items-center gap-3">
+                                            <div className="size-10 rounded-xl bg-slate-100 bg-cover bg-center shrink-0 border border-slate-200" style={{ backgroundImage: inv.profiles?.avatar ? `url(${inv.profiles.avatar})` : 'none' }}>
+                                                {!inv.profiles?.avatar && <span className="flex items-center justify-center h-full text-sm font-black text-slate-400">{inv.profiles?.full_name?.charAt(0)}</span>}
+                                            </div>
+                                            <div className="flex-1 min-w-0">
+                                                <h4 className="text-sm font-bold text-slate-900 truncate group-hover:text-blue-600 transition-colors uppercase tracking-tight">{inv.profiles?.full_name}</h4>
+                                                <p className="text-[10px] text-slate-500 truncate italic">Evento: {inv.appointments?.title}</p>
+                                            </div>
+                                        </div>
+                                        <div className="flex gap-2">
+                                            <button
+                                                onClick={() => onNavigateToChat?.(inv.user_id)}
+                                                className="flex-1 py-2 bg-slate-50 text-slate-600 rounded-lg text-xs font-black hover:bg-slate-100 transition-all flex items-center justify-center gap-1.5 border border-slate-100"
+                                            >
+                                                <span className="material-symbols-outlined text-[16px]">chat</span>
+                                                Chat
+                                            </button>
+                                            <button
+                                                onClick={() => handleCancelAction(inv.id)}
+                                                disabled={actionLoading}
+                                                className="flex-1 py-2 bg-rose-50 text-rose-600 rounded-lg text-xs font-black hover:bg-rose-100 transition-all flex items-center justify-center gap-1.5 border border-rose-100"
+                                            >
+                                                <span className="material-symbols-outlined text-[16px]">person_remove</span>
+                                                Remover
+                                            </button>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+                )}
 
                 {/* History Section */}
                 <div className="pt-4">
