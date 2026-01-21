@@ -38,6 +38,8 @@ export const AppointmentListView: React.FC<AppointmentListViewProps> = ({
     const [allUsers, setAllUsers] = useState<User[]>([]);
     const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
     const [hoverInfo, setHoverInfo] = useState<{ app: Appointment; x: number; y: number } | null>(null);
+    const [startDate, setStartDate] = useState('');
+    const [endDate, setEndDate] = useState('');
 
 
 
@@ -169,7 +171,10 @@ export const AppointmentListView: React.FC<AppointmentListViewProps> = ({
             else matchesUser = isOrganizer || isParticipant;
         }
 
-        return matchesSearch && matchesType && matchesLocation && matchesUser;
+        const matchesStartDate = !startDate || app.date >= startDate;
+        const matchesEndDate = !endDate || app.date <= endDate;
+
+        return matchesSearch && matchesType && matchesLocation && matchesUser && matchesStartDate && matchesEndDate;
     });
 
     const getTypeLabel = (type: string) => {
@@ -278,6 +283,35 @@ export const AppointmentListView: React.FC<AppointmentListViewProps> = ({
                                     {locations.map(l => <option key={l.id} value={l.id}>{l.name}</option>)}
                                 </select>
                             </div>
+                            <div className="grid grid-cols-2 gap-2">
+                                <div className="flex flex-col gap-1">
+                                    <label className="text-[10px] font-bold text-slate-400 uppercase ml-1">Início</label>
+                                    <input
+                                        type="date"
+                                        value={startDate}
+                                        onChange={(e) => setStartDate(e.target.value)}
+                                        className="w-full p-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-bold"
+                                    />
+                                </div>
+                                <div className="flex flex-col gap-1">
+                                    <label className="text-[10px] font-bold text-slate-400 uppercase ml-1">Fim</label>
+                                    <input
+                                        type="date"
+                                        value={endDate}
+                                        onChange={(e) => setEndDate(e.target.value)}
+                                        className="w-full p-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-bold"
+                                    />
+                                </div>
+                            </div>
+                            {(startDate || endDate) && (
+                                <button
+                                    onClick={() => { setStartDate(''); setEndDate(''); }}
+                                    className="w-full py-2 bg-rose-50 text-rose-600 rounded-lg text-xs font-bold uppercase flex items-center justify-center gap-2"
+                                >
+                                    <span className="material-symbols-outlined text-sm">backspace</span>
+                                    Limpar Datas
+                                </button>
+                            )}
                             <button
                                 onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
                                 className="w-full py-2 bg-slate-100 hover:bg-slate-200 rounded-lg text-xs font-bold uppercase text-slate-600 flex items-center justify-center gap-2"
@@ -352,6 +386,39 @@ export const AppointmentListView: React.FC<AppointmentListViewProps> = ({
                                 ))}
                             </select>
                         </div>
+                    </div>
+
+                    {/* Desktop Date Filters */}
+                    <div className="hidden md:flex items-center gap-4 mt-4 bg-white p-3 rounded-xl border border-slate-100 shadow-sm">
+                        <div className="flex items-center gap-3">
+                            <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1">
+                                <span className="material-symbols-outlined text-sm">calendar_month</span> Intervalo:
+                            </span>
+                            <div className="flex items-center gap-2">
+                                <input
+                                    type="date"
+                                    value={startDate}
+                                    onChange={(e) => setStartDate(e.target.value)}
+                                    className="px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-[11px] font-bold text-slate-600 outline-none focus:ring-2 focus:ring-primary-dark/10"
+                                />
+                                <span className="text-slate-300">até</span>
+                                <input
+                                    type="date"
+                                    value={endDate}
+                                    onChange={(e) => setEndDate(e.target.value)}
+                                    className="px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-[11px] font-bold text-slate-600 outline-none focus:ring-2 focus:ring-primary-dark/10"
+                                />
+                            </div>
+                        </div>
+                        {(startDate || endDate) && (
+                            <button
+                                onClick={() => { setStartDate(''); setEndDate(''); }}
+                                className="flex items-center gap-1 text-[10px] font-bold text-rose-500 hover:text-rose-600 uppercase transition-colors"
+                            >
+                                <span className="material-symbols-outlined text-[16px]">backspace</span>
+                                Limpar
+                            </button>
+                        )}
                     </div>
                 </div>
 

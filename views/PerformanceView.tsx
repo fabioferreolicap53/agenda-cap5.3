@@ -21,6 +21,8 @@ export const PerformanceView: React.FC<PerformanceViewProps> = ({ onToggleSideba
     const [filterType, setFilterType] = useState('all');
     const [filterLocation, setFilterLocation] = useState('all');
     const [filterUserId, setFilterUserId] = useState<string>('all');
+    const [startDate, setStartDate] = useState('');
+    const [endDate, setEndDate] = useState('');
 
     // Derived stats
     const [statusStats, setStatusStats] = useState<Record<string, number>>({});
@@ -102,7 +104,11 @@ export const PerformanceView: React.FC<PerformanceViewProps> = ({ onToggleSideba
         const matchesUser = filterUserId === 'all' ||
             a.created_by === filterUserId ||
             (a.attendees?.some(att => att.user_id === filterUserId && att.status !== 'declined') ?? false);
-        return matchesType && matchesLocation && matchesUser;
+
+        const matchesStartDate = !startDate || a.date >= startDate;
+        const matchesEndDate = !endDate || a.date <= endDate;
+
+        return matchesType && matchesLocation && matchesUser && matchesStartDate && matchesEndDate;
     });
 
     // --- Recalculate Stats based on Filtered Data ---
@@ -216,6 +222,35 @@ export const PerformanceView: React.FC<PerformanceViewProps> = ({ onToggleSideba
                                 {locations.map(l => <option key={l.id} value={l.id}>{l.name}</option>)}
                             </select>
                         </div>
+                        <div className="flex flex-col gap-1 flex-1">
+                            <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Início</label>
+                            <input
+                                type="date"
+                                value={startDate}
+                                onChange={(e) => setStartDate(e.target.value)}
+                                className="w-full p-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-bold text-slate-700 outline-none focus:border-primary-dark cursor-pointer"
+                            />
+                        </div>
+                        <div className="flex flex-col gap-1 flex-1">
+                            <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Fim</label>
+                            <input
+                                type="date"
+                                value={endDate}
+                                onChange={(e) => setEndDate(e.target.value)}
+                                className="w-full p-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-bold text-slate-700 outline-none focus:border-primary-dark cursor-pointer"
+                            />
+                        </div>
+                        {(startDate || endDate) && (
+                            <div className="flex items-end">
+                                <button
+                                    onClick={() => { setStartDate(''); setEndDate(''); }}
+                                    className="p-2 text-slate-400 hover:text-rose-500 transition-colors"
+                                    title="Limpar Datas"
+                                >
+                                    <span className="material-symbols-outlined text-[18px]">backspace</span>
+                                </button>
+                            </div>
+                        )}
                     </div>
                 </header>
 
