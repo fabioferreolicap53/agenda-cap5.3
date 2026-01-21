@@ -46,6 +46,44 @@ export const AppointmentDetailView: React.FC<AppointmentDetailViewProps> = ({
   const [selectedUserIds, setSelectedUserIds] = useState<string[]>([]);
   const [attendeeSearchTerm, setAttendeeSearchTerm] = useState('');
 
+  /* Conflict detection state */
+  const [showConflictDialog, setShowConflictDialog] = useState(false);
+  const [conflictDetails, setConflictDetails] = useState<{ title: string; start: string; end: string } | null>(null);
+
+  const checkConflict = async (locId: string, dateStr: string, start: string, end: string, excludeId: string) => {
+    const { data, error } = await supabase
+      .from('appointments')
+      .select('title, start_time, end_time')
+      .eq('location_id', locId)
+      .eq('date', dateStr)
+      .neq('id', excludeId);
+
+    if (error) {
+      console.error('Error checking conflict:', error);
+      return null;
+    }
+
+    if (data && data.length > 0) {
+      // Check each result for overlap
+      for (const item of data) {
+        const isConflict = (
+          (start >= item.start_time && start < item.end_time) || // New start is during existing
+          (end > item.start_time && end <= item.end_time) || // New end is during existing
+          (start <= item.start_time && end >= item.end_time) // New wraps existing
+        );
+
+        if (isConflict) {
+          return {
+            title: item.title,
+            start: item.start_time,
+            end: item.end_time
+          };
+        }
+      }
+    }
+    return null;
+  };
+
   const fetchOrganizerAndAttendees = async () => {
     // Fetch Organizer
     const { data: orgData } = await supabase
@@ -177,7 +215,7 @@ export const AppointmentDetailView: React.FC<AppointmentDetailViewProps> = ({
     }
   };
 
-  const handleSave = async () => {
+  const handleSave = async (checkConflictFirst: boolean = true) => {
     setLoading(true);
     try {
       // Ensure end_time is not null. If missing, default to start_time + 1 hour
@@ -190,6 +228,27 @@ export const AppointmentDetailView: React.FC<AppointmentDetailViewProps> = ({
 
       if (!finalEndTime) {
         throw new Error("O horário de término é obrigatório.");
+      }
+
+      // Conflict detection for edited appointment
+      if (checkConflictFirst && editLocationId && !isExternalLocation && editDate) {
+        const selectedLocation = locations.find(l => l.id === editLocationId);
+
+        if (selectedLocation?.has_conflict_control) {
+          if (!editStartTime || !finalEndTime) {
+            alert('Horário de início e término são obrigatórios para este local.');
+            setLoading(false);
+            return;
+          }
+
+          const conflict = await checkConflict(editLocationId, editDate, editStartTime, finalEndTime, appointment.id);
+          if (conflict) {
+            setConflictDetails(conflict);
+            setShowConflictDialog(true);
+            setLoading(false);
+            return;
+          }
+        }
       }
 
       // 1. Update Appointment Information
@@ -244,7 +303,7 @@ export const AppointmentDetailView: React.FC<AppointmentDetailViewProps> = ({
     } catch (err: any) {
       alert('Erro ao atualizar: ' + err.message);
     } finally {
-      setLoading(false);
+      if (!showConflictDialog) setLoading(false);
     }
   };
   const handleResponse = async (status: 'accepted' | 'declined') => {
@@ -763,6 +822,61 @@ export const AppointmentDetailView: React.FC<AppointmentDetailViewProps> = ({
         </div >
       </main >
       <Footer />
-    </div >
+
+      {/* Conflict Alert Overlay */}
+      {showConflictDialog && conflictDetails && (
+        <div className="fixed inset-0 z-[110] bg-slate-900/80 backdrop-blur-sm flex flex-col items-center justify-center p-6 animate-[fadeIn_0.2s_ease-out]">
+          <div className="bg-white w-full max-w-sm rounded-2xl shadow-[0_0_50px_rgba(225,29,72,0.25)] border-2 border-rose-500 p-6 flex flex-col items-center relative overflow-hidden">
+            {/* Decorative background circle */}
+            <div className="absolute -top-10 -right-10 size-32 bg-rose-50 rounded-full blur-2xl pointer-events-none"></div>
+
+            <div className="size-16 rounded-full bg-rose-100 text-rose-600 flex items-center justify-center mb-4 animate-pulse shrink-0 relative z-10">
+              <span className="material-symbols-outlined text-[32px]">warning</span>
+            </div>
+
+            <h3 className="text-xl font-black text-slate-800 mb-2 text-center relative z-10">Conflito de Local!</h3>
+
+            <p className="text-sm text-slate-600 text-center mb-5 relative z-10">
+              Este local já possui um evento agendado neste horário. Por favor, escolha outro horário ou local.
+            </p>
+
+            <div className="w-full bg-rose-50 border border-rose-100 rounded-xl p-3 mb-6 relative z-10">
+              <div className="flex items-start gap-3">
+                <div className="size-8 rounded-lg bg-rose-200/50 flex items-center justify-center shrink-0">
+                  <span className="material-symbols-outlined text-rose-600 text-[18px]">event_busy</span>
+                </div>
+                <div className="min-w-0">
+                  <p className="text-xs font-bold text-rose-700 uppercase tracking-wide mb-0.5">Evento Existente</p>
+                  <p className="text-sm font-bold text-slate-800 truncate">{conflictDetails.title}</p>
+                  <p className="text-xs text-slate-500 font-medium">{conflictDetails.start} - {conflictDetails.end}</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex flex-col gap-2 w-full relative z-10">
+              <button
+                onClick={() => {
+                  setShowConflictDialog(false);
+                  setConflictDetails(null);
+                  setIsEditing(false); // Cancel edit
+                }}
+                className="w-full py-2.5 rounded-lg bg-slate-800 hover:bg-slate-900 text-white font-bold text-sm transition-all shadow-lg shadow-slate-900/20"
+              >
+                Cancelar e Manter Original
+              </button>
+              <button
+                onClick={() => {
+                  setShowConflictDialog(false);
+                  setConflictDetails(null);
+                }}
+                className="w-full py-2.5 rounded-lg bg-slate-800 hover:bg-slate-900 text-white font-bold text-sm transition-all shadow-lg shadow-slate-900/20"
+              >
+                Entendi e Vou Alterar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
   );
 };
