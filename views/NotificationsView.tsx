@@ -276,14 +276,21 @@ export const NotificationsView: React.FC<NotificationsViewProps> = ({ user, onVi
         }
     };
 
-    const handleCancelAction = async (itemId: string) => {
+    const handleCancelAction = async (itemId: string, appointmentId?: string, attendeeUserId?: string) => {
         if (!window.confirm('Tem certeza que deseja cancelar esta solicitação/convite?')) return;
         setActionLoading(true);
         try {
-            const { error } = await supabase
-                .from('appointment_attendees')
-                .delete()
-                .eq('id', itemId);
+            let query = supabase.from('appointment_attendees').delete();
+
+            if (itemId) {
+                query = query.eq('id', itemId);
+            } else if (appointmentId && attendeeUserId) {
+                query = query.eq('appointment_id', appointmentId).eq('user_id', attendeeUserId);
+            } else {
+                throw new Error('Informações insuficientes para cancelar.');
+            }
+
+            const { error } = await query;
 
             if (error) throw error;
             await fetchNotifications();
@@ -479,7 +486,7 @@ export const NotificationsView: React.FC<NotificationsViewProps> = ({ user, onVi
                                             <button onClick={() => onViewAppointment(req.appointment_id)} className="flex-1 h-8 bg-slate-100 text-slate-600 rounded-lg text-[10px] font-black hover:bg-slate-200 transition-all flex items-center justify-center gap-1">
                                                 <span className="material-symbols-outlined text-[16px]">visibility</span> Ver
                                             </button>
-                                            <button onClick={() => handleCancelAction(req.id)} disabled={actionLoading} className="px-3 h-8 bg-rose-50 text-rose-500 rounded-lg text-[10px] font-black hover:bg-rose-500 hover:text-white transition-all">Cancelar</button>
+                                            <button onClick={() => handleCancelAction(req.id, req.appointment_id, req.user_id)} disabled={actionLoading} className="px-3 h-8 bg-rose-50 text-rose-500 rounded-lg text-[10px] font-black hover:bg-rose-500 hover:text-white transition-all">Cancelar</button>
                                         </div>
                                     </div>
                                 ))}
@@ -506,7 +513,7 @@ export const NotificationsView: React.FC<NotificationsViewProps> = ({ user, onVi
                                                 <span className="material-symbols-outlined text-[16px]">visibility</span> Ver
                                             </button>
                                             <button onClick={() => onNavigateToChat?.(inv.user_id)} className="size-8 bg-slate-100 text-slate-500 rounded-lg flex items-center justify-center hover:bg-slate-200 transition-all"><span className="material-symbols-outlined text-[18px]">chat</span></button>
-                                            <button onClick={() => handleCancelAction(inv.id)} disabled={actionLoading} className="size-8 bg-rose-50 text-rose-500 rounded-lg flex items-center justify-center hover:bg-rose-500 hover:text-white transition-all"><span className="material-symbols-outlined text-[18px]">person_remove</span></button>
+                                            <button onClick={() => handleCancelAction(inv.id, inv.appointment_id, inv.user_id)} disabled={actionLoading} className="size-8 bg-rose-50 text-rose-500 rounded-lg flex items-center justify-center hover:bg-rose-500 hover:text-white transition-all"><span className="material-symbols-outlined text-[18px]">person_remove</span></button>
                                         </div>
                                     </div>
                                 ))}
