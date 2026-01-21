@@ -453,6 +453,7 @@ export const NotificationsView: React.FC<NotificationsViewProps> = ({ user, onVi
                                             <div className="flex gap-2 pt-3 border-t border-slate-50 mt-auto">
                                                 <button onClick={() => handleResponse(inv.id, 'accepted')} disabled={actionLoading} className="flex-1 h-9 bg-emerald-500 text-white rounded-xl text-[10px] font-black hover:bg-emerald-600 transition-all shadow-sm shadow-emerald-200">Aceitar</button>
                                                 <button onClick={() => handleResponse(inv.id, 'declined')} disabled={actionLoading} className="flex-1 h-9 bg-rose-500 text-white rounded-xl text-[10px] font-black hover:bg-rose-600 transition-all shadow-sm shadow-rose-200">Recusar</button>
+                                                <button onClick={() => onNavigateToChat?.(inv.appointments.created_by)} className="flex-1 h-9 bg-slate-100 text-slate-500 rounded-xl flex items-center justify-center hover:bg-slate-200 transition-all" title="Chat"><span className="material-symbols-outlined text-[18px]">chat</span></button>
                                                 <button onClick={() => onViewAppointment(inv.appointment_id)} className="flex-1 h-9 bg-slate-100 text-slate-500 rounded-xl flex items-center justify-center hover:bg-slate-200 transition-all" title="Ver Detalhes"><span className="material-symbols-outlined text-[18px]">visibility</span></button>
                                             </div>
                                         </div>
@@ -462,7 +463,7 @@ export const NotificationsView: React.FC<NotificationsViewProps> = ({ user, onVi
                                         <div key={req.id} className="bg-white/80 backdrop-blur-sm border border-slate-200/60 rounded-2xl p-4 shadow-sm hover:shadow-md transition-all group relative overflow-hidden flex flex-col h-full">
                                             <div className="flex items-start justify-between gap-4 mb-3">
                                                 <div className="flex flex-col gap-0.5 flex-1">
-                                                    <span className="text-[10px] font-black text-indigo-600 uppercase tracking-widest leading-none">
+                                                    <span className="text-[10px] font-black text-primary-dark uppercase tracking-widest leading-none">
                                                         SOLICITAÇÃO
                                                     </span>
                                                     <span className="text-[9px] font-medium text-slate-500 italic leading-tight">
@@ -487,7 +488,7 @@ export const NotificationsView: React.FC<NotificationsViewProps> = ({ user, onVi
 
                                             <div className="flex gap-2 pt-3 border-t border-slate-50 mt-auto">
                                                 <button onClick={() => handleResponse(req.id, 'accepted')} disabled={actionLoading} className="flex-1 h-9 bg-indigo-600 text-white rounded-xl text-[10px] font-black hover:bg-indigo-700 transition-all shadow-sm shadow-indigo-200">Aprovar</button>
-                                                <button onClick={() => handleResponse(req.id, 'declined')} disabled={actionLoading} className="flex-1 h-9 bg-rose-50 text-rose-500 rounded-xl flex items-center justify-center hover:bg-rose-500 hover:text-white transition-all" title="Recusar"><span className="material-symbols-outlined text-[18px]">close</span></button>
+                                                <button onClick={() => handleResponse(req.id, 'declined')} disabled={actionLoading} className="flex-1 h-9 bg-rose-500 text-white rounded-xl text-[10px] font-black hover:bg-rose-600 transition-all shadow-sm shadow-rose-200">Recusar</button>
                                                 <button onClick={() => onNavigateToChat?.(req.user_id)} className="flex-1 h-9 bg-slate-100 text-slate-500 rounded-xl flex items-center justify-center hover:bg-slate-200 transition-all" title="Chat"><span className="material-symbols-outlined text-[18px]">chat</span></button>
                                                 <button onClick={() => onViewAppointment(req.appointment_id)} className="flex-1 h-9 bg-slate-100 text-slate-500 rounded-xl flex items-center justify-center hover:bg-slate-200 transition-all" title="Ver Detalhes"><span className="material-symbols-outlined text-[18px]">visibility</span></button>
                                             </div>
