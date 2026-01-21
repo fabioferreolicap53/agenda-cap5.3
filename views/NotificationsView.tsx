@@ -333,6 +333,7 @@ export const NotificationsView: React.FC<NotificationsViewProps> = ({ user, onVi
                 onClose={() => setIsProfileModalOpen(false)}
                 user={selectedUserProfile}
                 onNavigateToChat={onNavigateToChat}
+                currentUser={user}
             />
         </div>
     );

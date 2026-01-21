@@ -497,8 +497,13 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
                   <div
                     key={app.id}
                     onClick={() => onOpenDetails(app)}
+                    onMouseEnter={(e) => {
+                      const rect = e.currentTarget.getBoundingClientRect();
+                      setHoverInfo({ app, x: rect.right + 10, y: rect.top });
+                    }}
+                    onMouseLeave={() => setHoverInfo(null)}
                     style={getStyleObj(app.type)}
-                    className="group/event relative p-3 rounded-xl border-l-4 shadow-sm cursor-pointer transition-all hover:translate-x-1"
+                    className="group/event relative p-3 rounded-xl border-l-4 shadow-sm cursor-pointer transition-all hover:translate-x-1 hover:shadow-md"
                   >
                     <p className="text-[10px] font-bold opacity-70 mb-1">{app.startTime}{app.endTime ? ` - ${app.endTime}` : ''}</p>
                     <div className="flex items-center gap-2 mb-1">
@@ -508,21 +513,6 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
                         </span>
                       )}
                       <h4 className="text-xs font-bold leading-tight truncate">{app.title}</h4>
-                    </div>
-
-                    {/* Hover Preview Tooltip */}
-                    <div className="absolute left-0 bottom-full mb-3 w-56 p-3 bg-slate-900 text-white rounded-xl shadow-2xl opacity-0 invisible group-hover/event:opacity-100 group-hover/event:visible transition-all z-50 pointer-events-none translate-y-2 group-hover/event:translate-y-0">
-                      <div className="flex items-center gap-2 mb-2">
-                        <span className="p-1 rounded bg-white/10">
-                          <span className="material-symbols-outlined text-[14px]">event</span>
-                        </span>
-                        <p className="text-[10px] font-bold text-sky-300">{app.startTime}{app.endTime ? ` - ${app.endTime}` : ''}</p>
-                      </div>
-                      <p className="text-xs font-bold mb-1.5 leading-tight">{app.title}</p>
-                      {app.description && (
-                        <p className="text-[10px] text-slate-300 line-clamp-3 leading-relaxed border-t border-white/10 pt-1.5 mt-1.5">{app.description}</p>
-                      )}
-                      <div className="absolute top-full left-6 -mt-1 border-[6px] border-transparent border-t-slate-900"></div>
                     </div>
                   </div>
                 ))
@@ -605,34 +595,26 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
       <div className="flex-1 flex flex-col min-w-0 h-full">
         {/* Header */}
         {/* Header */}
-        <header className="bg-primary-dark text-white flex flex-col px-2 md:px-8 sticky top-0 z-10 shadow-md shrink-0 transition-all duration-300">
-          <div className="h-12 md:h-16 flex items-center justify-between">
-            <div className="flex items-center gap-1.5 md:gap-12 w-full md:w-auto">
-              {/* Mobile Menu Toggle */}
+        <header className="bg-primary-dark text-white flex flex-col shadow-lg shrink-0 z-20 relative overflow-visible transition-all duration-300">
+          {/* Top Bar: Nav & Actions */}
+          <div className="h-16 flex items-center justify-between px-4 md:px-8 border-b border-white/10">
+            <div className="flex items-center gap-4">
               <button
                 onClick={onToggleSidebar}
-                className="md:hidden size-8 flex items-center justify-center rounded-lg hover:bg-white/10 active:scale-90 transition-all shrink-0 mr-2"
+                className="md:hidden size-10 flex items-center justify-center rounded-xl hover:bg-white/10 active:scale-95 transition-all text-white/80 hover:text-white"
               >
-                <span className="material-symbols-outlined text-[20px]">menu</span>
+                <span className="material-symbols-outlined text-[24px]">menu</span>
               </button>
 
-              <div className="flex items-center gap-2 md:gap-4 text-white/90 flex-1 md:flex-none justify-center md:justify-start min-w-0">
-                <button
-                  onClick={goToToday}
-                  className="hidden md:block px-3 py-1.5 text-xs font-bold border border-white/20 rounded-lg hover:bg-white/10 transition-all"
-                >
-                  Hoje
-                </button>
-                {viewMode !== 'month' && (
+              <div className="flex items-center gap-6">
+                <div className="flex items-center bg-slate-900/30 rounded-lg p-1">
                   <button
-                    onClick={() => changeViewMode('month')}
-                    className="px-2 md:px-3 py-1.5 text-[10px] md:text-xs font-bold border border-white/20 rounded-lg hover:bg-white/10 transition-all flex items-center gap-1.5"
+                    onClick={goToToday}
+                    className="px-4 py-1.5 text-xs font-black uppercase tracking-wider rounded-md hover:bg-white/10 transition-colors"
                   >
-                    <span className="material-symbols-outlined text-[16px]">calendar_month</span>
-                    <span className="hidden sm:inline">Mensal</span>
+                    Hoje
                   </button>
-                )}
-                <div className="flex items-center gap-2">
+                  <div className="w-px h-4 bg-white/10 mx-1"></div>
                   <button
                     onClick={() => {
                       const d = new Date(currentDate);
@@ -641,18 +623,10 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
                       else d.setDate(d.getDate() - 1);
                       setCurrentDate(d);
                     }}
-                    className="p-1 hover:bg-white/10 rounded transition-colors"
+                    className="size-7 flex items-center justify-center rounded-md hover:bg-white/10 transition-colors"
                   >
-                    <span className="material-symbols-outlined">chevron_left</span>
+                    <span className="material-symbols-outlined text-sm">chevron_left</span>
                   </button>
-                  <h2 className="text-sm md:text-md font-semibold min-w-[120px] md:min-w-[200px] text-center capitalize truncate">
-                    {viewMode === 'month'
-                      ? currentDate.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })
-                      : viewMode === 'week'
-                        ? `Semana de ${weekDays[0].fullDate.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' })}`
-                        : currentDate.toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' })
-                    }
-                  </h2>
                   <button
                     onClick={() => {
                       const d = new Date(currentDate);
@@ -661,157 +635,141 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
                       else d.setDate(d.getDate() + 1);
                       setCurrentDate(d);
                     }}
-                    className="p-1 hover:bg-white/10 rounded transition-colors"
+                    className="size-7 flex items-center justify-center rounded-md hover:bg-white/10 transition-colors"
                   >
-                    <span className="material-symbols-outlined">chevron_right</span>
+                    <span className="material-symbols-outlined text-sm">chevron_right</span>
                   </button>
                 </div>
-              </div>
 
-              {/* Mobile Filter Toggle */}
-              <button
-                onClick={() => setMobileFiltersOpen(!mobileFiltersOpen)}
-                className="md:hidden size-8 flex items-center justify-center rounded-lg hover:bg-white/10 active:scale-90 transition-all shrink-0"
-              >
-                <span className="material-symbols-outlined text-[20px]">{mobileFiltersOpen ? 'filter_list_off' : 'filter_list'}</span>
-              </button>
-
-              {/* Filters - Desktop */}
-              <div className="hidden md:flex items-center gap-2 md:gap-3">
-                <select
-                  value={filterUserId}
-                  onChange={(e) => setFilterUserId(e.target.value)}
-                  className="bg-white/10 text-white border border-white/20 rounded-lg px-2 py-1.5 text-[10px] md:text-xs font-bold focus:outline-none focus:bg-white/20 option:bg-slate-800 max-w-[140px]"
-                >
-                  <option value="all" className="text-slate-800">Todos os Usuários</option>
-                  {allUsers.map(u => (
-                    <option key={u.id} value={u.id} className="text-slate-800">{u.full_name}</option>
-                  ))}
-                </select>
-
-                <select
-                  value={filterUserRole}
-                  onChange={(e) => setFilterUserRole(e.target.value as any)}
-                  className="bg-white/10 text-white border border-white/20 rounded-lg px-2 py-1.5 text-[10px] md:text-xs font-bold focus:outline-none focus:bg-white/20 option:bg-slate-800 max-w-[140px]"
-                  disabled={filterUserId === 'all'}
-                >
-                  <option value="all" className="text-slate-800">Todos os Papéis</option>
-                  <option value="participant" className="text-slate-800">Usuário participante</option>
-                  <option value="organizer" className="text-slate-800">Usuário organizador</option>
-                </select>
-
-                <select
-                  value={filterEventType}
-                  onChange={(e) => setFilterEventType(e.target.value)}
-                  className="bg-white/10 text-white border border-white/20 rounded-lg px-2 py-1.5 text-[10px] md:text-xs font-bold focus:outline-none focus:bg-white/20 option:bg-slate-800 max-w-[110px]"
-                >
-                  <option value="all" className="text-slate-800">Todos Tipos</option>
-                  {appointmentTypes.map(t => (
-                    <option key={t.id} value={t.value} className="text-slate-800">{t.label}</option>
-                  ))}
-                </select>
-
-                <select
-                  value={filterLocation}
-                  onChange={(e) => setFilterLocation(e.target.value)}
-                  className="bg-white/10 text-white border border-white/20 rounded-lg px-2 py-1.5 text-[10px] md:text-xs font-bold focus:outline-none focus:bg-white/20 option:bg-slate-800 max-w-[110px]"
-                >
-                  <option value="all" className="text-slate-800">Todos Locais</option>
-                  {locations.map(l => (
-                    <option key={l.id} value={l.id} className="text-slate-800">{l.name}</option>
-                  ))}
-                </select>
+                <h2 className="text-lg md:text-xl font-black capitalize min-w-[200px] tracking-tight">
+                  {viewMode === 'month'
+                    ? currentDate.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })
+                    : viewMode === 'week'
+                      ? <span className="flex items-center gap-2">
+                        <span className="opacity-50 text-sm font-bold uppercase tracking-wider">Semana de</span>
+                        {weekDays[0].fullDate.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' }).replace('.', '')}
+                      </span>
+                      : <span className="flex items-center gap-2">
+                        <span className="text-3xl font-black text-sky-400">{currentDate.getDate()}</span>
+                        <div className="flex flex-col leading-none">
+                          <span className="text-sm font-bold uppercase opacity-80">{currentDate.toLocaleDateString('pt-BR', { month: 'long' })}</span>
+                          <span className="text-xs font-medium opacity-50">{currentDate.getFullYear()}</span>
+                        </div>
+                      </span>
+                  }
+                </h2>
               </div>
             </div>
 
-            <div className="hidden md:flex items-center justify-end flex-1 gap-4 ml-4">
-              <div className="flex bg-white/10 p-1 rounded-lg shrink-0">
-                <button
-                  onClick={() => changeViewMode('month')}
-                  className={`px-3 lg:px-4 py-1.5 text-xs font-bold rounded-md transition-all ${viewMode === 'month' ? 'bg-white text-primary-dark shadow-sm' : 'text-white/70 hover:text-white'}`}
-                >
-                  Mês
-                </button>
-                <button
-                  onClick={() => changeViewMode('week')}
-                  className={`px-3 lg:px-4 py-1.5 text-xs font-bold rounded-md transition-all ${viewMode === 'week' ? 'bg-white text-primary-dark shadow-sm' : 'text-white/70 hover:text-white'}`}
-                >
-                  Semana
-                </button>
-                <button
-                  onClick={() => changeViewMode('day')}
-                  className={`px-3 lg:px-4 py-1.5 text-xs font-bold rounded-md transition-all ${viewMode === 'day' ? 'bg-white text-primary-dark shadow-sm' : 'text-white/70 hover:text-white'}`}
-                >
-                  Dia
-                </button>
+            <div className="flex items-center gap-4">
+              {/* View Toggles */}
+              <div className="hidden md:flex bg-slate-900/30 p-1 rounded-xl">
+                <button onClick={() => changeViewMode('month')} className={`px-4 py-2 rounded-lg text-xs font-black uppercase tracking-wider transition-all ${viewMode === 'month' ? 'bg-white text-primary-dark shadow-sm' : 'text-white/60 hover:text-white'}`}>Mês</button>
+                <button onClick={() => changeViewMode('week')} className={`px-4 py-2 rounded-lg text-xs font-black uppercase tracking-wider transition-all ${viewMode === 'week' ? 'bg-white text-primary-dark shadow-sm' : 'text-white/60 hover:text-white'}`}>Semana</button>
+                <button onClick={() => changeViewMode('day')} className={`px-4 py-2 rounded-lg text-xs font-black uppercase tracking-wider transition-all ${viewMode === 'day' ? 'bg-white text-primary-dark shadow-sm' : 'text-white/60 hover:text-white'}`}>Dia</button>
               </div>
-              <div className="h-8 w-px bg-white/20 mx-2"></div>
+
               <button
                 onClick={() => onOpenModal()}
-                className="flex items-center gap-2 px-4 lg:px-5 py-2 bg-white text-primary-dark hover:bg-slate-100 rounded-lg font-bold text-sm transition-all shadow-lg shadow-black/5 shrink-0"
+                className="hidden md:flex items-center gap-2 pl-4 pr-5 py-2.5 bg-sky-500 hover:bg-sky-400 text-white rounded-xl font-black text-xs uppercase tracking-widest transition-all shadow-lg shadow-sky-500/20 active:scale-95"
               >
                 <span className="material-symbols-outlined text-[20px]">add_circle</span>
-                <span className="hidden lg:inline">Adicionar</span>
+                Novo Evento
+              </button>
+              <button
+                onClick={() => onOpenModal()}
+                className="md:hidden size-10 flex items-center justify-center bg-sky-500 text-white rounded-xl shadow-lg active:scale-95 transition-all"
+              >
+                <span className="material-symbols-outlined text-[24px]">add</span>
+              </button>
+              <button
+                onClick={() => setMobileFiltersOpen(!mobileFiltersOpen)}
+                className="md:hidden size-10 flex items-center justify-center rounded-xl bg-slate-800 text-white/80 hover:bg-slate-700 transition-all"
+              >
+                <span className="material-symbols-outlined">{mobileFiltersOpen ? 'filter_alt_off' : 'filter_alt'}</span>
               </button>
             </div>
-
-            <button
-              onClick={() => onOpenModal()}
-              className="md:hidden size-8 flex items-center justify-center bg-white text-primary-dark rounded-lg shadow-lg ml-2 active:scale-95 transition-all shrink-0"
-            >
-              <span className="material-symbols-outlined text-[20px]">add</span>
-            </button>
           </div>
 
-          {/* Mobile Filters Dropdown */}
-          <div className={`md:hidden overflow-hidden transition-all duration-300 ease-in-out ${mobileFiltersOpen ? 'max-h-64 opacity-100 pb-4' : 'max-h-0 opacity-0'}`}>
-            <div className="grid grid-cols-2 gap-2 pt-2 border-t border-white/10">
+          {/* Bottom Bar: Filters */}
+          <div className="hidden md:flex items-center gap-3 px-8 py-3 bg-slate-900/20 border-b border-white/5 backdrop-blur-sm">
+            <span className="material-symbols-outlined text-white/40 text-[20px] mr-1">filter_alt</span>
+
+            <div className="h-6 w-px bg-white/10 mx-1"></div>
+
+            <div className="relative group">
               <select
                 value={filterUserId}
                 onChange={(e) => setFilterUserId(e.target.value)}
-                className="bg-white/10 text-white border border-white/20 rounded-lg px-2 py-2 text-xs font-bold focus:outline-none focus:bg-white/20 option:bg-slate-800 w-full"
+                className="appearance-none pl-3 pr-8 py-1.5 bg-white/5 border border-white/10 rounded-lg text-xs font-bold text-white focus:outline-none focus:bg-white/10 focus:border-white/30 transition-all cursor-pointer min-w-[140px]"
               >
-                <option value="all" className="text-slate-800">Todos os Usuários</option>
+                <option value="all" className="text-slate-900 bg-white">👤 Todos os Usuários</option>
                 {allUsers.map(u => (
-                  <option key={u.id} value={u.id} className="text-slate-800">{u.full_name}</option>
+                  <option key={u.id} value={u.id} className="text-slate-900 bg-white">{u.full_name}</option>
                 ))}
               </select>
+              <span className="material-symbols-outlined absolute right-2 top-1/2 -translate-y-1/2 text-[16px] text-white/50 pointer-events-none">expand_more</span>
+            </div>
+
+            <div className={`relative group transition-opacity ${filterUserId === 'all' ? 'opacity-50 pointer-events-none' : 'opacity-100'}`}>
               <select
                 value={filterUserRole}
                 onChange={(e) => setFilterUserRole(e.target.value as any)}
-                className="bg-white/10 text-white border border-white/20 rounded-lg px-2 py-2 text-xs font-bold focus:outline-none focus:bg-white/20 option:bg-slate-800 w-full col-span-2"
+                className="appearance-none pl-3 pr-8 py-1.5 bg-white/5 border border-white/10 rounded-lg text-xs font-bold text-white focus:outline-none focus:bg-white/10 focus:border-white/30 transition-all cursor-pointer min-w-[140px]"
                 disabled={filterUserId === 'all'}
               >
-                <option value="all" className="text-slate-800">Todos os Papéis</option>
-                <option value="participant" className="text-slate-800">Usuário participante</option>
-                <option value="organizer" className="text-slate-800">Usuário organizador</option>
+                <option value="all" className="text-slate-900 bg-white">🔖 Todos os Papéis</option>
+                <option value="participant" className="text-slate-900 bg-white">Participante</option>
+                <option value="organizer" className="text-slate-900 bg-white">Organizador</option>
               </select>
-              <div className="flex bg-white/10 p-1 rounded-lg col-span-2 justify-between">
-                {/* View Mode Toggle Mobile */}
-                <button onClick={() => changeViewMode('month')} className={`flex-1 py-1.5 text-[10px] font-bold rounded md:rounded-md transition-all ${viewMode === 'month' ? 'bg-white text-primary-dark shadow-sm' : 'text-white/70'}`}>Mês</button>
-                <button onClick={() => changeViewMode('week')} className={`flex-1 py-1.5 text-[10px] font-bold rounded md:rounded-md transition-all ${viewMode === 'week' ? 'bg-white text-primary-dark shadow-sm' : 'text-white/70'}`}>Sem</button>
-                <button onClick={() => changeViewMode('day')} className={`flex-1 py-1.5 text-[10px] font-bold rounded md:rounded-md transition-all ${viewMode === 'day' ? 'bg-white text-primary-dark shadow-sm' : 'text-white/70'}`}>Dia</button>
-              </div>
+              <span className="material-symbols-outlined absolute right-2 top-1/2 -translate-y-1/2 text-[16px] text-white/50 pointer-events-none">expand_more</span>
+            </div>
+
+            <div className="relative group">
               <select
                 value={filterEventType}
                 onChange={(e) => setFilterEventType(e.target.value)}
-                className="bg-white/10 text-white border border-white/20 rounded-lg px-2 py-2 text-xs font-bold focus:outline-none focus:bg-white/20 option:bg-slate-800 w-full"
+                className="appearance-none pl-3 pr-8 py-1.5 bg-white/5 border border-white/10 rounded-lg text-xs font-bold text-white focus:outline-none focus:bg-white/10 focus:border-white/30 transition-all cursor-pointer min-w-[120px]"
               >
-                <option value="all" className="text-slate-800">Tipos (Todos)</option>
+                <option value="all" className="text-slate-900 bg-white">📌 Todos Tipos</option>
                 {appointmentTypes.map(t => (
-                  <option key={t.id} value={t.value} className="text-slate-800">{t.label}</option>
+                  <option key={t.id} value={t.value} className="text-slate-900 bg-white">{t.label}</option>
                 ))}
               </select>
+              <span className="material-symbols-outlined absolute right-2 top-1/2 -translate-y-1/2 text-[16px] text-white/50 pointer-events-none">expand_more</span>
+            </div>
+
+            <div className="relative group">
               <select
                 value={filterLocation}
                 onChange={(e) => setFilterLocation(e.target.value)}
-                className="bg-white/10 text-white border border-white/20 rounded-lg px-2 py-2 text-xs font-bold focus:outline-none focus:bg-white/20 option:bg-slate-800 w-full"
+                className="appearance-none pl-3 pr-8 py-1.5 bg-white/5 border border-white/10 rounded-lg text-xs font-bold text-white focus:outline-none focus:bg-white/10 focus:border-white/30 transition-all cursor-pointer min-w-[120px]"
               >
-                <option value="all" className="text-slate-800">Locais (Todos)</option>
+                <option value="all" className="text-slate-900 bg-white">📍 Todos Locais</option>
                 {locations.map(l => (
-                  <option key={l.id} value={l.id} className="text-slate-800">{l.name}</option>
+                  <option key={l.id} value={l.id} className="text-slate-900 bg-white">{l.name}</option>
                 ))}
               </select>
+              <span className="material-symbols-outlined absolute right-2 top-1/2 -translate-y-1/2 text-[16px] text-white/50 pointer-events-none">expand_more</span>
+            </div>
+          </div>
+
+          {/* Mobile Filters Dropdown */}
+          <div className={`md:hidden overflow-hidden transition-all duration-300 bg-slate-900/50 backdrop-blur-md ${mobileFiltersOpen ? 'max-h-[400px] border-b border-white/10' : 'max-h-0'}`}>
+            <div className="p-4 space-y-3">
+              <div className="grid grid-cols-2 gap-2">
+                <select value={filterUserId} onChange={(e) => setFilterUserId(e.target.value)} className="bg-white/10 text-white rounded-lg p-2 text-xs font-bold w-full outline-none"><option value="all" className="text-slate-900">Todos Usuários</option>{allUsers.map(u => <option key={u.id} value={u.id} className="text-slate-900">{u.full_name}</option>)}</select>
+                <select value={filterUserRole} onChange={(e) => setFilterUserRole(e.target.value as any)} className="bg-white/10 text-white rounded-lg p-2 text-xs font-bold w-full outline-none" disabled={filterUserId === 'all'}><option value="all" className="text-slate-900">Todos Papéis</option><option value="participant" className="text-slate-900">Participante</option><option value="organizer" className="text-slate-900">Organizador</option></select>
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                <select value={filterEventType} onChange={(e) => setFilterEventType(e.target.value)} className="bg-white/10 text-white rounded-lg p-2 text-xs font-bold w-full outline-none"><option value="all" className="text-slate-900">Todos Tipos</option>{appointmentTypes.map(t => <option key={t.id} value={t.value} className="text-slate-900">{t.label}</option>)}</select>
+                <select value={filterLocation} onChange={(e) => setFilterLocation(e.target.value)} className="bg-white/10 text-white rounded-lg p-2 text-xs font-bold w-full outline-none"><option value="all" className="text-slate-900">Todos Locais</option>{locations.map(l => <option key={l.id} value={l.id} className="text-slate-900">{l.name}</option>)}</select>
+              </div>
+              <div className="flex bg-white/10 p-1 rounded-lg">
+                <button onClick={() => changeViewMode('month')} className={`flex-1 py-2 text-[10px] font-black uppercase rounded transition-all ${viewMode === 'month' ? 'bg-white text-primary-dark shadow-sm' : 'text-white/60'}`}>Mês</button>
+                <button onClick={() => changeViewMode('week')} className={`flex-1 py-2 text-[10px] font-black uppercase rounded transition-all ${viewMode === 'week' ? 'bg-white text-primary-dark shadow-sm' : 'text-white/60'}`}>Semana</button>
+                <button onClick={() => changeViewMode('day')} className={`flex-1 py-2 text-[10px] font-black uppercase rounded transition-all ${viewMode === 'day' ? 'bg-white text-primary-dark shadow-sm' : 'text-white/60'}`}>Dia</button>
+              </div>
             </div>
           </div>
         </header>
@@ -946,29 +904,58 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
       </aside>
 
       {/* Global Tooltip Portal */}
+      {/* Global Tooltip Portal */}
       {hoverInfo && (
         <div
-          className="fixed w-56 p-3 bg-slate-900 text-white rounded-xl shadow-2xl z-[9999] pointer-events-none animate-[fadeIn_0.1s_ease-out]"
+          className="fixed w-72 p-0 bg-white text-slate-800 rounded-2xl shadow-2xl z-[9999] pointer-events-none animate-[fadeIn_0.1s_ease-out] border border-slate-100"
           style={{
-            left: Math.min(hoverInfo.x, window.innerWidth - 240), // Prevent overflow right
-            top: Math.min(hoverInfo.y, window.innerHeight - 150) // Prevent overflow bottom (simple check)
+            left: Math.min(hoverInfo.x, window.innerWidth - 300),
+            top: Math.min(hoverInfo.y, window.innerHeight - 200)
           }}
         >
-          <div className="flex items-center gap-2 mb-2">
-            <span className="p-1 rounded bg-white/10">
-              <span className="material-symbols-outlined text-[14px]">event</span>
-            </span>
-            <p className="text-[10px] font-bold text-sky-300">
-              {hoverInfo.app.startTime}{hoverInfo.app.endTime ? ` - ${hoverInfo.app.endTime}` : ''}
-            </p>
+          {/* Header */}
+          <div className="bg-slate-900 text-white p-4 rounded-t-2xl relative overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent"></div>
+            <div className="relative z-10 flex items-start justify-between gap-3">
+              <h4 className="font-black text-sm leading-snug">{hoverInfo.app.title}</h4>
+              {appointmentTypes.find(t => t.value === hoverInfo.app.type)?.icon && (
+                <span className="material-symbols-outlined text-[20px] opacity-70">
+                  {appointmentTypes.find(t => t.value === hoverInfo.app.type)?.icon}
+                </span>
+              )}
+            </div>
           </div>
-          <p className="text-xs font-bold mb-1.5 leading-tight">{hoverInfo.app.title}</p>
-          {hoverInfo.app.description && (
-            <p className="text-[10px] text-slate-300 line-clamp-3 leading-relaxed border-t border-white/10 pt-1.5 mt-1.5">
-              {hoverInfo.app.description}
-            </p>
-          )}
-          {/* Optional: Arrow (tricky to position dynamically, ommitted for simpler robust floating) */}
+
+          {/* Body */}
+          <div className="p-4 space-y-3">
+            <div className="flex items-center gap-2 text-xs font-bold text-slate-600">
+              <span className="material-symbols-outlined text-sm text-primary-dark">schedule</span>
+              <p>{hoverInfo.app.startTime} - {hoverInfo.app.endTime || '...'}</p>
+            </div>
+
+            {locations.find(l => l.id === hoverInfo.app.location_id) && (
+              <div className="flex items-center gap-2 text-xs font-bold text-slate-500">
+                <span className="material-symbols-outlined text-sm text-primary-dark">location_on</span>
+                <p>{locations.find(l => l.id === hoverInfo.app.location_id)?.name}</p>
+              </div>
+            )}
+
+            {hoverInfo.app.description && (
+              <div className="pt-2 border-t border-slate-100 mt-1">
+                <p className="text-[11px] text-slate-500 leading-relaxed line-clamp-3 italic">
+                  "{hoverInfo.app.description}"
+                </p>
+              </div>
+            )}
+          </div>
+
+          {/* Footer - Attendees preview (if data embedded or lightweight check) */}
+          <div className="px-4 pb-3 flex items-center gap-[-8px]">
+            {/* If we had attendee count readily available we would show it here */}
+            <div className="text-[9px] font-bold text-slate-400 uppercase tracking-widest pl-1">
+              {translateType(hoverInfo.app.type, appointmentTypes)}
+            </div>
+          </div>
         </div>
       )}
     </div>

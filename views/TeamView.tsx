@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { ViewState, User, Sector } from '../types';
 import { supabase } from '../lib/supabase';
+import { UserProfileModal } from '../components/UserProfileModal';
 
 interface TeamViewProps {
   onChangeView: (view: ViewState) => void;
@@ -298,138 +299,14 @@ export const TeamView: React.FC<TeamViewProps> = ({ onChangeView, currentUser, s
       </div>
 
       {/* Member Profile Modal */}
-      {selectedMember && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm animate-[fadeIn_0.2s_ease-out]">
-          <div
-            className="bg-white w-full max-w-sm rounded-3xl shadow-2xl overflow-hidden animate-[zoomIn_0.3s_ease-out] relative border border-slate-100"
-            onClick={(e) => e.stopPropagation()}
-          >
-            {/* Modal Header/Background */}
-            <div className="h-32 bg-gradient-to-br from-primary-dark to-primary-light relative">
-              <button
-                onClick={() => setSelectedMember(null)}
-                className="absolute top-4 right-4 size-8 flex items-center justify-center bg-white/20 hover:bg-white/30 text-white rounded-full transition-colors z-10"
-              >
-                <span className="material-symbols-outlined text-[18px]">close</span>
-              </button>
-            </div>
-
-            {/* Profile Info */}
-            <div className="px-8 pb-10 pt-0 flex flex-col items-center -mt-16 relative">
-              <div
-                className="size-32 rounded-full border-4 border-white bg-cover bg-center shadow-2xl mb-4 bg-slate-100 flex items-center justify-center text-4xl font-black text-slate-300 uppercase relative"
-                style={{ backgroundImage: selectedMember.avatar ? `url('${selectedMember.avatar}')` : 'none' }}
-              >
-                {!selectedMember.avatar && (selectedMember.full_name ? selectedMember.full_name.split(' ').map(n => n[0]).slice(0, 2).join('') : 'U')}
-                <div
-                  className={`absolute bottom-3 right-3 size-6 border-4 border-white rounded-full z-20 shadow-sm ${{
-                    'online': 'bg-emerald-500',
-                    'busy': 'bg-rose-500',
-                    'away': 'bg-amber-500',
-                    'meeting': 'bg-purple-500',
-                    'lunch': 'bg-blue-500',
-                    'vacation': 'bg-indigo-500',
-                    'out_of_office': 'bg-slate-500'
-                  }[selectedMember.status || 'online']
-                    }`}
-                  title={
-                    {
-                      'online': 'Disponível',
-                      'busy': 'Ocupado',
-                      'away': 'Ausente',
-                      'meeting': 'Em Reunião',
-                      'lunch': 'Almoço',
-                      'vacation': 'Férias',
-                      'out_of_office': 'Em atividade externa'
-                    }[selectedMember.status || 'online']
-                  }
-                ></div>
-              </div>
-
-              <h2 className="text-xl font-black text-slate-900 mb-0.5">{selectedMember.full_name}</h2>
-              <p className={`text-[10px] font-bold uppercase tracking-widest mb-3 ${{
-                'online': 'text-emerald-500',
-                'busy': 'text-rose-500',
-                'away': 'text-amber-500',
-                'meeting': 'text-purple-500',
-                'lunch': 'text-blue-500',
-                'vacation': 'text-indigo-500',
-                'out_of_office': 'text-slate-500'
-              }[selectedMember.status || 'online']
-                }`}>
-                {
-                  {
-                    'online': 'Disponível',
-                    'busy': 'Ocupado',
-                    'away': 'Ausente',
-                    'meeting': 'Em Reunião',
-                    'lunch': 'Almoço',
-                    'vacation': 'Férias',
-                    'out_of_office': 'Em atividade externa'
-                  }[selectedMember.status || 'online']
-                }
-              </p>
-              {selectedMember.username && (
-                <span className="text-xs font-bold text-primary-dark bg-primary-dark/5 px-2.5 py-0.5 rounded-full mb-4">
-                  @{selectedMember.username}
-                </span>
-              )}
-
-              <div className="w-full space-y-4 text-center mt-2">
-                <div className="flex flex-col items-center gap-1">
-                  <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none">Setor</span>
-                  <p className="text-xs font-bold text-slate-700">
-                    {sectors.find(s => s.id === selectedMember.sector_id)?.name || 'Sem Setor'}
-                  </p>
-                </div>
-
-                <div className="flex flex-col items-center gap-1">
-                  <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none">Perfil</span>
-                  <p className="text-xs font-bold text-slate-700">{selectedMember.role === 'Administrador' ? '🚀 Administrador' : '👥 Membro Normal'}</p>
-                </div>
-
-                {selectedMember.phone && (
-                  <div className="flex flex-col items-center gap-1">
-                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none">Telefone</span>
-                    <p className="text-xs font-bold text-primary-dark flex items-center gap-1">
-                      <span className="material-symbols-outlined text-sm">call</span>
-                      {selectedMember.phone}
-                    </p>
-                  </div>
-                )}
-
-                <div className="pt-4 border-t border-slate-100 w-full">
-                  <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 block">Observações</span>
-                  <p className="text-xs text-slate-600 leading-relaxed font-medium bg-slate-50 p-4 rounded-xl text-left italic">
-                    {selectedMember.observations || 'Nenhuma observação detalhada para este membro.'}
-                  </p>
-                </div>
-              </div>
-
-              <button
-                onClick={() => setSelectedMember(null)}
-                className="mt-8 w-full bg-slate-900 hover:bg-slate-800 text-white py-3.5 rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] transition-all shadow-lg active:scale-95"
-              >
-                Fechar Perfil
-              </button>
-              {onNavigateToChat && selectedMember.id !== currentUser?.id && (
-                <button
-                  onClick={() => {
-                    onNavigateToChat(selectedMember.id);
-                    setSelectedMember(null);
-                  }}
-                  className="mt-2 w-full bg-white hover:bg-slate-50 text-primary-dark border-2 border-primary-dark/20 py-3 rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] transition-all flex items-center justify-center gap-2"
-                >
-                  <span className="material-symbols-outlined text-sm">chat</span>
-                  Conversar agora
-                </button>
-              )}
-            </div>
-          </div>
-          {/* Backdrop click to close */}
-          <div className="absolute inset-0 -z-10" onClick={() => setSelectedMember(null)}></div>
-        </div>
-      )}
+      <UserProfileModal
+        isOpen={!!selectedMember}
+        onClose={() => setSelectedMember(null)}
+        user={selectedMember}
+        onNavigateToChat={onNavigateToChat}
+        sectorName={selectedMember ? (sectors.find(s => s.id === selectedMember!.sector_id)?.name || 'Sem Setor') : undefined}
+        currentUser={currentUser}
+      />
     </div>
   );
 };
