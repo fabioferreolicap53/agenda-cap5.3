@@ -24,6 +24,9 @@ export const Modal: React.FC<ModalProps> = ({ isOpen, onClose, user, appointment
   const [users, setUsers] = useState<AppUser[]>([]);
   const [locations, setLocations] = useState<Location[]>([]);
   const [selectedLocationId, setSelectedLocationId] = useState<string>('');
+  const [isExternalLocation, setIsExternalLocation] = useState(false);
+  const [externalLocation, setExternalLocation] = useState('');
+  const [organizerOnly, setOrganizerOnly] = useState(false);
   const [selectedUserIds, setSelectedUserIds] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const [locationConflict, setLocationConflict] = useState<string | null>(null);
@@ -48,7 +51,21 @@ export const Modal: React.FC<ModalProps> = ({ isOpen, onClose, user, appointment
         setEndTime(initialAppointment.endTime || '');
         setType(initialAppointment.type);
         setDescription(initialAppointment.description || '');
-        setSelectedLocationId(initialAppointment.location_id || '');
+        if (initialAppointment.location_id) {
+          setSelectedLocationId(initialAppointment.location_id);
+          setIsExternalLocation(false);
+          setExternalLocation('');
+        } else if (initialAppointment.location_text) {
+          setSelectedLocationId('');
+          setIsExternalLocation(true);
+          setExternalLocation(initialAppointment.location_text);
+        } else {
+          setSelectedLocationId('');
+          setIsExternalLocation(false);
+          setExternalLocation('');
+        }
+
+        setOrganizerOnly(initialAppointment.organizer_only || false);
         setSelectedUserIds(initialSelectedUsers || []);
       } else {
         setTitle('');
@@ -58,6 +75,9 @@ export const Modal: React.FC<ModalProps> = ({ isOpen, onClose, user, appointment
         setDescription('');
         setSelectedUserIds(initialSelectedUsers || []);
         setSelectedLocationId('');
+        setIsExternalLocation(false);
+        setExternalLocation('');
+        setOrganizerOnly(false);
       }
       setSearchTerm('');
       setLocationConflict(null);
@@ -126,7 +146,7 @@ export const Modal: React.FC<ModalProps> = ({ isOpen, onClose, user, appointment
     setLoading(true);
 
     try {
-      if (checkConflictFirst && selectedLocationId && date) {
+      if (checkConflictFirst && selectedLocationId && !isExternalLocation && date) {
         const selectedLocation = locations.find(l => l.id === selectedLocationId);
 
         // If location has conflict control, times are mandatory
@@ -168,7 +188,9 @@ export const Modal: React.FC<ModalProps> = ({ isOpen, onClose, user, appointment
         type,
         description,
         created_by: user.id,
-        location_id: selectedLocationId || null
+        location_id: isExternalLocation ? null : (selectedLocationId || null),
+        location_text: isExternalLocation ? externalLocation : null,
+        organizer_only: organizerOnly
       }).select().single();
 
       if (error) throw error;
@@ -379,20 +401,51 @@ export const Modal: React.FC<ModalProps> = ({ isOpen, onClose, user, appointment
               </select>
             </div>
             <div className="space-y-1.5">
-              <label className="text-xs font-bold uppercase tracking-wider text-primary-dark">Local</label>
-              <select
-                value={selectedLocationId}
-                onChange={(e) => {
-                  setSelectedLocationId(e.target.value);
-                  setLocationConflict(null);
-                }}
-                className={`w-full px-4 py-2.5 rounded-lg border border-slate-200 bg-white focus:ring-2 focus:ring-primary-dark focus:border-transparent text-sm transition-all outline-none appearance-none`}
-              >
-                <option value="">Nenhum local selecionado</option>
-                {locations.map(loc => (
-                  <option key={loc.id} value={loc.id}>{loc.name}</option>
-                ))}
-              </select>
+              <div className="flex items-center justify-between">
+                <label className="text-xs font-bold uppercase tracking-wider text-primary-dark">Local</label>
+                <label className="flex items-center gap-1.5 cursor-pointer group">
+                  <div className="relative flex items-center">
+                    <input
+                      type="checkbox"
+                      checked={isExternalLocation}
+                      onChange={(e) => {
+                        setIsExternalLocation(e.target.checked);
+                        if (e.target.checked) {
+                          setSelectedLocationId('');
+                          setLocationConflict(null);
+                        }
+                      }}
+                      className="peer sr-only"
+                    />
+                    <div className="w-7 h-4 bg-slate-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-primary-dark/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-primary-dark"></div>
+                  </div>
+                  <span className="text-[10px] font-bold text-slate-400 group-hover:text-primary-dark transition-colors uppercase tracking-wider">Local externo</span>
+                </label>
+              </div>
+
+              {!isExternalLocation ? (
+                <select
+                  value={selectedLocationId}
+                  onChange={(e) => {
+                    setSelectedLocationId(e.target.value);
+                    setLocationConflict(null);
+                  }}
+                  className={`w-full px-4 py-2.5 rounded-lg border border-slate-200 bg-white focus:ring-2 focus:ring-primary-dark focus:border-transparent text-sm transition-all outline-none appearance-none`}
+                >
+                  <option value="">Nenhum local selecionado</option>
+                  {locations.map(loc => (
+                    <option key={loc.id} value={loc.id}>{loc.name}</option>
+                  ))}
+                </select>
+              ) : (
+                <input
+                  type="text"
+                  value={externalLocation}
+                  onChange={(e) => setExternalLocation(e.target.value)}
+                  placeholder="Digite o local externo..."
+                  className="w-full px-4 py-2.5 rounded-lg border border-slate-200 bg-white focus:ring-2 focus:ring-primary-dark focus:border-transparent text-sm transition-all outline-none"
+                />
+              )}
             </div>
           </div>
 
@@ -408,49 +461,74 @@ export const Modal: React.FC<ModalProps> = ({ isOpen, onClose, user, appointment
           </div>
 
           <div className="space-y-1.5">
-            <label className="text-xs font-bold uppercase tracking-wider text-primary-dark">Convidar Participantes</label>
-            <div className="mb-2 relative">
-              <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-[18px]">search</span>
-              <input
-                type="text"
-                placeholder="Buscar participante..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-9 pr-3 py-2 text-xs rounded-lg border border-slate-200 focus:border-primary-dark focus:ring-1 focus:ring-primary-dark outline-none transition-all"
-              />
+            <div className="flex items-center justify-between mb-2">
+              <label className="text-xs font-bold uppercase tracking-wider text-primary-dark">Convidar Participantes</label>
+              <label className="flex items-center gap-1.5 cursor-pointer group">
+                <input
+                  type="checkbox"
+                  checked={organizerOnly}
+                  onChange={(e) => {
+                    setOrganizerOnly(e.target.checked);
+                    if (e.target.checked) {
+                      setSelectedUserIds([]);
+                    }
+                  }}
+                  className="w-3.5 h-3.5 rounded border-slate-300 text-primary-dark focus:ring-primary-dark cursor-pointer"
+                />
+                <span className="text-[10px] font-bold text-slate-400 group-hover:text-primary-dark transition-colors uppercase tracking-wider">Exclusivo ao organizador</span>
+              </label>
             </div>
-            <div className="border border-slate-200 rounded-lg max-h-32 overflow-y-auto p-2 bg-slate-50/30 custom-scrollbar">
-              <div className="grid grid-cols-1 gap-1">
-                {users
-                  .filter(u => u.id !== user?.id)
-                  .filter(u => u.full_name?.toLowerCase().includes(searchTerm.toLowerCase()) || false)
-                  .map(u => (
-                    <label key={u.id} className="flex items-center gap-3 p-1.5 rounded-md hover:bg-white cursor-pointer transition-colors">
-                      <input
-                        type="checkbox"
-                        checked={selectedUserIds.includes(u.id)}
-                        onChange={(e) => {
-                          if (e.target.checked) {
-                            setSelectedUserIds(prev => [...prev, u.id]);
-                          } else {
-                            setSelectedUserIds(prev => prev.filter(id => id !== u.id));
-                          }
-                        }}
-                        className="size-4 rounded border-slate-300 text-primary-dark focus:ring-primary-dark"
-                      />
-                      <div className="size-6 rounded-full bg-slate-200 flex-shrink-0 flex items-center justify-center text-[9px] font-bold text-slate-400 uppercase" style={{ backgroundImage: u.avatar ? `url(${u.avatar})` : 'none', backgroundSize: 'cover' }}>
-                        {!u.avatar && (u.full_name ? u.full_name.split(' ').map(n => n[0]).slice(0, 2).join('') : 'U')}
-                      </div>
-                      <div className="flex flex-col min-w-0">
-                        <span className="text-sm font-medium text-slate-700 truncate">{u.full_name}</span>
-                        {u.observations && (
-                          <span className="text-[10px] text-slate-400 font-bold truncate tracking-tight">{u.observations}</span>
-                        )}
-                      </div>
-                    </label>
-                  ))}
+
+            {!organizerOnly ? (
+              <>
+                <div className="mb-2 relative">
+                  <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-[18px]">search</span>
+                  <input
+                    type="text"
+                    placeholder="Buscar participante..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="w-full pl-9 pr-3 py-2 text-xs rounded-lg border border-slate-200 focus:border-primary-dark focus:ring-1 focus:ring-primary-dark outline-none transition-all"
+                  />
+                </div>
+                <div className="border border-slate-200 rounded-lg max-h-32 overflow-y-auto p-2 bg-slate-50/30 custom-scrollbar">
+                  <div className="grid grid-cols-1 gap-1">
+                    {users
+                      .filter(u => u.id !== user?.id)
+                      .filter(u => u.full_name?.toLowerCase().includes(searchTerm.toLowerCase()) || false)
+                      .map(u => (
+                        <label key={u.id} className="flex items-center gap-3 p-1.5 rounded-md hover:bg-white cursor-pointer transition-colors">
+                          <input
+                            type="checkbox"
+                            checked={selectedUserIds.includes(u.id)}
+                            onChange={(e) => {
+                              if (e.target.checked) {
+                                setSelectedUserIds(prev => [...prev, u.id]);
+                              } else {
+                                setSelectedUserIds(prev => prev.filter(id => id !== u.id));
+                              }
+                            }}
+                            className="size-4 rounded border-slate-300 text-primary-dark focus:ring-primary-dark"
+                          />
+                          <div className="size-6 rounded-full bg-slate-200 flex-shrink-0 flex items-center justify-center text-[9px] font-bold text-slate-400 uppercase" style={{ backgroundImage: u.avatar ? `url(${u.avatar})` : 'none', backgroundSize: 'cover' }}>
+                            {!u.avatar && (u.full_name ? u.full_name.split(' ').map(n => n[0]).slice(0, 2).join('') : 'U')}
+                          </div>
+                          <div className="flex flex-col min-w-0">
+                            <span className="text-sm font-medium text-slate-700 truncate">{u.full_name}</span>
+                            {u.observations && (
+                              <span className="text-[10px] text-slate-400 font-bold truncate tracking-tight">{u.observations}</span>
+                            )}
+                          </div>
+                        </label>
+                      ))}
+                  </div>
+                </div>
+              </>
+            ) : (
+              <div className="p-4 rounded-lg bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-400 text-xs italic">
+                Convites desativados para eventos exclusivos.
               </div>
-            </div>
+            )}
           </div>
           <div className="flex items-center justify-end gap-3 pt-6 border-t border-slate-100 mt-2 shrink-0">
             <button

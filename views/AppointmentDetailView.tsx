@@ -37,6 +37,9 @@ export const AppointmentDetailView: React.FC<AppointmentDetailViewProps> = ({
   const [editType, setEditType] = useState(appointment.type);
   const [locations, setLocations] = useState<Location[]>([]);
   const [editLocationId, setEditLocationId] = useState(appointment.location_id || '');
+  const [isExternalLocation, setIsExternalLocation] = useState(!!appointment.location_text);
+  const [editExternalLocation, setEditExternalLocation] = useState(appointment.location_text || '');
+  const [editOrganizerOnly, setEditOrganizerOnly] = useState(appointment.organizer_only || false);
 
   const [allProfiles, setAllProfiles] = useState<User[]>([]);
   const [selectedUserIds, setSelectedUserIds] = useState<string[]>([]);
@@ -81,7 +84,16 @@ export const AppointmentDetailView: React.FC<AppointmentDetailViewProps> = ({
 
       if (locData) setLocation(locData);
     } else {
+      if (locData) setLocation(locData);
+    } else if (currentApp?.location_text || appointment.location_text) {
+      setEditLocationId('');
+      setIsExternalLocation(true);
+      setEditExternalLocation(currentApp?.location_text || appointment.location_text || '');
+      setLocation({ name: currentApp?.location_text || appointment.location_text || 'Local Externo', color: '#64748b' });
+    } else {
       setEditLocationId(''); // Sync edit state
+      setIsExternalLocation(false);
+      setEditExternalLocation('');
       setLocation(null);
     }
 
@@ -184,7 +196,10 @@ export const AppointmentDetailView: React.FC<AppointmentDetailViewProps> = ({
           start_time: editStartTime,
           end_time: finalEndTime,
           type: editType,
-          location_id: editLocationId || null
+          type: editType,
+          location_id: isExternalLocation ? null : (editLocationId || null),
+          location_text: isExternalLocation ? editExternalLocation : null,
+          organizer_only: editOrganizerOnly
         })
         .eq('id', appointment.id);
 
@@ -429,19 +444,28 @@ export const AppointmentDetailView: React.FC<AppointmentDetailViewProps> = ({
             </div>
           )}
 
-          {!isOwner && !myAttendeeRecord && (
-            <div className="mt-6 flex items-center gap-4 p-4 bg-primary-dark/5 rounded-2xl border border-primary-dark/10">
-              <div className="flex-1">
-                <p className="text-sm font-bold text-primary-dark">Gostaria de participar deste evento?</p>
-                <p className="text-xs text-slate-500 mt-1">Solicite ao organizador para ser incluído.</p>
+          <div className="mt-6 flex items-center gap-4 p-4 bg-primary-dark/5 rounded-2xl border border-primary-dark/10">
+            <div className="flex-1">
+              <p className="text-sm font-bold text-primary-dark">Gostaria de participar deste evento?</p>
+              <p className="text-xs text-slate-500 mt-1">Solicite ao organizador para ser incluído.</p>
+            </div>
+            <button
+              onClick={handleRequestParticipation}
+              disabled={loading}
+              className="px-4 py-2 bg-primary-dark hover:bg-primary-light text-white text-xs font-bold rounded-lg transition-all shadow-sm"
+            >
+              Solicitar Participação
+            </button>
+          </div>
+          )}
+
+          {!isOwner && appointment.organizer_only && !myAttendeeRecord && (
+            <div className="mt-6 flex items-center gap-4 p-4 bg-slate-50 rounded-2xl border border-slate-100">
+              <span className="material-symbols-outlined text-slate-400">lock</span>
+              <div>
+                <p className="text-sm font-bold text-slate-600">Evento Exclusivo</p>
+                <p className="text-xs text-slate-500">Este evento é exclusivo ao organizador e não permite solicitações.</p>
               </div>
-              <button
-                onClick={handleRequestParticipation}
-                disabled={loading}
-                className="px-4 py-2 bg-primary-dark hover:bg-primary-light text-white text-xs font-bold rounded-lg transition-all shadow-sm"
-              >
-                Solicitar Participação
-              </button>
             </div>
           )}
 
@@ -553,21 +577,46 @@ export const AppointmentDetailView: React.FC<AppointmentDetailViewProps> = ({
                   )
                 ) : (
                   <div className="space-y-1.5 pt-2">
-                    <label className="text-xs font-bold uppercase tracking-wider text-slate-400">Local do Evento</label>
-                    <select
-                      value={editLocationId}
-                      onChange={(e) => setEditLocationId(e.target.value)}
-                      className="w-full p-2.5 border border-slate-200 rounded-lg bg-white focus:ring-2 focus:ring-primary-dark outline-none text-sm transition-all cursor-pointer hover:border-slate-300"
-                    >
-                      <option value="">Nenhum local selecionado</option>
-                      {locations.map(loc => (
-                        <option key={loc.id} value={loc.id}>{loc.name}</option>
-                      ))}
-                    </select>
+                    <div className="flex items-center justify-between">
+                      <label className="text-xs font-bold uppercase tracking-wider text-slate-400">Local do Evento</label>
+                      <label className="flex items-center gap-1.5 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={isExternalLocation}
+                          onChange={(e) => {
+                            setIsExternalLocation(e.target.checked);
+                            if (e.target.checked) setEditLocationId('');
+                          }}
+                          className="accent-primary-dark"
+                        />
+                        <span className="text-[10px] font-bold text-slate-400 uppercase">Externo</span>
+                      </label>
+                    </div>
+
+                    {!isExternalLocation ? (
+                      <select
+                        value={editLocationId}
+                        onChange={(e) => setEditLocationId(e.target.value)}
+                        className="w-full p-2.5 border border-slate-200 rounded-lg bg-white focus:ring-2 focus:ring-primary-dark outline-none text-sm transition-all cursor-pointer hover:border-slate-300"
+                      >
+                        <option value="">Nenhum local selecionado</option>
+                        {locations.map(loc => (
+                          <option key={loc.id} value={loc.id}>{loc.name}</option>
+                        ))}
+                      </select>
+                    ) : (
+                      <input
+                        type="text"
+                        value={editExternalLocation}
+                        onChange={(e) => setEditExternalLocation(e.target.value)}
+                        placeholder="Digite o local externo..."
+                        className="w-full p-2.5 border border-slate-200 rounded-lg bg-white focus:ring-2 focus:ring-primary-dark outline-none text-sm transition-all"
+                      />
+                    )}
                   </div>
                 )}
               </div>
-            </section>
+            </section >
 
             <section className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
               <div className="px-6 py-4 border-b border-slate-100 bg-slate-50/50">
@@ -588,7 +637,7 @@ export const AppointmentDetailView: React.FC<AppointmentDetailViewProps> = ({
                 )}
               </div>
             </section>
-          </div>
+          </div >
 
           <div className="space-y-8">
             <section className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
@@ -602,66 +651,86 @@ export const AppointmentDetailView: React.FC<AppointmentDetailViewProps> = ({
                     <div className="space-y-4">
                       <div className="flex items-center justify-between px-1">
                         <label className="text-[10px] font-black uppercase tracking-[0.2em] text-primary-dark">Convidar Participantes</label>
-                        <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">{selectedUserIds.length} selecionados</span>
+                        <label className="flex items-center gap-1.5 cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={editOrganizerOnly}
+                            onChange={(e) => {
+                              setEditOrganizerOnly(e.target.checked);
+                              if (e.target.checked) setSelectedUserIds([]);
+                            }}
+                            className="accent-primary-dark"
+                          />
+                          <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Exclusivo</span>
+                        </label>
+                        {!editOrganizerOnly && <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">{selectedUserIds.length} selecionados</span>}
                       </div>
 
                       {/* Caixa de Busca */}
-                      <div className="relative group mx-1">
-                        <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-primary-dark transition-colors text-[18px]">search</span>
-                        <input
-                          type="text"
-                          placeholder="Buscar por nome ou observação..."
-                          value={attendeeSearchTerm}
-                          onChange={(e) => setAttendeeSearchTerm(e.target.value)}
-                          className="w-full pl-9 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl focus:ring-4 focus:ring-primary-dark/5 focus:border-primary-dark transition-all outline-none text-xs shadow-sm placeholder:text-slate-300 font-medium"
-                        />
-                        {attendeeSearchTerm && (
-                          <button
-                            onClick={() => setAttendeeSearchTerm('')}
-                            className="absolute right-3 top-1/2 -translate-y-1/2 size-5 flex items-center justify-center rounded-full bg-slate-100 text-slate-400 hover:bg-slate-200 hover:text-slate-600 transition-colors"
-                          >
-                            <span className="material-symbols-outlined text-[14px]">close</span>
-                          </button>
-                        )}
-                      </div>
+                      {!editOrganizerOnly ? (
+                        <>
+                          <div className="relative group mx-1">
+                            <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-primary-dark transition-colors text-[18px]">search</span>
+                            <input
+                              type="text"
+                              placeholder="Buscar por nome ou observação..."
+                              value={attendeeSearchTerm}
+                              onChange={(e) => setAttendeeSearchTerm(e.target.value)}
+                              className="w-full pl-9 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl focus:ring-4 focus:ring-primary-dark/5 focus:border-primary-dark transition-all outline-none text-xs shadow-sm placeholder:text-slate-300 font-medium"
+                            />
+                            {attendeeSearchTerm && (
+                              <button
+                                onClick={() => setAttendeeSearchTerm('')}
+                                className="absolute right-3 top-1/2 -translate-y-1/2 size-5 flex items-center justify-center rounded-full bg-slate-100 text-slate-400 hover:bg-slate-200 hover:text-slate-600 transition-colors"
+                              >
+                                <span className="material-symbols-outlined text-[14px]">close</span>
+                              </button>
+                            )}
+                          </div>
 
-                      <div className="border border-slate-200 rounded-2xl max-h-64 overflow-y-auto p-2 bg-slate-50/50 custom-scrollbar-light shadow-inner">
-                        <div className="grid grid-cols-1 gap-1">
-                          {allProfiles
-                            .filter(u => u.id !== appointment.created_by)
-                            .filter(u =>
-                              u.full_name.toLowerCase().includes(attendeeSearchTerm.toLowerCase()) ||
-                              (u.observations?.toLowerCase().includes(attendeeSearchTerm.toLowerCase()))
-                            )
-                            .map(u => (
-                              <label key={u.id} className={`flex items-center gap-3 p-2 rounded-lg cursor-pointer transition-all ${selectedUserIds.includes(u.id) ? 'bg-primary-dark/5 ring-1 ring-primary-dark/10' : 'hover:bg-white'
-                                }`}>
-                                <input
-                                  type="checkbox"
-                                  checked={selectedUserIds.includes(u.id)}
-                                  onChange={(e) => {
-                                    if (e.target.checked) {
-                                      setSelectedUserIds(prev => [...prev, u.id]);
-                                    } else {
-                                      setSelectedUserIds(prev => prev.filter(id => id !== u.id));
-                                    }
-                                  }}
-                                  className="size-4 rounded border-slate-300 text-primary-dark focus:ring-primary-dark"
-                                />
-                                <div className="size-8 rounded-full bg-slate-200 flex-shrink-0 border border-slate-100 flex items-center justify-center text-xs font-bold text-slate-400 uppercase" style={{ backgroundImage: u.avatar ? `url(${u.avatar})` : 'none', backgroundSize: 'cover' }}>
-                                  {!u.avatar && (u.full_name ? u.full_name.split(' ').map(n => n[0]).slice(0, 2).join('') : 'U')}
-                                </div>
-                                <div className="flex flex-col min-w-0">
-                                  <span className="text-[13px] font-bold text-slate-700 truncate">{u.full_name}</span>
-                                  {u.observations && (
-                                    <span className="text-[9px] text-slate-400 font-black uppercase tracking-tighter">{u.observations}</span>
-                                  )}
-                                </div>
-                              </label>
-                            ))}
+                          <div className="border border-slate-200 rounded-2xl max-h-64 overflow-y-auto p-2 bg-slate-50/50 custom-scrollbar-light shadow-inner">
+                            <div className="grid grid-cols-1 gap-1">
+                              {allProfiles
+                                .filter(u => u.id !== appointment.created_by)
+                                .filter(u =>
+                                  u.full_name.toLowerCase().includes(attendeeSearchTerm.toLowerCase()) ||
+                                  (u.observations?.toLowerCase().includes(attendeeSearchTerm.toLowerCase()))
+                                )
+                                .map(u => (
+                                  <label key={u.id} className={`flex items-center gap-3 p-2 rounded-lg cursor-pointer transition-all ${selectedUserIds.includes(u.id) ? 'bg-primary-dark/5 ring-1 ring-primary-dark/10' : 'hover:bg-white'
+                                    }`}>
+                                    <input
+                                      type="checkbox"
+                                      checked={selectedUserIds.includes(u.id)}
+                                      onChange={(e) => {
+                                        if (e.target.checked) {
+                                          setSelectedUserIds(prev => [...prev, u.id]);
+                                        } else {
+                                          setSelectedUserIds(prev => prev.filter(id => id !== u.id));
+                                        }
+                                      }}
+                                      className="size-4 rounded border-slate-300 text-primary-dark focus:ring-primary-dark"
+                                    />
+                                    <div className="size-8 rounded-full bg-slate-200 flex-shrink-0 border border-slate-100 flex items-center justify-center text-xs font-bold text-slate-400 uppercase" style={{ backgroundImage: u.avatar ? `url(${u.avatar})` : 'none', backgroundSize: 'cover' }}>
+                                      {!u.avatar && (u.full_name ? u.full_name.split(' ').map(n => n[0]).slice(0, 2).join('') : 'U')}
+                                    </div>
+                                    <div className="flex flex-col min-w-0">
+                                      <span className="text-[13px] font-bold text-slate-700 truncate">{u.full_name}</span>
+                                      {u.observations && (
+                                        <span className="text-[9px] text-slate-400 font-black uppercase tracking-tighter">{u.observations}</span>
+                                      )}
+                                    </div>
+                                  </label>
+                                ))}
+                            </div>
+                          </div>
+                          <p className="text-[10px] text-slate-400 italic px-1 pt-1">O organizador está incluído automaticamente.</p>
+                        </>
+                      ) : (
+                        <div className="p-4 rounded-lg bg-slate-50 border border-slate-100 text-center">
+                          <p className="text-xs text-slate-500 italic">Convites desativados para eventos exclusivos.</p>
                         </div>
-                      </div>
-                      <p className="text-[10px] text-slate-400 italic px-1 pt-1">O organizador está incluído automaticamente.</p>
+                      )}
                     </div>
                   ) : (
                     <>
@@ -899,9 +968,9 @@ export const AppointmentDetailView: React.FC<AppointmentDetailViewProps> = ({
               </div>
             </section>
           </div>
-        </div>
-      </main>
+        </div >
+      </main >
       <Footer />
-    </div>
+    </div >
   );
 };

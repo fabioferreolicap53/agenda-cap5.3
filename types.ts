@@ -67,4 +67,6 @@ export interface Appointment {
   attendees?: Attendee[];
   created_by: string;
   location_id?: string;
+  location_text?: string;
+  organizer_only?: boolean;
 }
