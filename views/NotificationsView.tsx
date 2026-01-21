@@ -11,7 +11,7 @@ interface NotificationsViewProps {
 }
 
 export const NotificationsView: React.FC<NotificationsViewProps> = ({ user, onViewAppointment, onNavigateToChat, onToggleSidebar }) => {
-    const [invitations, setInvitations] = useState<(Attendee & { appointments: { title: string, date: string, created_by: string }, profiles?: { full_name: string, avatar: string | null } })[]>([]);
+    const [invitations, setInvitations] = useState<(Attendee & { appointments: { title: string, date: string, created_by: string }, profiles?: { full_name: string, avatar: string | null, observations?: string | null } })[]>([]);
     const [pendingRequests, setPendingRequests] = useState<any[]>([]);
     const [historyItems, setHistoryItems] = useState<any[]>([]);
     const [sentRequests, setSentRequests] = useState<any[]>([]);
@@ -53,11 +53,21 @@ export const NotificationsView: React.FC<NotificationsViewProps> = ({ user, onVi
                     .select('id, title, date, created_by')
                     .in('id', appIds);
 
-                // Map apps to invites
-                enrichedInvitations = myInvites.map(inv => {
-                    const app = apps?.find(a => a.id === inv.appointment_id);
-                    return app ? { ...inv, appointments: app } : null;
-                }).filter(Boolean);
+                if (apps && apps.length > 0) {
+                    const creatorIds = apps.map(a => a.created_by);
+                    const { data: creatorProfiles } = await supabase
+                        .from('profiles')
+                        .select('id, full_name, avatar, observations')
+                        .in('id', creatorIds);
+
+                    // Map apps AND profiles to invites
+                    enrichedInvitations = myInvites.map(inv => {
+                        const app = apps.find(a => a.id === inv.appointment_id);
+                        if (!app) return null;
+                        const profile = creatorProfiles?.find(p => p.id === app.created_by);
+                        return { ...inv, appointments: app, profiles: profile };
+                    }).filter(Boolean);
+                }
             }
             setInvitations(enrichedInvitations);
 
@@ -341,9 +351,6 @@ export const NotificationsView: React.FC<NotificationsViewProps> = ({ user, onVi
 
                     <div className="flex items-center gap-2">
                         {loading && <div className="size-2 bg-primary-dark rounded-full animate-ping"></div>}
-                        <div className="size-8 md:size-10 rounded-full bg-slate-100 flex items-center justify-center border border-slate-200">
-                            <span className="material-symbols-outlined text-slate-400 text-[20px]">notifications</span>
-                        </div>
                     </div>
                 </div>
 
@@ -396,7 +403,12 @@ export const NotificationsView: React.FC<NotificationsViewProps> = ({ user, onVi
                                                 </span>
                                             </div>
                                             <h4 className="text-sm font-black text-slate-900 group-hover:text-primary-dark transition-colors line-clamp-1 mb-1">{inv.appointments.title}</h4>
-                                            <p className="text-[10px] text-slate-500 font-medium mb-4 line-clamp-2">De: <span className="font-bold text-slate-700">{inv.profiles?.full_name || 'Organizador'}</span></p>
+                                            <div className="flex flex-col gap-0.5 mb-4">
+                                                <p className="text-[10px] text-slate-500 font-medium">De: <span className="font-bold text-slate-700">{inv.profiles?.full_name || 'Organizador'}</span></p>
+                                                {inv.profiles?.observations && (
+                                                    <p className="text-[9px] text-slate-400 italic line-clamp-1">"{inv.profiles.observations}"</p>
+                                                )}
+                                            </div>
 
                                             <div className="flex gap-2 pt-3 border-t border-slate-50">
                                                 <button onClick={() => handleResponse(inv.id, 'accepted')} disabled={actionLoading} className="flex-1 h-8 bg-emerald-500 text-white rounded-lg text-[10px] font-black hover:bg-emerald-600 transition-all">Aceitar</button>
