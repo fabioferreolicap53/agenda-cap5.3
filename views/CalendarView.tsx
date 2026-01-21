@@ -846,6 +846,11 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
                 <div
                   key={app.id}
                   onClick={() => onOpenDetails(app)}
+                  onMouseEnter={(e) => {
+                    const rect = e.currentTarget.getBoundingClientRect();
+                    setHoverInfo({ app, x: rect.left - 290, y: rect.top });
+                  }}
+                  onMouseLeave={() => setHoverInfo(null)}
                   className="relative pl-3 pr-3 py-3 rounded-xl bg-white border border-slate-100 shadow-sm hover:shadow-md transition-all cursor-pointer group flex gap-3 overflow-hidden"
                 >
                   <div

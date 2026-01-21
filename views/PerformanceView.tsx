@@ -474,6 +474,272 @@ export const PerformanceView: React.FC<PerformanceViewProps> = ({ onToggleSideba
                         </div>
                     </div>
                 </div>
+
+                {/* NEW SECTION: Organizer Performance */}
+                <div className="mb-8">
+                    <h2 className="text-xl font-bold text-slate-900 mb-4">Desempenho dos Organizadores</h2>
+                    <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-8">
+                        <h3 className="font-bold text-slate-900 mb-6">Top Organizadores</h3>
+                        <div className="space-y-4">
+                            {(() => {
+                                const organizerStats: Record<string, { count: number, totalInvites: number, accepted: number }> = {};
+
+                                filteredAppointments.forEach(app => {
+                                    const orgId = app.created_by;
+                                    if (!organizerStats[orgId]) organizerStats[orgId] = { count: 0, totalInvites: 0, accepted: 0 };
+                                    organizerStats[orgId].count++;
+
+                                    app.attendees?.forEach(att => {
+                                        organizerStats[orgId].totalInvites++;
+                                        if (att.status === 'accepted') organizerStats[orgId].accepted++;
+                                    });
+                                });
+
+                                return Object.entries(organizerStats)
+                                    .sort(([, a], [, b]) => b.count - a.count)
+                                    .slice(0, 10)
+                                    .map(([userId, stats], index) => {
+                                        const user = profiles.find(p => p.id === userId);
+                                        const acceptanceRate = stats.totalInvites > 0 ? (stats.accepted / stats.totalInvites) * 100 : 0;
+
+                                        return (
+                                            <div key={userId} className="flex items-center gap-4 p-4 bg-slate-50 rounded-xl hover:bg-slate-100 transition-colors">
+                                                <div className="flex items-center justify-center size-8 rounded-full bg-primary-dark text-white font-black text-sm">
+                                                    {index + 1}
+                                                </div>
+                                                <div className="flex items-center gap-3 flex-1">
+                                                    {user?.avatar ? (
+                                                        <div className="size-10 rounded-full bg-cover bg-center border-2 border-white shadow-sm" style={{ backgroundImage: `url('${user.avatar}')` }}></div>
+                                                    ) : (
+                                                        <div className="size-10 rounded-full bg-slate-200 flex items-center justify-center text-sm font-bold text-slate-500">
+                                                            {user?.full_name?.[0] || 'U'}
+                                                        </div>
+                                                    )}
+                                                    <div className="flex-1">
+                                                        <p className="font-bold text-sm text-slate-900">{user?.full_name || 'Usuário Desconhecido'}</p>
+                                                        <p className="text-xs text-slate-500">{stats.count} eventos criados</p>
+                                                    </div>
+                                                </div>
+                                                <div className="text-right">
+                                                    <p className="text-lg font-black text-emerald-600">{acceptanceRate.toFixed(0)}%</p>
+                                                    <p className="text-[10px] font-bold text-slate-400 uppercase">Aceitação</p>
+                                                </div>
+                                            </div>
+                                        );
+                                    });
+                            })()}
+                        </div>
+                    </div>
+                </div>
+
+                {/* NEW SECTION: Peak Hours & Monthly Trends */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+                    {/* Peak Hours */}
+                    <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-8">
+                        <h3 className="font-bold text-slate-900 mb-6">Horários de Pico</h3>
+                        <div className="space-y-3">
+                            {(() => {
+                                const hourStats: Record<number, number> = {};
+
+                                filteredAppointments.forEach(app => {
+                                    if (app.startTime) {
+                                        const hour = parseInt(app.startTime.split(':')[0]);
+                                        hourStats[hour] = (hourStats[hour] || 0) + 1;
+                                    }
+                                });
+
+                                const maxCount = Math.max(...Object.values(hourStats), 1);
+
+                                return Object.entries(hourStats)
+                                    .sort(([a], [b]) => parseInt(a) - parseInt(b))
+                                    .map(([hour, count]) => {
+                                        const percentage = (count / maxCount) * 100;
+                                        return (
+                                            <div key={hour}>
+                                                <div className="flex justify-between text-xs font-bold text-slate-600 mb-1">
+                                                    <span>{hour}:00 - {hour}:59</span>
+                                                    <span>{count} eventos</span>
+                                                </div>
+                                                <div className="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
+                                                    <div className="bg-sky-500 h-full rounded-full transition-all" style={{ width: `${percentage}%` }}></div>
+                                                </div>
+                                            </div>
+                                        );
+                                    });
+                            })()}
+                        </div>
+                    </div>
+
+                    {/* Monthly Trends */}
+                    <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-8">
+                        <h3 className="font-bold text-slate-900 mb-6">Tendência Mensal (Últimos 6 Meses)</h3>
+                        <div className="h-48 flex items-end justify-between gap-2">
+                            {(() => {
+                                const monthStats: Record<string, number> = {};
+                                const now = new Date();
+                                const months: string[] = [];
+
+                                // Generate last 6 months
+                                for (let i = 5; i >= 0; i--) {
+                                    const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+                                    const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+                                    months.push(key);
+                                    monthStats[key] = 0;
+                                }
+
+                                filteredAppointments.forEach(app => {
+                                    const monthKey = app.date.substring(0, 7);
+                                    if (monthStats.hasOwnProperty(monthKey)) {
+                                        monthStats[monthKey]++;
+                                    }
+                                });
+
+                                const maxCount = Math.max(...Object.values(monthStats), 1);
+
+                                return months.map((month, i) => {
+                                    const count = monthStats[month];
+                                    const heightPercentage = (count / maxCount) * 100;
+                                    const [year, monthNum] = month.split('-');
+                                    const monthName = new Date(parseInt(year), parseInt(monthNum) - 1, 1).toLocaleDateString('pt-BR', { month: 'short' });
+
+                                    return (
+                                        <div key={month} className="flex-1 flex flex-col items-center group h-full justify-end">
+                                            <div
+                                                className="w-full bg-primary-dark rounded-t-lg relative transition-all hover:bg-primary-dark/80"
+                                                style={{ height: `${Math.max(heightPercentage, 5)}%` }}
+                                            >
+                                                <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-slate-900 text-white text-[10px] font-bold py-1 px-2 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+                                                    {count} eventos
+                                                </div>
+                                            </div>
+                                            <p className="text-[10px] font-bold text-slate-400 uppercase mt-2">{monthName}</p>
+                                        </div>
+                                    );
+                                });
+                            })()}
+                        </div>
+                    </div>
+                </div>
+
+                {/* NEW SECTION: Top Participants & Duration Analytics */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+                    {/* Top Participants */}
+                    <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-8">
+                        <h3 className="font-bold text-slate-900 mb-6">Participantes Mais Ativos</h3>
+                        <div className="space-y-3">
+                            {(() => {
+                                const participantStats: Record<string, { count: number, accepted: number, declined: number }> = {};
+
+                                filteredAppointments.forEach(app => {
+                                    app.attendees?.forEach(att => {
+                                        if (!participantStats[att.user_id]) {
+                                            participantStats[att.user_id] = { count: 0, accepted: 0, declined: 0 };
+                                        }
+                                        participantStats[att.user_id].count++;
+                                        if (att.status === 'accepted') participantStats[att.user_id].accepted++;
+                                        if (att.status === 'declined') participantStats[att.user_id].declined++;
+                                    });
+                                });
+
+                                return Object.entries(participantStats)
+                                    .sort(([, a], [, b]) => b.count - a.count)
+                                    .slice(0, 8)
+                                    .map(([userId, stats]) => {
+                                        const user = profiles.find(p => p.id === userId);
+                                        const responseRate = stats.count > 0 ? ((stats.accepted + stats.declined) / stats.count) * 100 : 0;
+
+                                        return (
+                                            <div key={userId} className="flex items-center gap-3 p-3 bg-slate-50 rounded-lg hover:bg-slate-100 transition-colors">
+                                                {user?.avatar ? (
+                                                    <div className="size-8 rounded-full bg-cover bg-center border-2 border-white shadow-sm" style={{ backgroundImage: `url('${user.avatar}')` }}></div>
+                                                ) : (
+                                                    <div className="size-8 rounded-full bg-slate-200 flex items-center justify-center text-xs font-bold text-slate-500">
+                                                        {user?.full_name?.[0] || 'U'}
+                                                    </div>
+                                                )}
+                                                <div className="flex-1 min-w-0">
+                                                    <p className="font-bold text-xs text-slate-900 truncate">{user?.full_name || 'Usuário'}</p>
+                                                    <p className="text-[10px] text-slate-500">{stats.count} participações</p>
+                                                </div>
+                                                <div className="text-right">
+                                                    <p className="text-sm font-black text-primary-dark">{responseRate.toFixed(0)}%</p>
+                                                    <p className="text-[9px] font-bold text-slate-400">Resposta</p>
+                                                </div>
+                                            </div>
+                                        );
+                                    });
+                            })()}
+                        </div>
+                    </div>
+
+                    {/* Duration Analytics */}
+                    <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-8">
+                        <h3 className="font-bold text-slate-900 mb-6">Análise de Duração</h3>
+                        {(() => {
+                            let totalMinutes = 0;
+                            let appointmentCount = 0;
+                            const durationByType: Record<string, { total: number, count: number }> = {};
+
+                            filteredAppointments.forEach(app => {
+                                if (app.startTime && app.endTime) {
+                                    const [startH, startM] = app.startTime.split(':').map(Number);
+                                    const [endH, endM] = app.endTime.split(':').map(Number);
+                                    const duration = (endH * 60 + endM) - (startH * 60 + startM);
+
+                                    if (duration > 0) {
+                                        totalMinutes += duration;
+                                        appointmentCount++;
+
+                                        const type = app.type || 'outros';
+                                        if (!durationByType[type]) durationByType[type] = { total: 0, count: 0 };
+                                        durationByType[type].total += duration;
+                                        durationByType[type].count++;
+                                    }
+                                }
+                            });
+
+                            const avgMinutes = appointmentCount > 0 ? totalMinutes / appointmentCount : 0;
+                            const totalHours = totalMinutes / 60;
+
+                            return (
+                                <div className="space-y-6">
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div className="p-4 bg-blue-50 rounded-xl border border-blue-100">
+                                            <p className="text-[10px] font-black text-blue-600 uppercase tracking-widest mb-1">Duração Média</p>
+                                            <p className="text-3xl font-black text-blue-700">{avgMinutes.toFixed(0)}</p>
+                                            <p className="text-xs font-bold text-blue-600/60 mt-1">minutos</p>
+                                        </div>
+                                        <div className="p-4 bg-purple-50 rounded-xl border border-purple-100">
+                                            <p className="text-[10px] font-black text-purple-600 uppercase tracking-widest mb-1">Total Agendado</p>
+                                            <p className="text-3xl font-black text-purple-700">{totalHours.toFixed(1)}</p>
+                                            <p className="text-xs font-bold text-purple-600/60 mt-1">horas</p>
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <p className="text-xs font-bold text-slate-500 mb-3 uppercase tracking-wider">Duração Média por Tipo</p>
+                                        <div className="space-y-2">
+                                            {Object.entries(durationByType)
+                                                .sort(([, a], [, b]) => (b.total / b.count) - (a.total / a.count))
+                                                .slice(0, 5)
+                                                .map(([type, stats]) => {
+                                                    const avg = stats.total / stats.count;
+                                                    const label = appointmentTypes.find(t => t.value === type)?.label || type;
+
+                                                    return (
+                                                        <div key={type} className="flex justify-between items-center text-xs">
+                                                            <span className="font-bold text-slate-600 capitalize">{label}</span>
+                                                            <span className="font-black text-slate-900">{avg.toFixed(0)} min</span>
+                                                        </div>
+                                                    );
+                                                })}
+                                        </div>
+                                    </div>
+                                </div>
+                            );
+                        })()}
+                    </div>
+                </div>
             </div>
         </div>
     );
