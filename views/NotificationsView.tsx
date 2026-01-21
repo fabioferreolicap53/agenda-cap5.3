@@ -17,6 +17,7 @@ export const NotificationsView: React.FC<NotificationsViewProps> = ({ user, onVi
     const [actionLoading, setActionLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [selectedUserProfile, setSelectedUserProfile] = useState<User | null>(null);
+    const [selectedSectorName, setSelectedSectorName] = useState<string>('');
     const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
 
     const fetchNotifications = async () => {
@@ -256,12 +257,22 @@ export const NotificationsView: React.FC<NotificationsViewProps> = ({ user, onVi
                                         <div className="flex-1 min-w-0">
                                             <h4
                                                 onClick={async () => {
-                                                    // Fetch full user profile
+                                                    // Fetch full user profile and sectors
                                                     const { data: fullProfile } = await supabase
                                                         .from('profiles')
                                                         .select('*')
                                                         .eq('id', req.user_id)
                                                         .single();
+
+                                                    let sectorName = '';
+                                                    if (fullProfile?.sector_id) {
+                                                        const { data: sector } = await supabase
+                                                            .from('sectors')
+                                                            .select('name')
+                                                            .eq('id', fullProfile.sector_id)
+                                                            .single();
+                                                        if (sector) sectorName = sector.name;
+                                                    }
 
                                                     if (fullProfile) {
                                                         setSelectedUserProfile({
@@ -272,8 +283,10 @@ export const NotificationsView: React.FC<NotificationsViewProps> = ({ user, onVi
                                                             observations: fullProfile.observations,
                                                             avatar: fullProfile.avatar,
                                                             username: fullProfile.username,
-                                                            phone: fullProfile.phone
-                                                        });
+                                                            phone: fullProfile.phone,
+                                                            status: fullProfile.status // Ensure status is passed
+                                                        } as User);
+                                                        setSelectedSectorName(sectorName); // Set sector name
                                                         setIsProfileModalOpen(true);
                                                     }
                                                 }}
@@ -334,6 +347,7 @@ export const NotificationsView: React.FC<NotificationsViewProps> = ({ user, onVi
                 user={selectedUserProfile}
                 onNavigateToChat={onNavigateToChat}
                 currentUser={user}
+                sectorName={selectedSectorName}
             />
         </div>
     );

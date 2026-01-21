@@ -696,7 +696,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
           </div>
 
           {/* Bottom Bar: Filters */}
-          <div className="hidden md:flex items-center gap-4 px-10 py-4 bg-slate-800/80 border-b border-white/5 backdrop-blur-md">
+          <div className="hidden md:flex items-center gap-2 px-4 py-4 bg-slate-800/80 border-b border-white/5 backdrop-blur-md justify-between lg:justify-start">
             {/* View Toggles Group */}
             <div className="flex items-center gap-2 text-white/50 mr-1">
               <span className="material-symbols-outlined text-[20px]">calendar_view_month</span>
@@ -722,7 +722,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
               <select
                 value={filterUserId}
                 onChange={(e) => setFilterUserId(e.target.value)}
-                className="appearance-none pl-10 pr-10 py-2 bg-slate-900/50 border border-white/10 rounded-xl text-xs font-bold text-white focus:outline-none focus:bg-slate-900 focus:border-sky-500/50 transition-all cursor-pointer min-w-[180px] shadow-sm hover:border-white/20"
+                className="appearance-none pl-9 pr-8 py-2 bg-slate-900/50 border border-white/10 rounded-xl text-xs font-bold text-white focus:outline-none focus:bg-slate-900 focus:border-sky-500/50 transition-all cursor-pointer min-w-[140px] shadow-sm hover:border-white/20"
               >
                 <option value="all" className="text-slate-900 bg-white">Todos os Usuários</option>
                 {allUsers.map(u => (
@@ -737,7 +737,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
               <select
                 value={filterUserRole}
                 onChange={(e) => setFilterUserRole(e.target.value as any)}
-                className="appearance-none pl-10 pr-10 py-2 bg-slate-900/50 border border-white/10 rounded-xl text-xs font-bold text-white focus:outline-none focus:bg-slate-900 focus:border-sky-500/50 transition-all cursor-pointer min-w-[170px] shadow-sm hover:border-white/20"
+                className="appearance-none pl-9 pr-8 py-2 bg-slate-900/50 border border-white/10 rounded-xl text-xs font-bold text-white focus:outline-none focus:bg-slate-900 focus:border-sky-500/50 transition-all cursor-pointer min-w-[130px] shadow-sm hover:border-white/20"
                 disabled={filterUserId === 'all'}
               >
                 <option value="all" className="text-slate-900 bg-white">Todos os Papéis</option>
@@ -752,7 +752,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
               <select
                 value={filterEventType}
                 onChange={(e) => setFilterEventType(e.target.value)}
-                className="appearance-none pl-10 pr-10 py-2 bg-slate-900/50 border border-white/10 rounded-xl text-xs font-bold text-white focus:outline-none focus:bg-slate-900 focus:border-sky-500/50 transition-all cursor-pointer min-w-[160px] shadow-sm hover:border-white/20"
+                className="appearance-none pl-9 pr-8 py-2 bg-slate-900/50 border border-white/10 rounded-xl text-xs font-bold text-white focus:outline-none focus:bg-slate-900 focus:border-sky-500/50 transition-all cursor-pointer min-w-[120px] shadow-sm hover:border-white/20"
               >
                 <option value="all" className="text-slate-900 bg-white">Todos Tipos</option>
                 {appointmentTypes.map(t => (
@@ -767,7 +767,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
               <select
                 value={filterLocation}
                 onChange={(e) => setFilterLocation(e.target.value)}
-                className="appearance-none pl-10 pr-10 py-2 bg-slate-900/50 border border-white/10 rounded-xl text-xs font-bold text-white focus:outline-none focus:bg-slate-900 focus:border-sky-500/50 transition-all cursor-pointer min-w-[160px] shadow-sm hover:border-white/20"
+                className="appearance-none pl-9 pr-8 py-2 bg-slate-900/50 border border-white/10 rounded-xl text-xs font-bold text-white focus:outline-none focus:bg-slate-900 focus:border-sky-500/50 transition-all cursor-pointer min-w-[120px] shadow-sm hover:border-white/20"
               >
                 <option value="all" className="text-slate-900 bg-white">Todos Locais</option>
                 {locations.map(l => (
