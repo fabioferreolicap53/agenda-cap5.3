@@ -603,6 +603,7 @@ export const Modal: React.FC<ModalProps> = ({ isOpen, onClose, user, appointment
                             onChange={(e) => {
                               if (e.target.checked) {
                                 setSelectedUserIds(prev => [...prev, u.id]);
+                                setOrganizerOnly(false); // Desativa se convidar alguém
                               } else {
                                 setSelectedUserIds(prev => prev.filter(id => id !== u.id));
                               }

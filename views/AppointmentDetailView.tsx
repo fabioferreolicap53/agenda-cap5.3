@@ -694,23 +694,32 @@ export const AppointmentDetailView: React.FC<AppointmentDetailViewProps> = ({
                 )}
               </div>
 
-              {isEditing && selectedUserIds.length === 0 && (
-                <div className="mt-4 pt-4 border-t border-slate-100">
-                  <label className="flex items-center gap-2 cursor-pointer group">
-                    <input
-                      type="checkbox"
-                      checked={editOrganizerOnly}
-                      onChange={e => setEditOrganizerOnly(e.target.checked)}
-                      className="size-4 accent-primary-dark rounded border-slate-300 focus:ring-primary-dark/20"
-                    />
-                    <div className="flex items-center gap-1.5">
-                      <span className="material-symbols-outlined text-[18px] text-slate-400 group-hover:text-primary-dark transition-colors">lock</span>
-                      <span className="text-xs font-bold text-slate-600 group-hover:text-primary-dark transition-colors uppercase tracking-tight">Exclusivo ao organizador</span>
+              {isEditing && (
+                <div className="mt-2 mb-4 p-3 bg-slate-50 border border-slate-100 rounded-xl">
+                  <label className="flex items-center justify-between cursor-pointer group">
+                    <div className="flex items-center gap-2">
+                      <span className={`material-symbols-outlined text-[20px] transition-colors ${editOrganizerOnly ? 'text-primary-dark font-black' : 'text-slate-400'}`}>
+                        {editOrganizerOnly ? 'lock' : 'lock_open'}
+                      </span>
+                      <div className="flex flex-col">
+                        <span className="text-[10px] font-bold text-slate-600 uppercase tracking-tight">Evento Restrito</span>
+                        <span className="text-[9px] text-slate-400 leading-tight">Exclusivo ao organizador</span>
+                      </div>
+                    </div>
+                    <div className="relative">
+                      <input
+                        type="checkbox"
+                        checked={editOrganizerOnly}
+                        onChange={e => {
+                          const val = e.target.checked;
+                          setEditOrganizerOnly(val);
+                          if (val) setSelectedUserIds([]); // Limpa participantes se ficar restrito
+                        }}
+                        className="peer sr-only"
+                      />
+                      <div className="w-8 h-4 bg-slate-200 rounded-full peer peer-checked:bg-primary-dark transition-colors after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:after:translate-x-4"></div>
                     </div>
                   </label>
-                  <p className="mt-1 text-[9px] text-slate-400 leading-tight italic ml-6">
-                    Se ativado, outros usuários não poderão solicitar participação neste evento.
-                  </p>
                 </div>
               )}
 
@@ -735,7 +744,10 @@ export const AppointmentDetailView: React.FC<AppointmentDetailViewProps> = ({
                           type="checkbox"
                           checked={selectedUserIds.includes(u.id)}
                           onChange={e => {
-                            if (e.target.checked) setSelectedUserIds(prev => [...prev, u.id]);
+                            if (e.target.checked) {
+                              setSelectedUserIds(prev => [...prev, u.id]);
+                              setEditOrganizerOnly(false); // Desativa restrição se adicionar alguém
+                            }
                             else setSelectedUserIds(prev => prev.filter(id => id !== u.id));
                           }}
                           className="size-3.5 accent-primary-dark"
