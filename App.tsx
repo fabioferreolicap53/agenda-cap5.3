@@ -40,8 +40,12 @@ const App: React.FC = () => {
   const [authError, setAuthError] = useState<string | null>(null);
   const [isRecovering, setIsRecovering] = useState(false);
 
-  // Detecção ultra-precoce de recuperação de senha
-  const recoveryLock = useRef(window.location.hash.includes('type=recovery'));
+  // Detecção ultra-precoce de recuperação de senha (hash ou query params)
+  const recoveryLock = useRef(
+    window.location.hash.includes('type=recovery') ||
+    window.location.search.includes('type=recovery') ||
+    window.location.hash.includes('#access_token=') // Algumas versões retornam direto o token
+  );
 
   const fetchData = useCallback(async (uid?: string) => {
     const userId = uid || session?.user.id;
@@ -123,12 +127,12 @@ const App: React.FC = () => {
     if (hash && hash.includes('error=')) {
       try {
         const hashContent = hash.startsWith('#') ? hash.substring(1) : hash;
-        const params = new URLSearchParams(hashContent);
+        const params = new URLSearchParams(hashContent || window.location.search);
         const errorMsg = params.get('error_description') || params.get('error');
         if (errorMsg) {
           setAuthError(decodeURIComponent(errorMsg).replace(/\+/g, ' '));
-          // Clear hash to prevent repeated error messages
-          window.history.replaceState(null, '', window.location.pathname + window.location.search);
+          // Clear hash/search to prevent repeated error messages
+          window.history.replaceState(null, '', window.location.pathname);
         }
       } catch (e) {
         console.error('Error parsing hash:', e);

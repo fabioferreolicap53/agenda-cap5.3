@@ -50,7 +50,7 @@ export const LoginView: React.FC<LoginViewProps> = ({ externalError }) => {
           redirectTo: window.location.origin + window.location.pathname, // Redirect back to this exact page (works locally and on GitHub Pages)
         });
         if (error) throw error;
-        setMessage({ type: 'success', text: 'Se o e-mail estiver cadastrado, você receberá um link de recuperação!' });
+        setMessage({ type: 'success', text: 'E-mail de recuperação enviado! Verifique sua caixa de entrada e spam.' });
       } else {
         const generatedUsername = fullName.trim().toLowerCase().replace(/\s+/g, '.');
 
