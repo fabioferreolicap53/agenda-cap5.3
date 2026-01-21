@@ -153,39 +153,72 @@ export const NotificationsView: React.FC<NotificationsViewProps> = ({ user, onVi
             setHistoryItems(myHistory);
 
             // ---------------------------------------------------------
-            // 4. SENT REQUESTS (Made by me)
+            // 4. SENT REQUESTS (Made by me to others)
             // ---------------------------------------------------------
-            const { data: myRequests, error: sentReqError } = await supabase
+            const { data: rawSentReqs, error: sentReqError } = await supabase
                 .from('appointment_attendees')
-                .select('*, appointments(title, date, created_by)')
+                .select('*')
                 .eq('user_id', userId)
                 .eq('status', 'requested');
 
             if (sentReqError) throw sentReqError;
-            setSentRequests(myRequests || []);
+
+            let enrichedSentReqs: any[] = [];
+            if (rawSentReqs && rawSentReqs.length > 0) {
+                const sAppIds = rawSentReqs.map(r => r.appointment_id);
+                const { data: sApps } = await supabase
+                    .from('appointments')
+                    .select('id, title, date, created_by')
+                    .in('id', sAppIds);
+
+                enrichedSentReqs = rawSentReqs.map(req => ({
+                    ...req,
+                    appointments: sApps?.find(a => a.id === req.appointment_id)
+                }));
+            }
+            setSentRequests(enrichedSentReqs);
 
             // ---------------------------------------------------------
             // 5. SENT INVITATIONS (Invitations I sent to others)
             // ---------------------------------------------------------
-            // We need to find all appointments created by me first
-            const { data: myApps } = await supabase
+            // To find invitations I sent, we find pending attendees in appointments I created
+            const { data: myOwnedApps } = await supabase
                 .from('appointments')
                 .select('id')
                 .eq('created_by', userId);
 
-            if (myApps && myApps.length > 0) {
-                const myAppIds = myApps.map(a => a.id);
-                const { data: myInvs, error: sentInvError } = await supabase
+            let enrichedSentInvs: any[] = [];
+            if (myOwnedApps && myOwnedApps.length > 0) {
+                const myAppIds = myOwnedApps.map(a => a.id);
+                const { data: rawSentInvs, error: sentInvError } = await supabase
                     .from('appointment_attendees')
-                    .select('*, appointments(title, date), profiles(full_name, avatar)')
+                    .select('*')
                     .in('appointment_id', myAppIds)
                     .eq('status', 'pending');
 
                 if (sentInvError) throw sentInvError;
-                setSentInvitations(myInvs || []);
-            } else {
-                setSentInvitations([]);
+
+                if (rawSentInvs && rawSentInvs.length > 0) {
+                    const invUserIds = rawSentInvs.map(r => r.user_id);
+                    const { data: invProfiles } = await supabase
+                        .from('profiles')
+                        .select('id, full_name, avatar')
+                        .in('id', invUserIds);
+
+                    const invAppIds = rawSentInvs.map(r => r.appointment_id);
+                    const { data: invApps } = await supabase
+                        .from('appointments')
+                        .select('id, title, date')
+                        .in('id', invAppIds);
+
+                    enrichedSentInvs = rawSentInvs.map(inv => ({
+                        ...inv,
+                        profiles: invProfiles?.find(p => p.id === inv.user_id),
+                        appointments: invApps?.find(a => a.id === inv.appointment_id)
+                    }));
+                }
             }
+            setSentInvitations(enrichedSentInvs);
 
         } catch (err: any) {
             console.error('Error fetching notifications:', err.message);
