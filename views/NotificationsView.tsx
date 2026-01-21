@@ -428,9 +428,11 @@ export const NotificationsView: React.FC<NotificationsViewProps> = ({ user, onVi
                                 <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
                                     {invitations.map(inv => (
                                         <div key={inv.id} className="bg-white/80 backdrop-blur-sm border border-slate-200/60 rounded-2xl p-4 shadow-sm hover:shadow-md transition-all group relative overflow-hidden">
-                                            <div className="flex items-center justify-between mb-2">
-                                                <span className="text-[9px] font-black text-primary-dark uppercase tracking-tight bg-primary-dark/5 px-2 py-1 rounded-md border border-primary-dark/10 leading-tight">CONVITE PARA PARTICIPAR DE UM EVENTO/COMPROMISSO CRIADO POR OUTRO USUÁRIO</span>
-                                                <span className="text-[9px] font-bold text-slate-400 flex items-center gap-1">
+                                            <div className="flex items-start justify-between gap-4 mb-3">
+                                                <span className="text-[8px] font-black text-primary-dark uppercase tracking-widest bg-primary-dark/5 px-2.5 py-1.5 rounded-lg border border-primary-dark/10 leading-relaxed flex-1 shadow-sm/5">
+                                                    CONVITE PARA PARTICIPAR DE UM EVENTO/COMPROMISSO CRIADO POR OUTRO USUÁRIO
+                                                </span>
+                                                <span className="text-[9px] font-bold text-slate-400 flex items-center gap-1 pt-1.5 shrink-0 bg-slate-50/50 px-2 py-0.5 rounded-md border border-slate-100">
                                                     <span className="material-symbols-outlined text-[12px]">calendar_today</span>
                                                     {new Date(inv.appointments.date + 'T12:00:00').toLocaleDateString('pt-BR')}
                                                 </span>
@@ -453,9 +455,14 @@ export const NotificationsView: React.FC<NotificationsViewProps> = ({ user, onVi
 
                                     {pendingRequests.map(req => (
                                         <div key={req.id} className="bg-white/80 backdrop-blur-sm border border-slate-200/60 rounded-2xl p-4 shadow-sm hover:shadow-md transition-all group relative overflow-hidden">
-                                            <div className="flex items-center justify-between mb-3">
-                                                <span className="text-[9px] font-black text-indigo-600 uppercase tracking-tight bg-indigo-50 px-2 py-1 rounded-md border border-indigo-100 leading-tight">SOLICITAÇÃO PARA PARTICIPAR DE UM EVENTO/COMPROMISSO CRIADO POR VOCÊ</span>
-                                                <span className="text-[9px] font-bold text-slate-400">{new Date(req.appointments.date + 'T12:00:00').toLocaleDateString('pt-BR')}</span>
+                                            <div className="flex items-start justify-between gap-4 mb-3">
+                                                <span className="text-[8px] font-black text-indigo-600 uppercase tracking-widest bg-indigo-50/50 px-2.5 py-1.5 rounded-lg border border-indigo-100 leading-relaxed flex-1 shadow-sm/5">
+                                                    SOLICITAÇÃO PARA PARTICIPAR DE UM EVENTO/COMPROMISSO CRIADO POR VOCÊ
+                                                </span>
+                                                <span className="text-[9px] font-bold text-slate-400 flex items-center gap-1 pt-1.5 shrink-0 bg-slate-50/50 px-2 py-0.5 rounded-md border border-slate-100">
+                                                    <span className="material-symbols-outlined text-[12px]">calendar_today</span>
+                                                    {new Date(req.appointments.date + 'T12:00:00').toLocaleDateString('pt-BR')}
+                                                </span>
                                             </div>
 
                                             <div className="flex items-center gap-3 mb-4">
