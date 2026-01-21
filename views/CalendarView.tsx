@@ -672,13 +672,6 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
 
             <div className="flex items-center gap-5 relative z-10">
               {/* View Toggles */}
-              <div className="hidden md:flex bg-slate-900/40 p-1.5 rounded-xl shadow-inner border border-white/5">
-                <button onClick={() => changeViewMode('month')} className={`px-5 py-2 rounded-lg text-[11px] font-black uppercase tracking-wider transition-all ${viewMode === 'month' ? 'bg-white text-primary-dark shadow-md transform scale-105' : 'text-white/60 hover:text-white hover:bg-white/5'}`}>Mês</button>
-                <button onClick={() => changeViewMode('week')} className={`px-5 py-2 rounded-lg text-[11px] font-black uppercase tracking-wider transition-all ${viewMode === 'week' ? 'bg-white text-primary-dark shadow-md transform scale-105' : 'text-white/60 hover:text-white hover:bg-white/5'}`}>Semana</button>
-                <button onClick={() => changeViewMode('day')} className={`px-5 py-2 rounded-lg text-[11px] font-black uppercase tracking-wider transition-all ${viewMode === 'day' ? 'bg-white text-primary-dark shadow-md transform scale-105' : 'text-white/60 hover:text-white hover:bg-white/5'}`}>Dia</button>
-              </div>
-
-              <div className="h-8 w-px bg-white/10 hidden md:block"></div>
 
               <button
                 onClick={() => onOpenModal()}
@@ -704,6 +697,20 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
 
           {/* Bottom Bar: Filters */}
           <div className="hidden md:flex items-center gap-4 px-10 py-4 bg-slate-800/80 border-b border-white/5 backdrop-blur-md">
+            {/* View Toggles Group */}
+            <div className="flex items-center gap-2 text-white/50 mr-1">
+              <span className="material-symbols-outlined text-[20px]">calendar_view_month</span>
+              <span className="text-[10px] font-black uppercase tracking-widest">Exibição</span>
+            </div>
+
+            <div className="flex bg-slate-900/50 p-1 rounded-lg border border-white/5 mr-4">
+              <button onClick={() => changeViewMode('month')} className={`px-4 py-1.5 rounded-md text-[10px] font-black uppercase tracking-wider transition-all ${viewMode === 'month' ? 'bg-white text-primary-dark shadow-sm' : 'text-white/60 hover:text-white hover:bg-white/5'}`}>Mês</button>
+              <button onClick={() => changeViewMode('week')} className={`px-4 py-1.5 rounded-md text-[10px] font-black uppercase tracking-wider transition-all ${viewMode === 'week' ? 'bg-white text-primary-dark shadow-sm' : 'text-white/60 hover:text-white hover:bg-white/5'}`}>Semana</button>
+              <button onClick={() => changeViewMode('day')} className={`px-4 py-1.5 rounded-md text-[10px] font-black uppercase tracking-wider transition-all ${viewMode === 'day' ? 'bg-white text-primary-dark shadow-sm' : 'text-white/60 hover:text-white hover:bg-white/5'}`}>Dia</button>
+            </div>
+
+            <div className="h-4 w-px bg-white/10 mx-2"></div>
+
             <div className="flex items-center gap-2 text-white/50 mr-2">
               <span className="material-symbols-outlined text-[20px]">filter_list</span>
               <span className="text-[10px] font-black uppercase tracking-widest">Filtros</span>
