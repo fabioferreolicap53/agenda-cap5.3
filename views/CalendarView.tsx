@@ -682,10 +682,10 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
 
               <button
                 onClick={() => onOpenModal()}
-                className="hidden md:flex items-center gap-2.5 pl-5 pr-6 py-3 bg-sky-500 hover:bg-sky-400 text-white rounded-xl font-black text-xs uppercase tracking-widest transition-all shadow-lg shadow-sky-500/20 active:scale-95 group"
+                className="hidden md:flex items-center gap-2 pl-4 pr-5 py-2.5 bg-white hover:bg-slate-50 text-primary-dark rounded-xl font-black text-xs uppercase tracking-widest transition-all shadow-lg active:scale-95 group border border-slate-100"
               >
-                <span className="material-symbols-outlined text-[20px] group-hover:rotate-90 transition-transform">add_circle</span>
-                Novo Evento
+                <span className="material-symbols-outlined text-[20px] group-hover:rotate-90 transition-transform text-primary-dark">add_circle</span>
+                Adicionar
               </button>
               <button
                 onClick={() => onOpenModal()}
