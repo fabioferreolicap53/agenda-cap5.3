@@ -37,6 +37,7 @@ export const AppointmentListView: React.FC<AppointmentListViewProps> = ({
     const [filterUserRole, setFilterUserRole] = useState<'all' | 'participant' | 'organizer'>('all');
     const [allUsers, setAllUsers] = useState<User[]>([]);
     const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
+    const [hoverInfo, setHoverInfo] = useState<{ app: Appointment; x: number; y: number } | null>(null);
 
 
 
@@ -370,6 +371,11 @@ export const AppointmentListView: React.FC<AppointmentListViewProps> = ({
                                     <div
                                         key={app.id}
                                         onClick={() => onOpenDetails(app)}
+                                        onMouseEnter={(e) => {
+                                            const rect = e.currentTarget.getBoundingClientRect();
+                                            setHoverInfo({ app, x: rect.left + 100, y: rect.top + 10 });
+                                        }}
+                                        onMouseLeave={() => setHoverInfo(null)}
                                         className={`bg-white p-6 rounded-2xl border transition-all cursor-pointer group relative overflow-hidden ${isToday ? 'border-primary-dark/30 shadow-md ring-1 ring-primary-dark/10 bg-primary-dark/[0.02]' : 'border-slate-100 shadow-sm hover:shadow-md'}`}
                                     >
                                         {isToday && (
@@ -427,6 +433,113 @@ export const AppointmentListView: React.FC<AppointmentListViewProps> = ({
                     )}
                 </div>
             </div >
+
+            {/* Global Tooltip Portal */}
+            {hoverInfo && (
+                <div
+                    className="fixed w-[280px] bg-white rounded-2xl shadow-2xl z-[9999] pointer-events-none animate-[fadeIn_0.15s_ease-out] border border-slate-200 overflow-hidden ring-4 ring-slate-900/5"
+                    style={{
+                        left: Math.min(hoverInfo.x, window.innerWidth - 300),
+                        top: Math.min(hoverInfo.y, window.innerHeight - 320)
+                    }}
+                >
+                    {/* Status Strip */}
+                    <div className="h-1.5 w-full" style={{ backgroundColor: appointmentTypes.find(t => t.value === hoverInfo.app.type)?.color || '#ccc' }}></div>
+
+                    <div className="p-4">
+                        {/* Header */}
+                        <div className="flex items-start justify-between gap-3 mb-3">
+                            <div>
+                                <h4 className="font-bold text-sm text-slate-900 leading-snug mb-0.5">{hoverInfo.app.title}</h4>
+                                <span className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                                    {appointmentTypes.find(t => t.value === hoverInfo.app.type)?.icon && (
+                                        <span className="material-symbols-outlined text-[12px]">{appointmentTypes.find(t => t.value === hoverInfo.app.type)?.icon}</span>
+                                    )}
+                                    {translateType(hoverInfo.app.type, appointmentTypes)}
+                                </span>
+                            </div>
+
+                            {/* Organizer Avatar */}
+                            {(() => {
+                                const organizer = allUsers.find(u => u.id === hoverInfo.app.created_by);
+                                return organizer ? (
+                                    <div className="size-8 rounded-full bg-cover bg-center border-2 border-white shadow-md shrink-0"
+                                        style={{ backgroundImage: organizer.avatar ? `url('${organizer.avatar}')` : 'none' }}
+                                        title={`Organizado por: ${organizer.full_name}`}
+                                    >
+                                        {!organizer.avatar && <div className="size-full flex items-center justify-center bg-slate-100 text-[10px] font-black text-slate-400 uppercase rounded-full">{organizer.full_name?.[0]}</div>}
+                                    </div>
+                                ) : null;
+                            })()}
+                        </div>
+
+                        {/* Meta Info */}
+                        <div className="space-y-2.5 mb-4">
+                            <div className="flex items-center gap-2.5 text-xs text-slate-600 bg-slate-50 p-2 rounded-lg">
+                                <span className="material-symbols-outlined text-base text-primary-dark">schedule</span>
+                                <div className="flex flex-col">
+                                    <span className="font-bold">{hoverInfo.app.startTime} - {hoverInfo.app.endTime || '...'}</span>
+                                    <span className="text-[10px] text-slate-400 font-medium capitalize">
+                                        {new Date(hoverInfo.app.date).toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' })}
+                                    </span>
+                                </div>
+                            </div>
+
+                            {(hoverInfo.app.location_id || (hoverInfo.app as any).location_text) && (
+                                <div className="flex items-center gap-2.5 text-xs font-bold text-slate-600 pl-1">
+                                    <span className="material-symbols-outlined text-base text-primary-dark">location_on</span>
+                                    <p>
+                                        {locations.find(l => l.id === hoverInfo.app.location_id)?.name || (hoverInfo.app as any).location_text}
+                                    </p>
+                                </div>
+                            )}
+
+                            {/* Explicit Organizer Info */}
+                            {(() => {
+                                const organizer = allUsers.find(u => u.id === hoverInfo.app.created_by);
+                                return organizer ? (
+                                    <div className="flex items-center gap-2.5 text-xs font-bold text-slate-600 pl-1">
+                                        <span className="material-symbols-outlined text-base text-primary-dark">person</span>
+                                        <p>Organizado por: {organizer.full_name}</p>
+                                    </div>
+                                ) : null;
+                            })()}
+                        </div>
+
+                        {/* Description */}
+                        {hoverInfo.app.description && (
+                            <div className="mb-4 text-xs text-slate-500 leading-relaxed italic border-l-2 border-slate-200 pl-3">
+                                "{hoverInfo.app.description.length > 80 ? hoverInfo.app.description.substring(0, 80) + '...' : hoverInfo.app.description}"
+                            </div>
+                        )}
+
+                        {/* Attendees Preview */}
+                        {hoverInfo.app.attendees && hoverInfo.app.attendees.length > 0 && (
+                            <div className="pt-3 border-t border-slate-100">
+                                <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-2">Participantes ({hoverInfo.app.attendees.length})</p>
+                                <div className="flex items-center -space-x-2 pl-1">
+                                    {hoverInfo.app.attendees.slice(0, 5).map((att, i) => {
+                                        const user = allUsers.find(u => u.id === att.user_id);
+                                        return (
+                                            <div key={i} className="size-6 rounded-full border-2 border-white bg-slate-200 bg-cover bg-center ring-1 ring-slate-100"
+                                                style={{ backgroundImage: user?.avatar ? `url('${user.avatar}')` : 'none' }}
+                                                title={user?.full_name || 'Usuário'}
+                                            >
+                                                {!user?.avatar && <div className="size-full flex items-center justify-center text-[8px] font-bold text-slate-400">{user?.full_name?.[0] || 'U'}</div>}
+                                            </div>
+                                        );
+                                    })}
+                                    {hoverInfo.app.attendees.length > 5 && (
+                                        <div className="size-6 rounded-full border-2 border-white bg-slate-100 flex items-center justify-center text-[9px] font-bold text-slate-500 ring-1 ring-slate-100">
+                                            +{hoverInfo.app.attendees.length - 5}
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            )}
         </div >
     );
 };
