@@ -197,7 +197,7 @@ export const AppointmentDetailView: React.FC<AppointmentDetailViewProps> = ({
           start_time: editStartTime,
           end_time: finalEndTime,
           type: editType,
-          type: editType,
+
           location_id: isExternalLocation ? null : (editLocationId || null),
           location_text: isExternalLocation ? editExternalLocation : null,
           organizer_only: editOrganizerOnly

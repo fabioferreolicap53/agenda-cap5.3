@@ -148,7 +148,7 @@ export const AppointmentListView: React.FC<AppointmentListViewProps> = ({
             (app.description?.toLowerCase().includes(searchTerm.toLowerCase()) ?? false);
         const matchesType = filterType === 'all' || app.type === filterType;
         const matchesLocation = filterLocation === 'all' || app.location_id === filterLocation;
-        const matchesLocation = filterLocation === 'all' || app.location_id === filterLocation;
+
 
         const isOrganizer = app.created_by === filterUserId;
         const isParticipant = app.attendees?.some(a => a.user_id === filterUserId && a.status !== 'declined') ?? false;
