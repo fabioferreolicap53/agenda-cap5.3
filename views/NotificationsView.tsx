@@ -280,27 +280,48 @@ export const NotificationsView: React.FC<NotificationsViewProps> = ({ user, onVi
         if (!window.confirm('Tem certeza que deseja cancelar esta solicitação/convite?')) return;
         setActionLoading(true);
         try {
+            console.log('Tentando cancelar:', { itemId, appointmentId, attendeeUserId });
+
+            // Try to delete using the most specific filters available
             let query = supabase.from('appointment_attendees').delete();
 
-            // ALWAYS prioritize composite key (appointment_id + user_id) as it's the standard
-            // and most reliable way to identify a record in this table for deletion.
             if (appointmentId && attendeeUserId) {
-                query = query.eq('appointment_id', appointmentId).eq('user_id', attendeeUserId);
+                query = query.match({ appointment_id: appointmentId, user_id: attendeeUserId });
             } else if (itemId) {
                 query = query.eq('id', itemId);
             } else {
-                throw new Error('Informações insuficientes para cancelar.');
+                throw new Error('Informações insuficientes.');
             }
 
-            const { error } = await query;
+            // Using select() to see if any rows were affected
+            const { data, error } = await query.select();
 
             if (error) throw error;
+
+            if (!data || data.length === 0) {
+                console.warn('Nenhum registro deletado via filtro primário. Tentando backup...');
+                // Fallback: try by ID if we have it and haven't tried yet
+                if (itemId && (appointmentId && attendeeUserId)) {
+                    const { data: retryData, error: retryError } = await supabase
+                        .from('appointment_attendees')
+                        .delete()
+                        .eq('id', itemId)
+                        .select();
+
+                    if (retryError) throw retryError;
+                    if (!retryData || retryData.length === 0) {
+                        throw new Error('Não foi possível localizar o registro para exclusão (pode já ter sido removido ou restrição de permissão).');
+                    }
+                } else {
+                    throw new Error('Não foi possível localizar o registro para exclusão.');
+                }
+            }
 
             alert('Cancelado com sucesso!');
             await fetchNotifications();
         } catch (err: any) {
-            console.error('Erro ao cancelar:', err);
-            alert('Erro ao cancelar: ' + err.message);
+            console.error('Erro detalhado ao cancelar:', err);
+            alert('Erro ao cancelar: ' + (err.message || 'Erro desconhecido'));
         } finally {
             setActionLoading(false);
         }
