@@ -589,11 +589,11 @@ export const AppointmentDetailView: React.FC<AppointmentDetailViewProps> = ({
               <div className="flex items-center gap-3">
                 <div className="relative shrink-0">
                   <div
-                    className="size-12 rounded-xl bg-slate-100 border border-slate-200 bg-cover bg-center flex items-center justify-center text-xs font-black text-slate-400 uppercase"
+                    className="size-14 rounded-full bg-slate-100 border-2 border-white shadow-md bg-cover bg-center flex items-center justify-center text-xs font-black text-slate-400 uppercase"
                     style={{ backgroundImage: organizer?.avatar ? `url('${organizer.avatar}')` : 'none' }}>
                     {!organizer?.avatar && (organizer?.full_name ? organizer.full_name.split(' ').map(n => n[0]).slice(0, 2).join('') : 'U')}
                   </div>
-                  <div className="absolute -bottom-1 -right-1 size-5 bg-white rounded-full flex items-center justify-center shadow-sm">
+                  <div className="absolute -bottom-0 -right-0 size-5 bg-white rounded-full flex items-center justify-center shadow-sm ring-2 ring-white">
                     <span className="material-symbols-outlined text-[14px] text-primary-dark">verified</span>
                   </div>
                 </div>
@@ -660,12 +660,12 @@ export const AppointmentDetailView: React.FC<AppointmentDetailViewProps> = ({
                     return (
                       <div key={att.id} className="flex items-center justify-between p-2 hover:bg-slate-50 rounded-lg transition-colors group">
                         <div className="flex items-center gap-3 min-w-0">
-                          <div className="size-8 rounded-full bg-slate-200 border border-slate-100 bg-cover bg-center shrink-0" style={{ backgroundImage: p?.avatar ? `url(${p.avatar})` : 'none' }}>
+                          <div className="size-9 rounded-full bg-slate-200 border-2 border-white shadow-sm bg-cover bg-center shrink-0" style={{ backgroundImage: p?.avatar ? `url(${p.avatar})` : 'none' }}>
                             {!p?.avatar && (p?.full_name ? p.full_name[0] : 'U')}
                           </div>
                           <div className="min-w-0">
                             <p className="text-xs font-bold text-slate-700 truncate">{p?.full_name}</p>
-                            <p className="text-[9px] text-slate-400 truncate uppercase tracking-tight">{p?.role || 'Membro'}</p>
+                            <p className="text-[10px] text-slate-500 truncate italic">{p?.observations || 'Sem observações'}</p>
                           </div>
                         </div>
                         <div className={`size-6 rounded-full flex items-center justify-center ${statusBg} ${statusColor}`} title={att.status}>
