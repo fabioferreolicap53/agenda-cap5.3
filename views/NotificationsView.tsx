@@ -607,6 +607,13 @@ export const NotificationsView: React.FC<NotificationsViewProps> = ({ user, onVi
                                                         <span className="material-symbols-outlined text-[16px]">chat</span>
                                                     </button>
                                                 )}
+                                                <button
+                                                    onClick={() => handleCancelAction(item.id, item.appointment_id, item.user_id)}
+                                                    className="size-7 flex items-center justify-center bg-rose-50 text-rose-400 rounded-lg hover:bg-rose-500 hover:text-white transition-all shadow-sm"
+                                                    title="Excluir do Histórico"
+                                                >
+                                                    <span className="material-symbols-outlined text-[16px]">delete</span>
+                                                </button>
                                             </div>
                                         </div>
                                     ))}
