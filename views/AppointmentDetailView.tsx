@@ -65,17 +65,20 @@ export const AppointmentDetailView: React.FC<AppointmentDetailViewProps> = ({
     }
 
     // Fetch latest appointment data (to ensure we have location_id)
+    // Fetch latest appointment data (to ensure we have latest fields)
     const { data: currentApp } = await supabase
       .from('appointments')
-      .select('location_id')
+      .select('location_id, location_text, organizer_only')
       .eq('id', appointment.id)
       .single();
 
     const locationId = currentApp?.location_id || appointment.location_id;
+    const locationText = currentApp?.location_text || appointment.location_text;
 
     // Fetch Location if exists
     if (locationId) {
       setEditLocationId(locationId); // Sync edit state
+      setIsExternalLocation(false);
       const { data: locData } = await supabase
         .from('locations')
         .select('name, color')
@@ -83,13 +86,11 @@ export const AppointmentDetailView: React.FC<AppointmentDetailViewProps> = ({
         .single();
 
       if (locData) setLocation(locData);
-    } else {
-      if (locData) setLocation(locData);
-    } else if (currentApp?.location_text || appointment.location_text) {
+    } else if (locationText) {
       setEditLocationId('');
       setIsExternalLocation(true);
-      setEditExternalLocation(currentApp?.location_text || appointment.location_text || '');
-      setLocation({ name: currentApp?.location_text || appointment.location_text || 'Local Externo', color: '#64748b' });
+      setEditExternalLocation(locationText);
+      setLocation({ name: locationText, color: '#64748b' });
     } else {
       setEditLocationId(''); // Sync edit state
       setIsExternalLocation(false);
@@ -444,19 +445,20 @@ export const AppointmentDetailView: React.FC<AppointmentDetailViewProps> = ({
             </div>
           )}
 
-          <div className="mt-6 flex items-center gap-4 p-4 bg-primary-dark/5 rounded-2xl border border-primary-dark/10">
-            <div className="flex-1">
-              <p className="text-sm font-bold text-primary-dark">Gostaria de participar deste evento?</p>
-              <p className="text-xs text-slate-500 mt-1">Solicite ao organizador para ser incluído.</p>
+          {!isOwner && !appointment.organizer_only && !myAttendeeRecord && (
+            <div className="mt-6 flex items-center gap-4 p-4 bg-primary-dark/5 rounded-2xl border border-primary-dark/10">
+              <div className="flex-1">
+                <p className="text-sm font-bold text-primary-dark">Gostaria de participar deste evento?</p>
+                <p className="text-xs text-slate-500 mt-1">Solicite ao organizador para ser incluído.</p>
+              </div>
+              <button
+                onClick={handleRequestParticipation}
+                disabled={loading}
+                className="px-4 py-2 bg-primary-dark hover:bg-primary-light text-white text-xs font-bold rounded-lg transition-all shadow-sm"
+              >
+                Solicitar Participação
+              </button>
             </div>
-            <button
-              onClick={handleRequestParticipation}
-              disabled={loading}
-              className="px-4 py-2 bg-primary-dark hover:bg-primary-light text-white text-xs font-bold rounded-lg transition-all shadow-sm"
-            >
-              Solicitar Participação
-            </button>
-          </div>
           )}
 
           {!isOwner && appointment.organizer_only && !myAttendeeRecord && (
