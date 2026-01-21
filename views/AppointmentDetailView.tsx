@@ -547,7 +547,7 @@ export const AppointmentDetailView: React.FC<AppointmentDetailViewProps> = ({
                 <span className="material-symbols-outlined text-slate-400">lock</span>
                 <div>
                   <p className="text-sm font-bold text-slate-700">Evento Restrito</p>
-                  <p className="text-xs">Apenas o organizador e convidados podem visualizar e participar deste evento.</p>
+                  <p className="text-xs">Apenas o organizador pode participar deste evento.</p>
                 </div>
               </div>
             )}
