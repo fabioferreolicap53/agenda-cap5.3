@@ -282,10 +282,12 @@ export const NotificationsView: React.FC<NotificationsViewProps> = ({ user, onVi
         try {
             let query = supabase.from('appointment_attendees').delete();
 
-            if (itemId) {
-                query = query.eq('id', itemId);
-            } else if (appointmentId && attendeeUserId) {
+            // ALWAYS prioritize composite key (appointment_id + user_id) as it's the standard
+            // and most reliable way to identify a record in this table for deletion.
+            if (appointmentId && attendeeUserId) {
                 query = query.eq('appointment_id', appointmentId).eq('user_id', attendeeUserId);
+            } else if (itemId) {
+                query = query.eq('id', itemId);
             } else {
                 throw new Error('Informações insuficientes para cancelar.');
             }
@@ -293,8 +295,11 @@ export const NotificationsView: React.FC<NotificationsViewProps> = ({ user, onVi
             const { error } = await query;
 
             if (error) throw error;
+
+            alert('Cancelado com sucesso!');
             await fetchNotifications();
         } catch (err: any) {
+            console.error('Erro ao cancelar:', err);
             alert('Erro ao cancelar: ' + err.message);
         } finally {
             setActionLoading(false);
