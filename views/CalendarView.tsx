@@ -561,36 +561,40 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
             </div>
           ) : (
             <div className="space-y-4 md:space-y-6">
-              {apps.map(app => (
-                <div
-                  key={app.id}
-                  onClick={() => onOpenDetails(app)}
-                  style={getStyleObj(app.type)}
-                  className="flex flex-col sm:flex-row gap-4 sm:gap-6 p-4 md:p-6 rounded-2xl border border-slate-100 shadow-sm cursor-pointer transition-all hover:shadow-md hover:border-slate-200 bg-white group"
-                >
-                  <div className="flex sm:flex-col items-center justify-between sm:justify-center w-full sm:w-24 shrink-0 border-b sm:border-b-0 sm:border-r border-slate-100 pb-3 sm:pb-0 sm:py-1">
-                    <span className="text-sm font-black text-slate-900">{app.startTime}</span>
-                    <div className="hidden sm:block h-4 w-px bg-slate-200 my-1"></div>
-                    <span className="text-[10px] font-bold text-slate-400">{app.endTime}</span>
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-2">
-                      <span className="text-[9px] md:text-[10px] font-bold uppercase px-2 py-0.5 rounded border flex items-center gap-1.5" style={getStyleObj(app.type)}>
-                        {appointmentTypes.find(t => t.value === app.type)?.icon && (
-                          <span className="material-symbols-outlined text-[14px]">
-                            {appointmentTypes.find(t => t.value === app.type)?.icon}
-                          </span>
-                        )}
-                        {translateType(app.type, appointmentTypes)}
-                      </span>
-                    </div>
-                    <h3 className="text-base md:text-lg font-bold text-slate-900 mb-1 md:mb-2 line-clamp-2">{app.title}</h3>
-                    <p className="text-xs md:text-sm text-slate-500 line-clamp-2">{app.description || 'Nenhuma descrição fornecida.'}</p>
-                  </div>
-                  <div className="hidden sm:flex items-center">
-                    <span className="material-symbols-outlined text-slate-300 group-hover:text-primary-dark transition-colors">chevron_right</span>
-                  </div>
+              {apps.map(app => (<div
+                key={app.id}
+                onClick={() => onOpenDetails(app)}
+                onMouseEnter={(e) => {
+                  const rect = e.currentTarget.getBoundingClientRect();
+                  setHoverInfo({ app, x: rect.left + 100, y: rect.top + 10 });
+                }}
+                onMouseLeave={() => setHoverInfo(null)}
+                style={getStyleObj(app.type)}
+                className="flex flex-col sm:flex-row gap-4 sm:gap-6 p-4 md:p-6 rounded-2xl border border-slate-100 shadow-sm cursor-pointer transition-all hover:shadow-md hover:border-slate-200 bg-white group"
+              >
+                <div className="flex sm:flex-col items-center justify-between sm:justify-center w-full sm:w-24 shrink-0 border-b sm:border-b-0 sm:border-r border-slate-100 pb-3 sm:pb-0 sm:py-1">
+                  <span className="text-sm font-black text-slate-900">{app.startTime}</span>
+                  <div className="hidden sm:block h-4 w-px bg-slate-200 my-1"></div>
+                  <span className="text-[10px] font-bold text-slate-400">{app.endTime}</span>
                 </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="text-[9px] md:text-[10px] font-bold uppercase px-2 py-0.5 rounded border flex items-center gap-1.5" style={getStyleObj(app.type)}>
+                      {appointmentTypes.find(t => t.value === app.type)?.icon && (
+                        <span className="material-symbols-outlined text-[14px]">
+                          {appointmentTypes.find(t => t.value === app.type)?.icon}
+                        </span>
+                      )}
+                      {translateType(app.type, appointmentTypes)}
+                    </span>
+                  </div>
+                  <h3 className="text-base md:text-lg font-bold text-slate-900 mb-1 md:mb-2 line-clamp-2">{app.title}</h3>
+                  <p className="text-xs md:text-sm text-slate-500 line-clamp-2">{app.description || 'Nenhuma descrição fornecida.'}</p>
+                </div>
+                <div className="hidden sm:flex items-center">
+                  <span className="material-symbols-outlined text-slate-300 group-hover:text-primary-dark transition-colors">chevron_right</span>
+                </div>
+              </div>
               ))}
             </div>
           )}
@@ -1021,6 +1025,17 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
                   </p>
                 </div>
               )}
+
+              {/* Explicit Organizer Info */}
+              {(() => {
+                const organizer = allUsers.find(u => u.id === hoverInfo.app.created_by);
+                return organizer ? (
+                  <div className="flex items-center gap-2.5 text-xs font-bold text-slate-600 pl-1">
+                    <span className="material-symbols-outlined text-base text-primary-dark">person</span>
+                    <p>Organizado por: {organizer.full_name}</p>
+                  </div>
+                ) : null;
+              })()}
             </div>
 
             {/* Description */}
