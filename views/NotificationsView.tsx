@@ -451,9 +451,9 @@ export const NotificationsView: React.FC<NotificationsViewProps> = ({ user, onVi
                                             </div>
 
                                             <div className="flex gap-2 pt-3 border-t border-slate-50">
-                                                <button onClick={() => handleResponse(inv.id, 'accepted')} disabled={actionLoading} className="flex-1 h-8 bg-emerald-500 text-white rounded-lg text-[10px] font-black hover:bg-emerald-600 transition-all">Aceitar</button>
-                                                <button onClick={() => handleResponse(inv.id, 'declined')} disabled={actionLoading} className="flex-1 h-8 bg-rose-500 text-white rounded-lg text-[10px] font-black hover:bg-rose-600 transition-all">Recusar</button>
-                                                <button onClick={() => onViewAppointment(inv.appointment_id)} className="size-8 bg-slate-100 text-slate-500 rounded-lg flex items-center justify-center hover:bg-slate-200 transition-all"><span className="material-symbols-outlined text-[18px]">visibility</span></button>
+                                                <button onClick={() => handleResponse(inv.id, 'accepted')} disabled={actionLoading} className="flex-1 h-9 bg-emerald-500 text-white rounded-xl text-[10px] font-black hover:bg-emerald-600 transition-all shadow-sm shadow-emerald-200">Aceitar</button>
+                                                <button onClick={() => handleResponse(inv.id, 'declined')} disabled={actionLoading} className="flex-1 h-9 bg-rose-500 text-white rounded-xl text-[10px] font-black hover:bg-rose-600 transition-all shadow-sm shadow-rose-200">Recusar</button>
+                                                <button onClick={() => onViewAppointment(inv.appointment_id)} className="flex-1 h-9 bg-slate-100 text-slate-500 rounded-xl flex items-center justify-center hover:bg-slate-200 transition-all" title="Ver Detalhes"><span className="material-symbols-outlined text-[18px]">visibility</span></button>
                                             </div>
                                         </div>
                                     ))}
@@ -486,10 +486,10 @@ export const NotificationsView: React.FC<NotificationsViewProps> = ({ user, onVi
                                             </div>
 
                                             <div className="flex gap-2 pt-3 border-t border-slate-50">
-                                                <button onClick={() => handleResponse(req.id, 'accepted')} disabled={actionLoading} className="flex-1 h-8 bg-indigo-600 text-white rounded-lg text-[10px] font-black hover:bg-indigo-700 transition-all">Aprovar</button>
-                                                <button onClick={() => handleResponse(req.id, 'declined')} disabled={actionLoading} className="size-8 bg-rose-50 text-rose-500 rounded-lg flex items-center justify-center hover:bg-rose-500 hover:text-white transition-all"><span className="material-symbols-outlined text-[18px]">close</span></button>
-                                                <button onClick={() => onNavigateToChat?.(req.user_id)} className="size-8 bg-slate-100 text-slate-500 rounded-lg flex items-center justify-center hover:bg-slate-200 transition-all"><span className="material-symbols-outlined text-[18px]">chat</span></button>
-                                                <button onClick={() => onViewAppointment(req.appointment_id)} className="size-8 bg-slate-100 text-slate-500 rounded-lg flex items-center justify-center hover:bg-slate-200 transition-all"><span className="material-symbols-outlined text-[18px]">visibility</span></button>
+                                                <button onClick={() => handleResponse(req.id, 'accepted')} disabled={actionLoading} className="flex-1 h-9 bg-indigo-600 text-white rounded-xl text-[10px] font-black hover:bg-indigo-700 transition-all shadow-sm shadow-indigo-200">Aprovar</button>
+                                                <button onClick={() => handleResponse(req.id, 'declined')} disabled={actionLoading} className="flex-1 h-9 bg-rose-50 text-rose-500 rounded-xl flex items-center justify-center hover:bg-rose-500 hover:text-white transition-all" title="Recusar"><span className="material-symbols-outlined text-[18px]">close</span></button>
+                                                <button onClick={() => onNavigateToChat?.(req.user_id)} className="flex-1 h-9 bg-slate-100 text-slate-500 rounded-xl flex items-center justify-center hover:bg-slate-200 transition-all" title="Chat"><span className="material-symbols-outlined text-[18px]">chat</span></button>
+                                                <button onClick={() => onViewAppointment(req.appointment_id)} className="flex-1 h-9 bg-slate-100 text-slate-500 rounded-xl flex items-center justify-center hover:bg-slate-200 transition-all" title="Ver Detalhes"><span className="material-symbols-outlined text-[18px]">visibility</span></button>
                                             </div>
                                         </div>
                                     ))}
