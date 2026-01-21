@@ -629,6 +629,10 @@ export const NotificationsView: React.FC<NotificationsViewProps> = ({ user, onVi
                                                         <span className="material-symbols-outlined text-[18px]">chat</span>
                                                         Chat
                                                     </button>
+                                                    <button onClick={() => onViewAppointment(inv.appointment_id)} className="flex-1 h-10 bg-slate-50 text-slate-600 rounded-xl text-xs font-black hover:bg-primary-dark hover:text-white transition-all flex items-center justify-center gap-2 border border-slate-100">
+                                                        <span className="material-symbols-outlined text-[18px]">visibility</span>
+                                                        Ver
+                                                    </button>
                                                     <button onClick={() => handleCancelAction(inv.id)} disabled={actionLoading} className="px-4 h-10 bg-rose-50 text-rose-500 rounded-xl text-xs font-black hover:bg-rose-500 hover:text-white transition-all flex items-center justify-center gap-2">
                                                         <span className="material-symbols-outlined text-[18px]">person_remove</span>
                                                         Remover
