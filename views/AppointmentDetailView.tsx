@@ -694,6 +694,26 @@ export const AppointmentDetailView: React.FC<AppointmentDetailViewProps> = ({
                 )}
               </div>
 
+              {isEditing && selectedUserIds.length === 0 && (
+                <div className="mt-4 pt-4 border-t border-slate-100">
+                  <label className="flex items-center gap-2 cursor-pointer group">
+                    <input
+                      type="checkbox"
+                      checked={editOrganizerOnly}
+                      onChange={e => setEditOrganizerOnly(e.target.checked)}
+                      className="size-4 accent-primary-dark rounded border-slate-300 focus:ring-primary-dark/20"
+                    />
+                    <div className="flex items-center gap-1.5">
+                      <span className="material-symbols-outlined text-[18px] text-slate-400 group-hover:text-primary-dark transition-colors">lock</span>
+                      <span className="text-xs font-bold text-slate-600 group-hover:text-primary-dark transition-colors uppercase tracking-tight">Exclusivo ao organizador</span>
+                    </div>
+                  </label>
+                  <p className="mt-1 text-[9px] text-slate-400 leading-tight italic ml-6">
+                    Se ativado, outros usuários não poderão solicitar participação neste evento.
+                  </p>
+                </div>
+              )}
+
               {isEditing && !editOrganizerOnly && (
                 <div className="mt-4 pt-4 border-t border-slate-100">
                   <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Adicionar Participantes</p>
