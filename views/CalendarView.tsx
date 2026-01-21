@@ -596,12 +596,12 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
               {/* Mobile Menu Toggle */}
               <button
                 onClick={onToggleSidebar}
-                className="md:hidden size-8 flex items-center justify-center rounded-lg hover:bg-white/10 active:scale-90 transition-all shrink-0"
+                className="md:hidden size-8 flex items-center justify-center rounded-lg hover:bg-white/10 active:scale-90 transition-all shrink-0 mr-2"
               >
                 <span className="material-symbols-outlined text-[20px]">menu</span>
               </button>
 
-              <div className="flex items-center gap-2 md:gap-4 text-white/90 flex-1 md:flex-none justify-center md:justify-start">
+              <div className="flex items-center gap-2 md:gap-4 text-white/90 flex-1 md:flex-none justify-center md:justify-start min-w-0">
                 <button
                   onClick={goToToday}
                   className="hidden md:block px-3 py-1.5 text-xs font-bold border border-white/20 rounded-lg hover:bg-white/10 transition-all"
@@ -666,9 +666,9 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
                 <select
                   value={filterUserId}
                   onChange={(e) => setFilterUserId(e.target.value)}
-                  className="bg-white/10 text-white border border-white/20 rounded-lg px-2 py-1.5 text-[10px] md:text-xs font-bold focus:outline-none focus:bg-white/20 option:bg-slate-800 max-w-[120px] md:max-w-[150px]"
+                  className="bg-white/10 text-white border border-white/20 rounded-lg px-2 py-1.5 text-[10px] md:text-xs font-bold focus:outline-none focus:bg-white/20 option:bg-slate-800 max-w-[140px]"
                 >
-                  <option value="all" className="text-slate-800">Todos os Participantes</option>
+                  <option value="all" className="text-slate-800">Todos</option>
                   {allUsers.map(u => (
                     <option key={u.id} value={u.id} className="text-slate-800">{u.full_name}</option>
                   ))}
@@ -677,9 +677,9 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
                 <select
                   value={filterEventType}
                   onChange={(e) => setFilterEventType(e.target.value)}
-                  className="bg-white/10 text-white border border-white/20 rounded-lg px-2 py-1.5 text-[10px] md:text-xs font-bold focus:outline-none focus:bg-white/20 option:bg-slate-800 max-w-[100px] md:max-w-none"
+                  className="bg-white/10 text-white border border-white/20 rounded-lg px-2 py-1.5 text-[10px] md:text-xs font-bold focus:outline-none focus:bg-white/20 option:bg-slate-800 max-w-[110px]"
                 >
-                  <option value="all" className="text-slate-800">Tipos</option>
+                  <option value="all" className="text-slate-800">Todos Tipos</option>
                   {appointmentTypes.map(t => (
                     <option key={t.id} value={t.value} className="text-slate-800">{t.label}</option>
                   ))}
@@ -688,9 +688,9 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
                 <select
                   value={filterLocation}
                   onChange={(e) => setFilterLocation(e.target.value)}
-                  className="bg-white/10 text-white border border-white/20 rounded-lg px-2 py-1.5 text-[10px] md:text-xs font-bold focus:outline-none focus:bg-white/20 option:bg-slate-800 max-w-[100px] md:max-w-none"
+                  className="bg-white/10 text-white border border-white/20 rounded-lg px-2 py-1.5 text-[10px] md:text-xs font-bold focus:outline-none focus:bg-white/20 option:bg-slate-800 max-w-[110px]"
                 >
-                  <option value="all" className="text-slate-800">Locais</option>
+                  <option value="all" className="text-slate-800">Todos Locais</option>
                   {locations.map(l => (
                     <option key={l.id} value={l.id} className="text-slate-800">{l.name}</option>
                   ))}
@@ -698,23 +698,23 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
               </div>
             </div>
 
-            <div className="hidden md:flex items-center gap-4">
-              <div className="flex bg-white/10 p-1 rounded-lg">
+            <div className="hidden md:flex items-center justify-end flex-1 gap-4 ml-4">
+              <div className="flex bg-white/10 p-1 rounded-lg shrink-0">
                 <button
                   onClick={() => changeViewMode('month')}
-                  className={`px-4 py-1.5 text-xs font-bold rounded-md transition-all ${viewMode === 'month' ? 'bg-white text-primary-dark shadow-sm' : 'text-white/70 hover:text-white'}`}
+                  className={`px-3 lg:px-4 py-1.5 text-xs font-bold rounded-md transition-all ${viewMode === 'month' ? 'bg-white text-primary-dark shadow-sm' : 'text-white/70 hover:text-white'}`}
                 >
                   Mês
                 </button>
                 <button
                   onClick={() => changeViewMode('week')}
-                  className={`px-4 py-1.5 text-xs font-bold rounded-md transition-all ${viewMode === 'week' ? 'bg-white text-primary-dark shadow-sm' : 'text-white/70 hover:text-white'}`}
+                  className={`px-3 lg:px-4 py-1.5 text-xs font-bold rounded-md transition-all ${viewMode === 'week' ? 'bg-white text-primary-dark shadow-sm' : 'text-white/70 hover:text-white'}`}
                 >
                   Semana
                 </button>
                 <button
                   onClick={() => changeViewMode('day')}
-                  className={`px-4 py-1.5 text-xs font-bold rounded-md transition-all ${viewMode === 'day' ? 'bg-white text-primary-dark shadow-sm' : 'text-white/70 hover:text-white'}`}
+                  className={`px-3 lg:px-4 py-1.5 text-xs font-bold rounded-md transition-all ${viewMode === 'day' ? 'bg-white text-primary-dark shadow-sm' : 'text-white/70 hover:text-white'}`}
                 >
                   Dia
                 </button>
@@ -722,19 +722,16 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
               <div className="h-8 w-px bg-white/20 mx-2"></div>
               <button
                 onClick={() => onOpenModal()}
-                className="flex items-center gap-2 px-5 py-2 bg-white text-primary-dark hover:bg-slate-100 rounded-lg font-bold text-sm transition-all shadow-lg shadow-black/5"
+                className="flex items-center gap-2 px-4 lg:px-5 py-2 bg-white text-primary-dark hover:bg-slate-100 rounded-lg font-bold text-sm transition-all shadow-lg shadow-black/5 shrink-0"
               >
                 <span className="material-symbols-outlined text-[20px]">add_circle</span>
-                <span className="hidden sm:inline">Adicionar</span>
+                <span className="hidden lg:inline">Adicionar</span>
               </button>
             </div>
-            {/* Mobile Add Button - Floating or Header? Keeping header action simple for now, using existing add logic or separate button if needed. 
-                Wait, if 'md:flex' hidden, then mobile user has no Add button? The original had 'hidden md:flex' for the whole block.
-                I need to make sure 'onOpenModal' is accessible on mobile.
-            */}
+
             <button
               onClick={() => onOpenModal()}
-              className="md:hidden size-8 flex items-center justify-center bg-white text-primary-dark rounded-lg shadow-lg ml-1.5 active:scale-95 transition-all shrink-0"
+              className="md:hidden size-8 flex items-center justify-center bg-white text-primary-dark rounded-lg shadow-lg ml-2 active:scale-95 transition-all shrink-0"
             >
               <span className="material-symbols-outlined text-[20px]">add</span>
             </button>

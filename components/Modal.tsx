@@ -27,6 +27,7 @@ export const Modal: React.FC<ModalProps> = ({ isOpen, onClose, user, appointment
   const [selectedUserIds, setSelectedUserIds] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const [locationConflict, setLocationConflict] = useState<string | null>(null);
+  const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
     // Reset state on open
@@ -58,6 +59,7 @@ export const Modal: React.FC<ModalProps> = ({ isOpen, onClose, user, appointment
         setSelectedUserIds(initialSelectedUsers || []);
         setSelectedLocationId('');
       }
+      setSearchTerm('');
       setLocationConflict(null);
     }
   }, [isOpen, initialDate, initialSelectedUsers, initialAppointment]);
@@ -407,33 +409,46 @@ export const Modal: React.FC<ModalProps> = ({ isOpen, onClose, user, appointment
 
           <div className="space-y-1.5">
             <label className="text-xs font-bold uppercase tracking-wider text-primary-dark">Convidar Participantes</label>
+            <div className="mb-2 relative">
+              <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-[18px]">search</span>
+              <input
+                type="text"
+                placeholder="Buscar participante..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full pl-9 pr-3 py-2 text-xs rounded-lg border border-slate-200 focus:border-primary-dark focus:ring-1 focus:ring-primary-dark outline-none transition-all"
+              />
+            </div>
             <div className="border border-slate-200 rounded-lg max-h-32 overflow-y-auto p-2 bg-slate-50/30 custom-scrollbar">
               <div className="grid grid-cols-1 gap-1">
-                {users.filter(u => u.id !== user?.id).map(u => (
-                  <label key={u.id} className="flex items-center gap-3 p-1.5 rounded-md hover:bg-white cursor-pointer transition-colors">
-                    <input
-                      type="checkbox"
-                      checked={selectedUserIds.includes(u.id)}
-                      onChange={(e) => {
-                        if (e.target.checked) {
-                          setSelectedUserIds(prev => [...prev, u.id]);
-                        } else {
-                          setSelectedUserIds(prev => prev.filter(id => id !== u.id));
-                        }
-                      }}
-                      className="size-4 rounded border-slate-300 text-primary-dark focus:ring-primary-dark"
-                    />
-                    <div className="size-6 rounded-full bg-slate-200 flex-shrink-0 flex items-center justify-center text-[9px] font-bold text-slate-400 uppercase" style={{ backgroundImage: u.avatar ? `url(${u.avatar})` : 'none', backgroundSize: 'cover' }}>
-                      {!u.avatar && (u.full_name ? u.full_name.split(' ').map(n => n[0]).slice(0, 2).join('') : 'U')}
-                    </div>
-                    <div className="flex flex-col min-w-0">
-                      <span className="text-sm font-medium text-slate-700 truncate">{u.full_name}</span>
-                      {u.observations && (
-                        <span className="text-[10px] text-slate-400 font-bold truncate tracking-tight">{u.observations}</span>
-                      )}
-                    </div>
-                  </label>
-                ))}
+                {users
+                  .filter(u => u.id !== user?.id)
+                  .filter(u => u.full_name?.toLowerCase().includes(searchTerm.toLowerCase()) || false)
+                  .map(u => (
+                    <label key={u.id} className="flex items-center gap-3 p-1.5 rounded-md hover:bg-white cursor-pointer transition-colors">
+                      <input
+                        type="checkbox"
+                        checked={selectedUserIds.includes(u.id)}
+                        onChange={(e) => {
+                          if (e.target.checked) {
+                            setSelectedUserIds(prev => [...prev, u.id]);
+                          } else {
+                            setSelectedUserIds(prev => prev.filter(id => id !== u.id));
+                          }
+                        }}
+                        className="size-4 rounded border-slate-300 text-primary-dark focus:ring-primary-dark"
+                      />
+                      <div className="size-6 rounded-full bg-slate-200 flex-shrink-0 flex items-center justify-center text-[9px] font-bold text-slate-400 uppercase" style={{ backgroundImage: u.avatar ? `url(${u.avatar})` : 'none', backgroundSize: 'cover' }}>
+                        {!u.avatar && (u.full_name ? u.full_name.split(' ').map(n => n[0]).slice(0, 2).join('') : 'U')}
+                      </div>
+                      <div className="flex flex-col min-w-0">
+                        <span className="text-sm font-medium text-slate-700 truncate">{u.full_name}</span>
+                        {u.observations && (
+                          <span className="text-[10px] text-slate-400 font-bold truncate tracking-tight">{u.observations}</span>
+                        )}
+                      </div>
+                    </label>
+                  ))}
               </div>
             </div>
           </div>
