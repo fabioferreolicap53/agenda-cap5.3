@@ -40,6 +40,7 @@ export const AppointmentDetailView: React.FC<AppointmentDetailViewProps> = ({
   const [isExternalLocation, setIsExternalLocation] = useState(!!appointment.location_text);
   const [editExternalLocation, setEditExternalLocation] = useState(appointment.location_text || '');
   const [editOrganizerOnly, setEditOrganizerOnly] = useState(appointment.organizer_only || false);
+  const [currentOrganizerOnly, setCurrentOrganizerOnly] = useState(appointment.organizer_only || false);
 
   const [allProfiles, setAllProfiles] = useState<User[]>([]);
   const [selectedUserIds, setSelectedUserIds] = useState<string[]>([]);
@@ -71,6 +72,10 @@ export const AppointmentDetailView: React.FC<AppointmentDetailViewProps> = ({
       .select('location_id, location_text, organizer_only')
       .eq('id', appointment.id)
       .single();
+
+    if (currentApp) {
+      setCurrentOrganizerOnly(currentApp.organizer_only || false);
+    }
 
     const locationId = currentApp?.location_id || appointment.location_id;
     const locationText = currentApp?.location_text || appointment.location_text;
@@ -537,7 +542,17 @@ export const AppointmentDetailView: React.FC<AppointmentDetailViewProps> = ({
             </div>
 
             {/* Status Banners (Requests, Invites) */}
-            {!isOwner && !appointment.organizer_only && !myAttendeeRecord && (
+            {!isOwner && currentOrganizerOnly && !myAttendeeRecord && (
+              <div className="flex items-center gap-3 p-4 bg-slate-50 rounded-xl border border-slate-200 text-slate-500">
+                <span className="material-symbols-outlined text-slate-400">lock</span>
+                <div>
+                  <p className="text-sm font-bold text-slate-700">Evento Restrito</p>
+                  <p className="text-xs">Apenas o organizador e convidados podem visualizar e participar deste evento.</p>
+                </div>
+              </div>
+            )}
+
+            {!isOwner && !currentOrganizerOnly && !myAttendeeRecord && (
               <div className="flex items-center justify-between gap-4 p-4 bg-primary-dark/5 rounded-xl border border-primary-dark/10">
                 <div className="flex items-center gap-3">
                   <span className="material-symbols-outlined text-primary-dark">waving_hand</span>

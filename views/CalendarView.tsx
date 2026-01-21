@@ -120,12 +120,16 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
       const appIds = appData.map(d => d.id);
       const { data: rawApps } = await supabase
         .from('appointments')
-        .select('id, location_id')
+        .select('id, location_id, organizer_only')
         .in('id', appIds);
 
       const locationMap = new Map();
+      const organizerOnlyMap = new Map();
       if (rawApps) {
-        rawApps.forEach(ra => locationMap.set(ra.id, ra.location_id));
+        rawApps.forEach(ra => {
+          locationMap.set(ra.id, ra.location_id);
+          organizerOnlyMap.set(ra.id, ra.organizer_only);
+        });
       }
 
       // Fetch attendees for these appointments
@@ -153,6 +157,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
         description: d.description,
         created_by: d.created_by,
         location_id: locationMap.get(d.id) || d.location_id, // Prefer raw fetch, fallback to view
+        organizer_only: organizerOnlyMap.has(d.id) ? organizerOnlyMap.get(d.id) : d.organizer_only,
         attendees: attendeesMap.get(d.id) || []
       }));
       setAppointments(mapped);
