@@ -285,15 +285,16 @@ export const Modal: React.FC<ModalProps> = ({ isOpen, onClose, user, appointment
 
               <div className="flex flex-col gap-2 w-full relative z-10">
                 <button
-                  onClick={() => {
-                    setShowConflictDialog(false);
-                    setConflictDetails(null);
-                  }}
+                  onClick={handleClose}
                   className="w-full py-2.5 rounded-lg bg-slate-800 hover:bg-slate-900 text-white font-bold text-sm transition-all shadow-lg shadow-slate-900/20"
                 >
                   Cancelar e Escolher Outro
                 </button>
                 <button
+                  onClick={() => {
+                    setShowConflictDialog(false);
+                    setConflictDetails(null);
+                  }}
                   className="w-full py-2.5 rounded-lg bg-slate-800 hover:bg-slate-900 text-white font-bold text-sm transition-all shadow-lg shadow-slate-900/20"
                 >
                   Entendi e Vou Alterar
