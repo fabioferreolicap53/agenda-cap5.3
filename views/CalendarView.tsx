@@ -828,25 +828,48 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
 
         <div className="space-y-4">
           {todayApps.length === 0 ? (
-            <p className="text-xs text-slate-400 italic text-center py-4">Nenhum compromisso para hoje.</p>
-          ) : (
-            todayApps.map(app => (
-              <div
-                key={app.id}
-                onClick={() => onOpenDetails(app)}
-                className="p-4 rounded-xl border border-slate-200 bg-white hover:shadow-md transition-all cursor-pointer group"
-              >
-                <div className="flex items-start justify-between mb-3">
-                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">{app.startTime} - {app.endTime}</span>
-                  <div
-                    className="size-2 rounded-full"
-                    style={{ backgroundColor: appointmentTypes.find(t => t.value === app.type)?.color || '#cbd5e1' }}
-                  ></div>
-                </div>
-                <h4 className="font-bold text-sm mb-1 text-slate-900 group-hover:text-primary-dark transition-colors">{app.title}</h4>
-                <p className="text-xs text-slate-500 leading-relaxed line-clamp-2">{app.description || 'Sem descrição.'}</p>
+            <div className="flex flex-col items-center justify-center py-6 text-center">
+              <div className="size-10 rounded-full bg-slate-50 flex items-center justify-center text-slate-300 mb-2">
+                <span className="material-symbols-outlined text-[20px]">event_busy</span>
               </div>
-            ))
+              <p className="text-xs text-slate-400 italic">Sem agenda para hoje.</p>
+            </div>
+          ) : (
+            todayApps.map(app => {
+              const appColor = appointmentTypes.find(t => t.value === app.type)?.color || '#cbd5e1';
+              return (
+                <div
+                  key={app.id}
+                  onClick={() => onOpenDetails(app)}
+                  className="relative pl-3 pr-3 py-3 rounded-xl bg-white border border-slate-100 shadow-sm hover:shadow-md transition-all cursor-pointer group flex gap-3 overflow-hidden"
+                >
+                  <div
+                    className="absolute left-0 top-0 bottom-0 w-1"
+                    style={{ backgroundColor: appColor }}
+                  ></div>
+
+                  <div className="flex flex-col items-center justify-center min-w-[50px] border-r border-slate-50 pr-3">
+                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-tighter">{app.startTime}</span>
+                    <div className="h-2 w-px bg-slate-100 my-0.5"></div>
+                    <span className="text-[10px] font-black text-slate-300 uppercase tracking-tighter">{app.endTime}</span>
+                  </div>
+
+                  <div className="flex-1 min-w-0 flex flex-col justify-center">
+                    <h4 className="font-bold text-xs text-slate-800 truncate group-hover:text-primary-dark transition-colors">{app.title}</h4>
+                    <div className="flex items-center gap-1 mt-0.5">
+                      {app.location_text ? (
+                        <span className="text-[9px] text-slate-400 font-bold uppercase tracking-wider truncate max-w-[120px] flex items-center gap-1">
+                          <span className="material-symbols-outlined text-[10px]">location_on</span>
+                          {app.location_text}
+                        </span>
+                      ) : (
+                        <span className="text-[9px] text-slate-300 italic truncate">{app.description || 'Sem detalhes'}</span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              );
+            })
           )}
         </div>
 
