@@ -212,13 +212,22 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
     const matchesType = filterEventType === 'all' || app.type === filterEventType;
     const matchesLocation = filterLocation === 'all' || app.location_id === filterLocation;
 
-    const isOrganizer = app.created_by === filterUserId;
-    const isParticipant = app.attendees?.some(a => a.user_id === filterUserId && a.status !== 'declined') ?? false;
+    // Determine the target user to check roles against
+    // If a specific user is selected, use that user.
+    // If "All Users" is selected, but a specific ROLE is selected, check against the CURRENT USER.
+    // If "All Users" and "All Roles", no user check is needed (matchesUser = true).
+    const targetUserId = filterUserId === 'all' ? user?.id : filterUserId;
+
+    // Check role matches based on targetUserId
+    // Note: If filterUserId is 'all' and filterUserRole is 'all', we skip this check entirely below.
+    const isOrganizer = app.created_by === targetUserId;
+    const isParticipant = app.attendees?.some(a => a.user_id === targetUserId && a.status !== 'declined') ?? false;
 
     let matchesUser = false;
-    if (filterUserId === 'all') {
-      matchesUser = true;
+    if (filterUserId === 'all' && filterUserRole === 'all') {
+      matchesUser = true; // Show everything
     } else {
+      // Either a specific user is selected OR a specific role is selected (implying "My Role")
       if (filterUserRole === 'organizer') matchesUser = isOrganizer;
       else if (filterUserRole === 'participant') matchesUser = isParticipant;
       else matchesUser = isOrganizer || isParticipant;
@@ -696,86 +705,73 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
           </div>
 
           {/* Bottom Bar: Filters */}
-          <div className="hidden md:flex items-center gap-2 px-4 py-4 bg-slate-800/80 border-b border-white/5 backdrop-blur-md justify-between lg:justify-start">
+          <div className="hidden md:flex items-center gap-3 px-6 py-3 bg-white border-b border-slate-200 justify-between lg:justify-start shadow-sm z-10">
             {/* View Toggles Group */}
-            <div className="flex items-center gap-2 text-white/50 mr-1">
-              <span className="material-symbols-outlined text-[20px]">calendar_view_month</span>
-              <span className="text-[10px] font-black uppercase tracking-widest">Exibição</span>
+            <div className="flex bg-slate-100 p-1 rounded-lg border border-slate-200 mr-2">
+              <button onClick={() => changeViewMode('month')} className={`px-4 py-1.5 rounded-md text-[11px] font-bold uppercase tracking-wider transition-all ${viewMode === 'month' ? 'bg-white text-primary-dark shadow-sm ring-1 ring-black/5' : 'text-slate-500 hover:text-slate-700 hover:bg-slate-200/50'}`}>Mês</button>
+              <button onClick={() => changeViewMode('week')} className={`px-4 py-1.5 rounded-md text-[11px] font-bold uppercase tracking-wider transition-all ${viewMode === 'week' ? 'bg-white text-primary-dark shadow-sm ring-1 ring-black/5' : 'text-slate-500 hover:text-slate-700 hover:bg-slate-200/50'}`}>Semana</button>
+              <button onClick={() => changeViewMode('day')} className={`px-4 py-1.5 rounded-md text-[11px] font-bold uppercase tracking-wider transition-all ${viewMode === 'day' ? 'bg-white text-primary-dark shadow-sm ring-1 ring-black/5' : 'text-slate-500 hover:text-slate-700 hover:bg-slate-200/50'}`}>Dia</button>
             </div>
 
-            <div className="flex bg-slate-900/50 p-1 rounded-lg border border-white/5 mr-4">
-              <button onClick={() => changeViewMode('month')} className={`px-4 py-1.5 rounded-md text-[10px] font-black uppercase tracking-wider transition-all ${viewMode === 'month' ? 'bg-white text-primary-dark shadow-sm' : 'text-white/60 hover:text-white hover:bg-white/5'}`}>Mês</button>
-              <button onClick={() => changeViewMode('week')} className={`px-4 py-1.5 rounded-md text-[10px] font-black uppercase tracking-wider transition-all ${viewMode === 'week' ? 'bg-white text-primary-dark shadow-sm' : 'text-white/60 hover:text-white hover:bg-white/5'}`}>Semana</button>
-              <button onClick={() => changeViewMode('day')} className={`px-4 py-1.5 rounded-md text-[10px] font-black uppercase tracking-wider transition-all ${viewMode === 'day' ? 'bg-white text-primary-dark shadow-sm' : 'text-white/60 hover:text-white hover:bg-white/5'}`}>Dia</button>
-            </div>
-
-            <div className="h-4 w-px bg-white/10 mx-2"></div>
-
-            <div className="flex items-center gap-2 text-white/50 mr-2">
-              <span className="material-symbols-outlined text-[20px]">filter_list</span>
-              <span className="text-[10px] font-black uppercase tracking-widest">Filtros</span>
-            </div>
-
-            <div className="h-4 w-px bg-white/10 mx-2"></div>
+            <div className="h-5 w-px bg-slate-200 mx-2"></div>
 
             <div className="relative group">
               <select
                 value={filterUserId}
                 onChange={(e) => setFilterUserId(e.target.value)}
-                className="appearance-none pl-9 pr-8 py-2 bg-slate-900/50 border border-white/10 rounded-xl text-xs font-bold text-white focus:outline-none focus:bg-slate-900 focus:border-sky-500/50 transition-all cursor-pointer min-w-[140px] shadow-sm hover:border-white/20"
+                className="appearance-none pl-9 pr-8 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-bold text-slate-700 focus:outline-none focus:bg-white focus:border-sky-500/50 focus:ring-2 focus:ring-sky-500/10 transition-all cursor-pointer min-w-[140px] shadow-sm hover:border-slate-300"
               >
-                <option value="all" className="text-slate-900 bg-white">Todos os Usuários</option>
+                <option value="all">Todos os Usuários</option>
                 {allUsers.map(u => (
-                  <option key={u.id} value={u.id} className="text-slate-900 bg-white">{u.full_name}</option>
+                  <option key={u.id} value={u.id}>{u.full_name}</option>
                 ))}
               </select>
-              <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[18px] text-sky-400 pointer-events-none">person</span>
-              <span className="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-[16px] text-white/30 pointer-events-none group-hover:text-white/70 transition-colors">expand_more</span>
+              <span className="material-symbols-outlined absolute left-2.5 top-1/2 -translate-y-1/2 text-[18px] text-slate-400 pointer-events-none">person</span>
+              <span className="material-symbols-outlined absolute right-2.5 top-1/2 -translate-y-1/2 text-[16px] text-slate-400 pointer-events-none">expand_more</span>
             </div>
 
-            <div className={`relative group transition-all duration-300 ${filterUserId === 'all' ? 'opacity-40 grayscale pointer-events-none' : 'opacity-100'}`}>
+            <div className="relative group">
               <select
                 value={filterUserRole}
                 onChange={(e) => setFilterUserRole(e.target.value as any)}
-                className="appearance-none pl-9 pr-8 py-2 bg-slate-900/50 border border-white/10 rounded-xl text-xs font-bold text-white focus:outline-none focus:bg-slate-900 focus:border-sky-500/50 transition-all cursor-pointer min-w-[130px] shadow-sm hover:border-white/20"
-                disabled={filterUserId === 'all'}
+                className="appearance-none pl-9 pr-8 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-bold text-slate-700 focus:outline-none focus:bg-white focus:border-sky-500/50 focus:ring-2 focus:ring-sky-500/10 transition-all cursor-pointer min-w-[130px] shadow-sm hover:border-slate-300"
               >
-                <option value="all" className="text-slate-900 bg-white">Todos os Papéis</option>
-                <option value="participant" className="text-slate-900 bg-white">Participante</option>
-                <option value="organizer" className="text-slate-900 bg-white">Organizador</option>
+                <option value="all">Todos os Papéis</option>
+                <option value="participant">Participante</option>
+                <option value="organizer">Organizador</option>
               </select>
-              <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[18px] text-sky-400 pointer-events-none">badge</span>
-              <span className="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-[16px] text-white/30 pointer-events-none group-hover:text-white/70 transition-colors">expand_more</span>
+              <span className="material-symbols-outlined absolute left-2.5 top-1/2 -translate-y-1/2 text-[18px] text-slate-400 pointer-events-none">badge</span>
+              <span className="material-symbols-outlined absolute right-2.5 top-1/2 -translate-y-1/2 text-[16px] text-slate-400 pointer-events-none">expand_more</span>
             </div>
 
             <div className="relative group">
               <select
                 value={filterEventType}
                 onChange={(e) => setFilterEventType(e.target.value)}
-                className="appearance-none pl-9 pr-8 py-2 bg-slate-900/50 border border-white/10 rounded-xl text-xs font-bold text-white focus:outline-none focus:bg-slate-900 focus:border-sky-500/50 transition-all cursor-pointer min-w-[120px] shadow-sm hover:border-white/20"
+                className="appearance-none pl-9 pr-8 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-bold text-slate-700 focus:outline-none focus:bg-white focus:border-sky-500/50 focus:ring-2 focus:ring-sky-500/10 transition-all cursor-pointer min-w-[120px] shadow-sm hover:border-slate-300"
               >
-                <option value="all" className="text-slate-900 bg-white">Todos Tipos</option>
+                <option value="all">Todos Tipos</option>
                 {appointmentTypes.map(t => (
-                  <option key={t.id} value={t.value} className="text-slate-900 bg-white">{t.label}</option>
+                  <option key={t.id} value={t.value}>{t.label}</option>
                 ))}
               </select>
-              <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[18px] text-sky-400 pointer-events-none">category</span>
-              <span className="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-[16px] text-white/30 pointer-events-none group-hover:text-white/70 transition-colors">expand_more</span>
+              <span className="material-symbols-outlined absolute left-2.5 top-1/2 -translate-y-1/2 text-[18px] text-slate-400 pointer-events-none">category</span>
+              <span className="material-symbols-outlined absolute right-2.5 top-1/2 -translate-y-1/2 text-[16px] text-slate-400 pointer-events-none">expand_more</span>
             </div>
 
             <div className="relative group">
               <select
                 value={filterLocation}
                 onChange={(e) => setFilterLocation(e.target.value)}
-                className="appearance-none pl-9 pr-8 py-2 bg-slate-900/50 border border-white/10 rounded-xl text-xs font-bold text-white focus:outline-none focus:bg-slate-900 focus:border-sky-500/50 transition-all cursor-pointer min-w-[120px] shadow-sm hover:border-white/20"
+                className="appearance-none pl-9 pr-8 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-bold text-slate-700 focus:outline-none focus:bg-white focus:border-sky-500/50 focus:ring-2 focus:ring-sky-500/10 transition-all cursor-pointer min-w-[120px] shadow-sm hover:border-slate-300"
               >
-                <option value="all" className="text-slate-900 bg-white">Todos Locais</option>
+                <option value="all">Todos Locais</option>
                 {locations.map(l => (
-                  <option key={l.id} value={l.id} className="text-slate-900 bg-white">{l.name}</option>
+                  <option key={l.id} value={l.id}>{l.name}</option>
                 ))}
               </select>
-              <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[18px] text-sky-400 pointer-events-none">location_on</span>
-              <span className="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-[16px] text-white/30 pointer-events-none group-hover:text-white/70 transition-colors">expand_more</span>
+              <span className="material-symbols-outlined absolute left-2.5 top-1/2 -translate-y-1/2 text-[18px] text-slate-400 pointer-events-none">location_on</span>
+              <span className="material-symbols-outlined absolute right-2.5 top-1/2 -translate-y-1/2 text-[16px] text-slate-400 pointer-events-none">expand_more</span>
             </div>
           </div>
 

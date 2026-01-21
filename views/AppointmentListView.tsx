@@ -150,11 +150,12 @@ export const AppointmentListView: React.FC<AppointmentListViewProps> = ({
         const matchesLocation = filterLocation === 'all' || app.location_id === filterLocation;
 
 
-        const isOrganizer = app.created_by === filterUserId;
-        const isParticipant = app.attendees?.some(a => a.user_id === filterUserId && a.status !== 'declined') ?? false;
+        const targetUserId = filterUserId === 'all' ? user?.id : filterUserId;
+        const isOrganizer = app.created_by === targetUserId;
+        const isParticipant = app.attendees?.some(a => a.user_id === targetUserId && a.status !== 'declined') ?? false;
 
         let matchesUser = false;
-        if (filterUserId === 'all') {
+        if (filterUserId === 'all' && filterUserRole === 'all') {
             matchesUser = true;
         } else {
             if (filterUserRole === 'organizer') matchesUser = isOrganizer;
