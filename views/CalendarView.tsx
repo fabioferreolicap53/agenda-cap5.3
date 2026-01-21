@@ -201,15 +201,28 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
     };
   }, [selectedSectorIds, user?.id]);
 
+  // Reset role filter when user filter changes
+  useEffect(() => {
+    setFilterUserRole('all');
+  }, [filterUserId]);
+
+
   // Derived filtered list
   const filteredAppointments = appointments.filter(app => {
     const matchesType = filterEventType === 'all' || app.type === filterEventType;
     const matchesLocation = filterLocation === 'all' || app.location_id === filterLocation;
 
-    const matchesUser = filterUserId === 'all' ||
-      (filterUserRole === 'organizer' ? app.created_by === filterUserId :
-        filterUserRole === 'participant' ? (app.attendees?.some(a => a.user_id === filterUserId && a.status !== 'declined') ?? false) :
-          (app.created_by === filterUserId || (app.attendees?.some(a => a.user_id === filterUserId && a.status !== 'declined') ?? false)));
+    const isOrganizer = app.created_by === filterUserId;
+    const isParticipant = app.attendees?.some(a => a.user_id === filterUserId && a.status !== 'declined') ?? false;
+
+    let matchesUser = false;
+    if (filterUserId === 'all') {
+      matchesUser = true;
+    } else {
+      if (filterUserRole === 'organizer') matchesUser = isOrganizer;
+      else if (filterUserRole === 'participant') matchesUser = isParticipant;
+      else matchesUser = isOrganizer || isParticipant;
+    }
 
     return matchesType && matchesLocation && matchesUser;
   });
