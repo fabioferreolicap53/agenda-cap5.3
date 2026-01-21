@@ -60,6 +60,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
   const [filterEventType, setFilterEventType] = useState('all');
   const [filterLocation, setFilterLocation] = useState('all');
   const [filterUserId, setFilterUserId] = useState<string>('all');
+  const [filterUserRole, setFilterUserRole] = useState<'all' | 'participant' | 'organizer'>('all');
   const [allUsers, setAllUsers] = useState<User[]>([]);
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
 
@@ -206,8 +207,9 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
     const matchesLocation = filterLocation === 'all' || app.location_id === filterLocation;
 
     const matchesUser = filterUserId === 'all' ||
-      app.created_by === filterUserId ||
-      (app.attendees?.some(a => a.user_id === filterUserId && a.status !== 'declined') ?? false);
+      (filterUserRole === 'organizer' ? app.created_by === filterUserId :
+        filterUserRole === 'participant' ? (app.attendees?.some(a => a.user_id === filterUserId && a.status !== 'declined') ?? false) :
+          (app.created_by === filterUserId || (app.attendees?.some(a => a.user_id === filterUserId && a.status !== 'declined') ?? false)));
 
     return matchesType && matchesLocation && matchesUser;
   });
@@ -668,10 +670,21 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
                   onChange={(e) => setFilterUserId(e.target.value)}
                   className="bg-white/10 text-white border border-white/20 rounded-lg px-2 py-1.5 text-[10px] md:text-xs font-bold focus:outline-none focus:bg-white/20 option:bg-slate-800 max-w-[140px]"
                 >
-                  <option value="all" className="text-slate-800">Todos</option>
+                  <option value="all" className="text-slate-800">Todos os Usuários</option>
                   {allUsers.map(u => (
                     <option key={u.id} value={u.id} className="text-slate-800">{u.full_name}</option>
                   ))}
+                </select>
+
+                <select
+                  value={filterUserRole}
+                  onChange={(e) => setFilterUserRole(e.target.value as any)}
+                  className="bg-white/10 text-white border border-white/20 rounded-lg px-2 py-1.5 text-[10px] md:text-xs font-bold focus:outline-none focus:bg-white/20 option:bg-slate-800 max-w-[140px]"
+                  disabled={filterUserId === 'all'}
+                >
+                  <option value="all" className="text-slate-800">Todos os Papéis</option>
+                  <option value="participant" className="text-slate-800">Usuário participante</option>
+                  <option value="organizer" className="text-slate-800">Usuário organizador</option>
                 </select>
 
                 <select
@@ -745,10 +758,20 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
                 onChange={(e) => setFilterUserId(e.target.value)}
                 className="bg-white/10 text-white border border-white/20 rounded-lg px-2 py-2 text-xs font-bold focus:outline-none focus:bg-white/20 option:bg-slate-800 w-full"
               >
-                <option value="all" className="text-slate-800">Todos os Participantes</option>
+                <option value="all" className="text-slate-800">Todos os Usuários</option>
                 {allUsers.map(u => (
                   <option key={u.id} value={u.id} className="text-slate-800">{u.full_name}</option>
                 ))}
+              </select>
+              <select
+                value={filterUserRole}
+                onChange={(e) => setFilterUserRole(e.target.value as any)}
+                className="bg-white/10 text-white border border-white/20 rounded-lg px-2 py-2 text-xs font-bold focus:outline-none focus:bg-white/20 option:bg-slate-800 w-full col-span-2"
+                disabled={filterUserId === 'all'}
+              >
+                <option value="all" className="text-slate-800">Todos os Papéis</option>
+                <option value="participant" className="text-slate-800">Usuário participante</option>
+                <option value="organizer" className="text-slate-800">Usuário organizador</option>
               </select>
               <div className="flex bg-white/10 p-1 rounded-lg col-span-2 justify-between">
                 {/* View Mode Toggle Mobile */}

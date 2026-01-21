@@ -34,6 +34,7 @@ export const AppointmentListView: React.FC<AppointmentListViewProps> = ({
     const [localSectorId, setLocalSectorId] = useState<string>('all');
     const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
     const [filterUserId, setFilterUserId] = useState<string>('all');
+    const [filterUserRole, setFilterUserRole] = useState<'all' | 'participant' | 'organizer'>('all');
     const [allUsers, setAllUsers] = useState<User[]>([]);
     const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
 
@@ -142,8 +143,9 @@ export const AppointmentListView: React.FC<AppointmentListViewProps> = ({
         const matchesType = filterType === 'all' || app.type === filterType;
         const matchesLocation = filterLocation === 'all' || app.location_id === filterLocation;
         const matchesUser = filterUserId === 'all' ||
-            app.created_by === filterUserId ||
-            (app.attendees?.some(a => a.user_id === filterUserId && a.status !== 'declined') ?? false);
+            (filterUserRole === 'organizer' ? app.created_by === filterUserId :
+                filterUserRole === 'participant' ? (app.attendees?.some(a => a.user_id === filterUserId && a.status !== 'declined') ?? false) :
+                    (app.created_by === filterUserId || (app.attendees?.some(a => a.user_id === filterUserId && a.status !== 'declined') ?? false)));
 
         return matchesSearch && matchesType && matchesLocation && matchesUser;
     });
@@ -223,8 +225,18 @@ export const AppointmentListView: React.FC<AppointmentListViewProps> = ({
                                 onChange={(e) => setFilterUserId(e.target.value)}
                                 className="w-full p-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-bold uppercase"
                             >
-                                <option value="all">Participantes (Todos)</option>
+                                <option value="all">Todos os Usuários</option>
                                 {allUsers.map(u => <option key={u.id} value={u.id}>{u.full_name}</option>)}
+                            </select>
+                            <select
+                                value={filterUserRole}
+                                onChange={(e) => setFilterUserRole(e.target.value as any)}
+                                className="w-full p-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-bold uppercase"
+                                disabled={filterUserId === 'all'}
+                            >
+                                <option value="all">Todos os Papéis</option>
+                                <option value="participant">Usuário participante</option>
+                                <option value="organizer">Usuário organizador</option>
                             </select>
                             <div className="grid grid-cols-2 gap-2">
                                 <select
@@ -255,7 +267,7 @@ export const AppointmentListView: React.FC<AppointmentListViewProps> = ({
                     </div>
 
                     {/* Desktop Filters */}
-                    <div className="hidden md:grid grid-cols-5 gap-4">
+                    <div className="hidden md:grid grid-cols-6 gap-4">
                         <div className="relative group col-span-2">
                             <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-primary-dark transition-colors">search</span>
                             <input
@@ -273,10 +285,23 @@ export const AppointmentListView: React.FC<AppointmentListViewProps> = ({
                                 onChange={(e) => setFilterUserId(e.target.value)}
                                 className="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl focus:ring-4 focus:ring-primary-dark/5 focus:border-primary-dark transition-all outline-none text-[11px] font-bold uppercase tracking-wider appearance-none cursor-pointer"
                             >
-                                <option value="all">Participantes (Todos)</option>
+                                <option value="all">Todos os Usuários</option>
                                 {allUsers.map(u => (
                                     <option key={u.id} value={u.id}>{u.full_name}</option>
                                 ))}
+                            </select>
+                        </div>
+                        <div className="relative">
+                            <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">badge</span>
+                            <select
+                                value={filterUserRole}
+                                onChange={(e) => setFilterUserRole(e.target.value as any)}
+                                className="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl focus:ring-4 focus:ring-primary-dark/5 focus:border-primary-dark transition-all outline-none text-[11px] font-bold uppercase tracking-wider appearance-none cursor-pointer"
+                                disabled={filterUserId === 'all'}
+                            >
+                                <option value="all">Todos os Papéis</option>
+                                <option value="participant">Usuário participante</option>
+                                <option value="organizer">Usuário organizador</option>
                             </select>
                         </div>
                         <div className="relative">
