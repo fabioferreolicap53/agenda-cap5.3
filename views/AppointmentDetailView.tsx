@@ -599,7 +599,7 @@ export const AppointmentDetailView: React.FC<AppointmentDetailViewProps> = ({
                 </div>
                 <div className="min-w-0">
                   <p className="text-sm font-bold text-slate-900 truncate">{organizer?.full_name}</p>
-                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider truncate">{organizer?.role || 'Membro'}</p>
+                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider truncate">{organizer?.observations || 'Membro'}</p>
                 </div>
               </div>
 
