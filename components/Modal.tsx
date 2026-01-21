@@ -330,38 +330,134 @@ export const Modal: React.FC<ModalProps> = ({ isOpen, onClose, user, appointment
             <div className="grid grid-cols-2 gap-2">
               <div className="space-y-1.5">
                 <label className="text-xs font-bold uppercase tracking-wider text-primary-dark">Início</label>
-                <input
-                  required
-                  value={startTime}
-                  onChange={(e) => {
-                    const newStart = e.target.value;
-                    setStartTime(newStart);
-                    setLocationConflict(null);
+                <div className="flex gap-1">
+                  <input
+                    required
+                    value={startTime}
+                    onChange={(e) => {
+                      const newStart = e.target.value;
+                      setStartTime(newStart);
+                      setLocationConflict(null);
 
-                    // Auto-set end time to +1 hour if empty or if we want to be helpful
-                    if (newStart && !endTime) {
-                      const [h, m] = newStart.split(':').map(Number);
-                      const newH = (h + 1) % 24;
-                      setEndTime(`${String(newH).padStart(2, '0')}:${String(m).padStart(2, '0')}`);
-                    }
-                  }}
-                  step="300" // 5 minutes
-                  className="w-full px-3 py-2.5 rounded-lg border border-slate-200 bg-white focus:ring-2 focus:ring-primary-dark focus:border-transparent text-sm transition-all outline-none"
-                  type="time"
-                />
+                      // Auto-set end time to +1 hour if empty or if we want to be helpful
+                      if (newStart && !endTime) {
+                        const [h, m] = newStart.split(':').map(Number);
+                        const newH = (h + 1) % 24;
+                        setEndTime(`${String(newH).padStart(2, '0')}:${String(m).padStart(2, '0')}`);
+                      }
+                    }}
+                    step="300" // 5 minutes
+                    className="flex-1 px-3 py-2.5 rounded-lg border border-slate-200 bg-white focus:ring-2 focus:ring-primary-dark focus:border-transparent text-sm transition-all outline-none"
+                    type="time"
+                  />
+                  <div className="flex flex-col gap-0.5">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (!startTime) return;
+                        const [h, m] = startTime.split(':').map(Number);
+                        const totalMins = h * 60 + m + 5;
+                        const newH = Math.floor(totalMins / 60) % 24;
+                        const newM = totalMins % 60;
+                        setStartTime(`${String(newH).padStart(2, '0')}:${String(newM).padStart(2, '0')}`);
+                      }}
+                      className="size-5 flex items-center justify-center bg-slate-100 hover:bg-primary-dark hover:text-white rounded text-slate-600 transition-all active:scale-90"
+                      title="Adicionar 5 minutos"
+                    >
+                      <span className="material-symbols-outlined text-[14px]">add</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (!startTime) return;
+                        const [h, m] = startTime.split(':').map(Number);
+                        const totalMins = h * 60 + m - 5;
+                        const newH = Math.floor((totalMins + 1440) / 60) % 24;
+                        const newM = (totalMins + 1440) % 60;
+                        setStartTime(`${String(newH).padStart(2, '0')}:${String(newM).padStart(2, '0')}`);
+                      }}
+                      className="size-5 flex items-center justify-center bg-slate-100 hover:bg-primary-dark hover:text-white rounded text-slate-600 transition-all active:scale-90"
+                      title="Subtrair 5 minutos"
+                    >
+                      <span className="material-symbols-outlined text-[14px]">remove</span>
+                    </button>
+                  </div>
+                </div>
               </div>
               <div className="space-y-1.5">
                 <label className="text-xs font-bold uppercase tracking-wider text-primary-dark">Término</label>
-                <input
-                  value={endTime}
-                  onChange={(e) => {
-                    setEndTime(e.target.value);
-                    setLocationConflict(null);
-                  }}
-                  step="300" // 5 minutes
-                  className="w-full px-3 py-2.5 rounded-lg border border-slate-200 bg-white focus:ring-2 focus:ring-primary-dark focus:border-transparent text-sm transition-all outline-none"
-                  type="time"
-                />
+                <div className="flex gap-1">
+                  <input
+                    value={endTime}
+                    onChange={(e) => {
+                      setEndTime(e.target.value);
+                      setLocationConflict(null);
+                    }}
+                    step="300" // 5 minutes
+                    className="flex-1 px-3 py-2.5 rounded-lg border border-slate-200 bg-white focus:ring-2 focus:ring-primary-dark focus:border-transparent text-sm transition-all outline-none"
+                    type="time"
+                  />
+                  <div className="flex flex-col gap-0.5">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (!endTime) return;
+                        const [h, m] = endTime.split(':').map(Number);
+                        const totalMins = h * 60 + m + 5;
+                        const newH = Math.floor(totalMins / 60) % 24;
+                        const newM = totalMins % 60;
+                        setEndTime(`${String(newH).padStart(2, '0')}:${String(newM).padStart(2, '0')}`);
+                      }}
+                      className="size-5 flex items-center justify-center bg-slate-100 hover:bg-primary-dark hover:text-white rounded text-slate-600 transition-all active:scale-90"
+                      title="Adicionar 5 minutos"
+                    >
+                      <span className="material-symbols-outlined text-[14px]">add</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (!endTime) return;
+                        const [h, m] = endTime.split(':').map(Number);
+                        const totalMins = h * 60 + m - 5;
+                        const newH = Math.floor((totalMins + 1440) / 60) % 24;
+                        const newM = (totalMins + 1440) % 60;
+                        setEndTime(`${String(newH).padStart(2, '0')}:${String(newM).padStart(2, '0')}`);
+                      }}
+                      className="size-5 flex items-center justify-center bg-slate-100 hover:bg-primary-dark hover:text-white rounded text-slate-600 transition-all active:scale-90"
+                      title="Subtrair 5 minutos"
+                    >
+                      <span className="material-symbols-outlined text-[14px]">remove</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+            {/* Quick Time Presets */}
+            <div className="md:col-span-2 space-y-2">
+              <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-hide">
+                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider shrink-0 mr-1">Horários:</span>
+                {[
+                  { label: 'Manhã', time: '08:00' },
+                  { label: 'Meio-dia', time: '12:00' },
+                  { label: 'Tarde', time: '14:00' },
+                  { label: 'Fim da Tarde', time: '17:00' },
+                  { label: 'Noite', time: '19:00' }
+                ].map((preset) => (
+                  <button
+                    key={preset.time}
+                    type="button"
+                    onClick={() => {
+                      setStartTime(preset.time);
+                      // Auto-set end time to +1 hour
+                      const [h, m] = preset.time.split(':').map(Number);
+                      const newH = (h + 1) % 24;
+                      setEndTime(`${String(newH).padStart(2, '0')}:${String(m).padStart(2, '0')}`);
+                    }}
+                    className="px-3 py-1.5 bg-slate-100 hover:bg-primary-dark hover:text-white text-slate-600 rounded-lg text-[11px] font-bold transition-all shrink-0 active:scale-95"
+                  >
+                    {preset.label}
+                  </button>
+                ))}
               </div>
             </div>
             {/* Quick Duration Chips */}
