@@ -13,6 +13,7 @@ interface NotificationsViewProps {
 export const NotificationsView: React.FC<NotificationsViewProps> = ({ user, onViewAppointment, onNavigateToChat, onToggleSidebar }) => {
     const [invitations, setInvitations] = useState<(Attendee & { appointments: { title: string, date: string, created_by: string } })[]>([]);
     const [pendingRequests, setPendingRequests] = useState<any[]>([]);
+    const [historyItems, setHistoryItems] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [actionLoading, setActionLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -102,6 +103,52 @@ export const NotificationsView: React.FC<NotificationsViewProps> = ({ user, onVi
             }
 
             setPendingRequests(myPendingRequests);
+
+            // ---------------------------------------------------------
+            // 3. HISTORY (Resolved requests where I am involved)
+            // ---------------------------------------------------------
+            const { data: resolvedItems, error: historyError } = await supabase
+                .from('appointment_attendees')
+                .select('*')
+                .in('status', ['accepted', 'declined'])
+                .order('id', { ascending: false }); // Sort by latest (ID is a good proxy if no created_at)
+
+            if (historyError) throw historyError;
+
+            let myHistory: any[] = [];
+            if (resolvedItems && resolvedItems.length > 0) {
+                const histAppIds = resolvedItems.map(r => r.appointment_id);
+                const { data: histApps } = await supabase
+                    .from('appointments')
+                    .select('id, title, date, created_by')
+                    .in('id', histAppIds);
+
+                const histUserIds = resolvedItems.map(r => r.user_id);
+                const { data: histProfiles } = await supabase
+                    .from('profiles')
+                    .select('id, full_name, avatar')
+                    .in('id', histUserIds);
+
+                myHistory = resolvedItems.map(req => {
+                    const app = histApps?.find(a => a.id === req.appointment_id);
+                    const profile = histProfiles?.find(p => p.id === req.user_id);
+
+                    // Filter: I am the participant OR I am the organizer
+                    const isIBeingParticipant = req.user_id === userId;
+                    const isIBeingOrganizer = app && app.created_by === userId;
+
+                    if (isIBeingParticipant || isIBeingOrganizer) {
+                        return {
+                            ...req,
+                            appointments: app,
+                            profiles: profile,
+                            iAmOrganizer: isIBeingOrganizer
+                        };
+                    }
+                    return null;
+                }).filter(Boolean);
+            }
+            setHistoryItems(myHistory);
 
         } catch (err: any) {
             console.error('Error fetching notifications:', err.message);
@@ -333,6 +380,72 @@ export const NotificationsView: React.FC<NotificationsViewProps> = ({ user, onVi
                                                 Negar
                                             </button>
                                         </div>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                </div>
+
+                {/* History Section */}
+                <div className="pt-4">
+                    <div className="flex items-center gap-2 mb-4">
+                        <span className="material-symbols-outlined text-slate-400">history</span>
+                        <h3 className="text-sm font-black text-slate-800 uppercase tracking-widest">Histórico de Atividades ({historyItems.length})</h3>
+                    </div>
+                    {historyItems.length === 0 ? (
+                        <div className="bg-white border border-slate-200 rounded-2xl p-8 text-center text-slate-400">
+                            <span className="material-symbols-outlined text-4xl mb-2 opacity-10">history_toggle_off</span>
+                            <p className="text-xs font-bold uppercase tracking-widest">Nenhuma atividade recente</p>
+                        </div>
+                    ) : (
+                        <div className="grid gap-3">
+                            {historyItems.slice(0, 15).map(item => (
+                                <div key={item.id} className="bg-white/60 border border-slate-200 rounded-xl p-4 flex items-center gap-4 group hover:bg-white transition-all">
+                                    <div className="size-10 rounded-xl bg-slate-100 bg-cover bg-center shrink-0 border border-slate-100" style={{ backgroundImage: item.profiles?.avatar ? `url(${item.profiles.avatar})` : 'none' }}>
+                                        {!item.profiles?.avatar && <span className="flex items-center justify-center h-full text-sm font-black text-slate-400">{item.profiles?.full_name?.charAt(0)}</span>}
+                                    </div>
+                                    <div className="flex-1 min-w-0">
+                                        <div className="flex items-center gap-2 mb-0.5">
+                                            <span className={`text-[9px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded ${item.status === 'accepted' ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700'}`}>
+                                                {item.status === 'accepted' ? 'Aceito' : 'Recusado'}
+                                            </span>
+                                            <span className="text-[10px] font-bold text-slate-400">{new Date(item.appointments?.date + 'T12:00:00').toLocaleDateString('pt-BR')}</span>
+                                        </div>
+                                        <p className="text-sm text-slate-700 font-medium truncate">
+                                            {item.iAmOrganizer ? (
+                                                <>Você {item.status === 'accepted' ? 'aprovou' : 'negou'} <strong>{item.profiles?.full_name}</strong> em <strong>{item.appointments?.title}</strong></>
+                                            ) : (
+                                                <>{item.status === 'accepted' ? 'Sua participação' : 'Seu pedido'} em <strong>{item.appointments?.title}</strong> foi <strong>{item.status === 'accepted' ? 'aceito' : 'recusada'}</strong></>
+                                            )}
+                                        </p>
+                                    </div>
+                                    <div className="flex gap-2 shrink-0">
+                                        <button
+                                            onClick={() => onViewAppointment(item.appointment_id)}
+                                            className="size-8 flex items-center justify-center bg-slate-100 text-slate-500 rounded-lg hover:bg-primary-dark hover:text-white transition-all shadow-sm"
+                                            title="Ver evento"
+                                        >
+                                            <span className="material-symbols-outlined text-[18px]">visibility</span>
+                                        </button>
+                                        {!item.iAmOrganizer && (
+                                            <button
+                                                onClick={() => onNavigateToChat?.(item.appointments?.created_by)}
+                                                className="size-8 flex items-center justify-center bg-slate-100 text-slate-500 rounded-lg hover:bg-primary-dark hover:text-white transition-all shadow-sm"
+                                                title="Falar com organizador"
+                                            >
+                                                <span className="material-symbols-outlined text-[18px]">chat</span>
+                                            </button>
+                                        )}
+                                        {item.iAmOrganizer && (
+                                            <button
+                                                onClick={() => onNavigateToChat?.(item.user_id)}
+                                                className="size-8 flex items-center justify-center bg-slate-100 text-slate-500 rounded-lg hover:bg-primary-dark hover:text-white transition-all shadow-sm"
+                                                title="Falar com solicitante"
+                                            >
+                                                <span className="material-symbols-outlined text-[18px]">chat</span>
+                                            </button>
+                                        )}
                                     </div>
                                 </div>
                             ))}
