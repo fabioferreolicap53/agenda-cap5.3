@@ -31,6 +31,7 @@ export const Modal: React.FC<ModalProps> = ({ isOpen, onClose, user, appointment
   const [loading, setLoading] = useState(false);
   const [locationConflict, setLocationConflict] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
+  const [showExternalLocationWarning, setShowExternalLocationWarning] = useState(false);
 
   useEffect(() => {
     // Reset state on open
@@ -517,8 +518,12 @@ export const Modal: React.FC<ModalProps> = ({ isOpen, onClose, user, appointment
                       type="checkbox"
                       checked={isExternalLocation}
                       onChange={(e) => {
-                        setIsExternalLocation(e.target.checked);
-                        if (e.target.checked) {
+                        const checked = e.target.checked;
+                        if (checked) {
+                          setShowExternalLocationWarning(true);
+                        }
+                        setIsExternalLocation(checked);
+                        if (checked) {
                           setSelectedLocationId('');
                           setLocationConflict(null);
                         }
@@ -553,6 +558,26 @@ export const Modal: React.FC<ModalProps> = ({ isOpen, onClose, user, appointment
                   placeholder="Digite o local externo..."
                   className="w-full px-4 py-2.5 rounded-lg border border-slate-200 bg-white focus:ring-2 focus:ring-primary-dark focus:border-transparent text-sm transition-all outline-none"
                 />
+              )}
+
+              {/* External Location Warning */}
+              {showExternalLocationWarning && isExternalLocation && (
+                <div className="mt-2 p-3 bg-amber-50 border border-amber-200 rounded-lg flex items-start gap-2 animate-[fadeIn_0.2s_ease-out]">
+                  <span className="material-symbols-outlined text-amber-600 text-[18px] shrink-0">info</span>
+                  <div className="flex-1">
+                    <p className="text-xs font-bold text-amber-800 mb-0.5">Local Externo</p>
+                    <p className="text-xs text-amber-700">
+                      Este local não será incluído nos filtros e estatísticas específicas. Será agrupado como "Outros locais".
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setShowExternalLocationWarning(false)}
+                    className="text-amber-400 hover:text-amber-600 transition-colors"
+                  >
+                    <span className="material-symbols-outlined text-[16px]">close</span>
+                  </button>
+                </div>
               )}
             </div>
           </div>

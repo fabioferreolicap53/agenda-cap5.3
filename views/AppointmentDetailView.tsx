@@ -49,6 +49,7 @@ export const AppointmentDetailView: React.FC<AppointmentDetailViewProps> = ({
   /* Conflict detection state */
   const [showConflictDialog, setShowConflictDialog] = useState(false);
   const [conflictDetails, setConflictDetails] = useState<{ title: string; start: string; end: string } | null>(null);
+  const [showExternalLocationWarning, setShowExternalLocationWarning] = useState(false);
 
   const checkConflict = async (locId: string, dateStr: string, start: string, end: string, excludeId: string) => {
     const { data, error } = await supabase
@@ -567,7 +568,7 @@ export const AppointmentDetailView: React.FC<AppointmentDetailViewProps> = ({
                     <div>
                       <div className="flex items-center justify-between h-4 mb-1">
                         <label className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Local</label>
-                        <label className="flex items-center gap-1 cursor-pointer"><input type="checkbox" checked={isExternalLocation} onChange={e => setIsExternalLocation(e.target.checked)} className="size-3 accent-primary-dark" /><span className="text-[9px] font-bold text-slate-400 uppercase">Externo</span></label>
+                        <label className="flex items-center gap-1 cursor-pointer"><input type="checkbox" checked={isExternalLocation} onChange={e => { const checked = e.target.checked; if (checked) { setShowExternalLocationWarning(true); } setIsExternalLocation(checked); }} className="size-3 accent-primary-dark" /><span className="text-[9px] font-bold text-slate-400 uppercase">Externo</span></label>
                       </div>
                       {!isExternalLocation ? (
                         <select value={editLocationId} onChange={e => setEditLocationId(e.target.value)} className="w-full p-2 border border-slate-200 rounded text-sm font-bold text-slate-700 outline-none">
@@ -576,6 +577,26 @@ export const AppointmentDetailView: React.FC<AppointmentDetailViewProps> = ({
                         </select>
                       ) : (
                         <input value={editExternalLocation} onChange={e => setEditExternalLocation(e.target.value)} className="w-full p-2 border border-slate-200 rounded text-sm font-bold text-slate-700 outline-none" placeholder="Digite o local..." />
+                      )}
+
+                      {/* External Location Warning */}
+                      {showExternalLocationWarning && isExternalLocation && (
+                        <div className="mt-2 p-2.5 bg-amber-50 border border-amber-200 rounded-lg flex items-start gap-2 animate-[fadeIn_0.2s_ease-out]">
+                          <span className="material-symbols-outlined text-amber-600 text-[16px] shrink-0">info</span>
+                          <div className="flex-1">
+                            <p className="text-[10px] font-bold text-amber-800 mb-0.5">Local Externo</p>
+                            <p className="text-[10px] text-amber-700 leading-tight">
+                              Este local será agrupado como "Outros locais" nos filtros e estatísticas.
+                            </p>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => setShowExternalLocationWarning(false)}
+                            className="text-amber-400 hover:text-amber-600 transition-colors"
+                          >
+                            <span className="material-symbols-outlined text-[14px]">close</span>
+                          </button>
+                        </div>
                       )}
                     </div>
                   </div>

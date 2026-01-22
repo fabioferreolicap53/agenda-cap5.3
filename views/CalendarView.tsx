@@ -215,7 +215,18 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
   // Derived filtered list
   const filteredAppointments = appointments.filter(app => {
     const matchesType = filterEventType === 'all' || app.type === filterEventType;
-    const matchesLocation = filterLocation === 'all' || app.location_id === filterLocation;
+
+    // Location filter logic
+    let matchesLocation = false;
+    if (filterLocation === 'all') {
+      matchesLocation = true;
+    } else if (filterLocation === 'external') {
+      // Match appointments with location_text (external locations)
+      matchesLocation = !!(app as any).location_text;
+    } else {
+      // Match specific managed location
+      matchesLocation = app.location_id === filterLocation;
+    }
 
     // Determine the target user to check roles against
     // If a specific user is selected, use that user.
@@ -791,6 +802,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
                 {locations.map(l => (
                   <option key={l.id} value={l.id}>{l.name}</option>
                 ))}
+                <option value="external">Outros locais</option>
               </select>
               <span className="material-symbols-outlined absolute left-2.5 top-1/2 -translate-y-1/2 text-[18px] text-slate-400 pointer-events-none">location_on</span>
               <span className="material-symbols-outlined absolute right-2.5 top-1/2 -translate-y-1/2 text-[16px] text-slate-400 pointer-events-none">expand_more</span>
