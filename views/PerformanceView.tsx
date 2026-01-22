@@ -100,7 +100,19 @@ export const PerformanceView: React.FC<PerformanceViewProps> = ({ onToggleSideba
     // Simplification for now: Sector filter affects Member stats only. Type/Location affects Appointment stats.
     const filteredAppointments = appointments.filter(a => {
         const matchesType = filterType === 'all' || a.type === filterType;
-        const matchesLocation = filterLocation === 'all' || a.location_id === filterLocation;
+
+        // Location filter logic with external location support
+        let matchesLocation = false;
+        if (filterLocation === 'all') {
+            matchesLocation = true;
+        } else if (filterLocation === 'external') {
+            // Match appointments with location_text (external locations)
+            matchesLocation = !!(a as any).location_text;
+        } else {
+            // Match specific managed location
+            matchesLocation = a.location_id === filterLocation;
+        }
+
         const matchesUser = filterUserId === 'all' ||
             a.created_by === filterUserId ||
             (a.attendees?.some(att => att.user_id === filterUserId && att.status !== 'declined') ?? false);
@@ -220,6 +232,7 @@ export const PerformanceView: React.FC<PerformanceViewProps> = ({ onToggleSideba
                             >
                                 <option value="all">Todos os Locais</option>
                                 {locations.map(l => <option key={l.id} value={l.id}>{l.name}</option>)}
+                                <option value="external">Outros locais</option>
                             </select>
                         </div>
                         <div className="flex flex-col gap-1 flex-1">
@@ -255,33 +268,75 @@ export const PerformanceView: React.FC<PerformanceViewProps> = ({ onToggleSideba
                 </header>
 
                 {/* Top Cards */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                    <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 transition-hover hover:shadow-md">
-                        <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Total de Membros</p>
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+                    <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 transition-all hover:shadow-lg hover:scale-[1.02]">
+                        <div className="flex items-center justify-between mb-2">
+                            <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Total de Membros</p>
+                            <span className="material-symbols-outlined text-slate-300 text-2xl">group</span>
+                        </div>
                         <div className="flex items-end gap-3">
                             <span className="text-3xl font-black text-slate-900">{totalMembers}</span>
                             <span className="text-xs font-bold text-emerald-500">Filtrados</span>
                         </div>
                     </div>
-                    <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 transition-hover hover:shadow-md">
-                        <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Total de Compromissos</p>
+                    <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 transition-all hover:shadow-lg hover:scale-[1.02]">
+                        <div className="flex items-center justify-between mb-2">
+                            <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Total de Compromissos</p>
+                            <span className="material-symbols-outlined text-slate-300 text-2xl">event</span>
+                        </div>
                         <div className="flex items-end gap-3">
                             <span className="text-3xl font-black text-slate-900">{totalAppointments}</span>
                             <span className="text-xs font-bold text-blue-500">Filtrados</span>
                         </div>
                     </div>
-                    <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 transition-hover hover:shadow-md">
-                        <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Membros Disponíveis</p>
+                    <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 transition-all hover:shadow-lg hover:scale-[1.02]">
+                        <div className="flex items-center justify-between mb-2">
+                            <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Membros Disponíveis</p>
+                            <span className="material-symbols-outlined text-slate-300 text-2xl">check_circle</span>
+                        </div>
                         <div className="flex items-end gap-3">
                             <span className="text-3xl font-black text-slate-900">{currentStatusStats['online'] || 0}</span>
                             <span className="text-xs font-bold text-emerald-500">Agora</span>
                         </div>
                     </div>
+                    {/* NEW: Attendance Rate Card */}
+                    <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 transition-all hover:shadow-lg hover:scale-[1.02]">
+                        <div className="flex items-center justify-between mb-2">
+                            <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Taxa de Comparecimento</p>
+                            <span className="material-symbols-outlined text-slate-300 text-2xl">verified</span>
+                        </div>
+                        {(() => {
+                            const pastAppointments = filteredAppointments.filter(app => {
+                                const appDate = new Date(app.date);
+                                return appDate < new Date();
+                            });
+
+                            let totalAttendees = 0;
+                            let acceptedAttendees = 0;
+
+                            pastAppointments.forEach(app => {
+                                app.attendees?.forEach(att => {
+                                    totalAttendees++;
+                                    if (att.status === 'accepted') acceptedAttendees++;
+                                });
+                            });
+
+                            const rate = totalAttendees > 0 ? (acceptedAttendees / totalAttendees) * 100 : 0;
+
+                            return (
+                                <div className="flex items-end gap-3">
+                                    <span className="text-3xl font-black text-slate-900">{rate.toFixed(1)}%</span>
+                                    <span className="text-xs font-bold text-purple-500">{acceptedAttendees}/{totalAttendees}</span>
+                                </div>
+                            );
+                        })()}
+                    </div>
                 </div>
 
+                {/* NEW: Location Distribution Chart */}
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
                     {/* Status Distribution Chart */}
-                    <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-8">
+                    <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-8 transition-all hover:shadow-lg">
                         <h3 className="font-bold text-slate-900 mb-6">Distribuição de Status (Atual)</h3>
                         <div className="space-y-4">
                             {Object.entries(currentStatusStats).map(([status, count]) => {
@@ -306,7 +361,7 @@ export const PerformanceView: React.FC<PerformanceViewProps> = ({ onToggleSideba
                     </div>
 
                     {/* Appointment Types Chart */}
-                    <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-8">
+                    <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-8 transition-all hover:shadow-lg">
                         <h3 className="font-bold text-slate-900 mb-6">Tipos de Agendamento</h3>
                         <div className="flex flex-wrap gap-3">
                             {Object.entries(currentTypeStats).map(([type, count]) => {
@@ -320,6 +375,50 @@ export const PerformanceView: React.FC<PerformanceViewProps> = ({ onToggleSideba
                             })}
                             {Object.keys(currentTypeStats).length === 0 && <p className="text-slate-400 italic text-sm">Nenhum dado com os filtros atuais.</p>}
                         </div>
+                    </div>
+                </div>
+
+                {/* NEW: Location Distribution Chart */}
+                <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-8 mb-8 transition-all hover:shadow-lg">
+                    <h3 className="font-bold text-slate-900 mb-6">Distribuição por Local</h3>
+                    <div className="space-y-3">
+                        {(() => {
+                            const locationCounts: Record<string, number> = {};
+
+                            filteredAppointments.forEach(app => {
+                                if (app.location_id) {
+                                    const locName = locations.find(l => l.id === app.location_id)?.name || 'Desconhecido';
+                                    locationCounts[locName] = (locationCounts[locName] || 0) + 1;
+                                } else if ((app as any).location_text) {
+                                    locationCounts['Outros locais'] = (locationCounts['Outros locais'] || 0) + 1;
+                                }
+                            });
+
+                            const total = Object.values(locationCounts).reduce((a, b) => a + b, 0);
+
+                            return Object.entries(locationCounts)
+                                .sort(([, a], [, b]) => b - a)
+                                .slice(0, 10)
+                                .map(([location, count]) => {
+                                    const percentage = total > 0 ? (count / total) * 100 : 0;
+
+                                    return (
+                                        <div key={location}>
+                                            <div className="flex justify-between text-xs font-bold text-slate-600 mb-1">
+                                                <span>{location}</span>
+                                                <span>{count} ({percentage.toFixed(1)}%)</span>
+                                            </div>
+                                            <div className="w-full bg-slate-100 rounded-full h-2.5 overflow-hidden">
+                                                <div
+                                                    className="h-full rounded-full bg-sky-500 transition-all"
+                                                    style={{ width: `${percentage}%` }}
+                                                />
+                                            </div>
+                                        </div>
+                                    );
+                                });
+                        })()}
+                        {filteredAppointments.length === 0 && <p className="text-slate-400 italic text-sm">Nenhum dado com os filtros atuais.</p>}
                     </div>
                 </div>
 
@@ -474,7 +573,16 @@ export const PerformanceView: React.FC<PerformanceViewProps> = ({ onToggleSideba
                                         const locStats: Record<string, { total: number, accepted: number }> = {};
 
                                         filteredAppointments.forEach(app => {
-                                            const locId = app.location_id || 'unknown';
+                                            let locId: string;
+
+                                            if (app.location_id) {
+                                                locId = app.location_id;
+                                            } else if ((app as any).location_text) {
+                                                locId = 'external'; // Group all external locations
+                                            } else {
+                                                locId = 'unknown';
+                                            }
+
                                             if (!locStats[locId]) locStats[locId] = { total: 0, accepted: 0 };
 
                                             app.attendees?.forEach(att => {
@@ -489,7 +597,9 @@ export const PerformanceView: React.FC<PerformanceViewProps> = ({ onToggleSideba
                                             .slice(0, 5)
                                             .map(([locId, stats]) => {
                                                 const rate = stats.total > 0 ? (stats.accepted / stats.total) * 100 : 0;
-                                                const locName = locations.find(l => l.id === locId)?.name || 'Local Removido';
+                                                const locName = locId === 'external'
+                                                    ? 'Outros locais'
+                                                    : (locations.find(l => l.id === locId)?.name || 'Local Removido');
 
                                                 return (
                                                     <div key={locId}>
@@ -773,6 +883,41 @@ export const PerformanceView: React.FC<PerformanceViewProps> = ({ onToggleSideba
                                 </div>
                             );
                         })()}
+                    </div>
+                </div>
+
+                {/* NEW SECTION: Sector Distribution */}
+                <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-8 mb-8 transition-all hover:shadow-lg">
+                    <h3 className="font-bold text-slate-900 mb-6">Eventos por Setor</h3>
+                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                        {(() => {
+                            const sectorCounts: Record<string, number> = {};
+
+                            filteredAppointments.forEach(app => {
+                                const creator = profiles.find(p => p.id === app.created_by);
+                                if (creator?.sector_id) {
+                                    const sectorName = sectors.find(s => s.id === creator.sector_id)?.name || 'Sem Setor';
+                                    sectorCounts[sectorName] = (sectorCounts[sectorName] || 0) + 1;
+                                } else {
+                                    sectorCounts['Sem Setor'] = (sectorCounts['Sem Setor'] || 0) + 1;
+                                }
+                            });
+
+                            return Object.entries(sectorCounts)
+                                .sort(([, a], [, b]) => b - a)
+                                .map(([sector, count]) => (
+                                    <div key={sector} className="p-4 bg-slate-50 rounded-xl border border-slate-100 hover:bg-slate-100 transition-colors">
+                                        <p className="text-[10px] font-bold text-slate-400 uppercase mb-1 truncate" title={sector}>
+                                            {sector}
+                                        </p>
+                                        <p className="text-2xl font-black text-slate-800">{count}</p>
+                                        <p className="text-[10px] text-slate-500 mt-1">eventos</p>
+                                    </div>
+                                ));
+                        })()}
+                        {filteredAppointments.length === 0 && (
+                            <p className="text-slate-400 italic text-sm col-span-full">Nenhum dado com os filtros atuais.</p>
+                        )}
                     </div>
                 </div>
             </div>
