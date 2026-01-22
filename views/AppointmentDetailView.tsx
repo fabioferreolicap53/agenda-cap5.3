@@ -546,9 +546,9 @@ export const AppointmentDetailView: React.FC<AppointmentDetailViewProps> = ({
                         <span className="text-sm font-bold">{appointment.startTime} - {appointment.endTime || '??:??'}</span>
                       ) : (
                         <div className="flex items-center gap-1">
-                          <input type="time" value={editStartTime} onChange={e => setEditStartTime(e.target.value)} className="font-bold border-b border-slate-200 focus:outline-none text-sm w-16" />
+                          <input type="time" value={editStartTime} onChange={e => setEditStartTime(e.target.value)} className="font-bold border-b border-slate-200 focus:outline-none text-sm w-20" />
                           <span>-</span>
-                          <input type="time" value={editEndTime} onChange={e => setEditEndTime(e.target.value)} className="font-bold border-b border-slate-200 focus:outline-none text-sm w-16" />
+                          <input type="time" value={editEndTime} onChange={e => setEditEndTime(e.target.value)} className="font-bold border-b border-slate-200 focus:outline-none text-sm w-20" />
                         </div>
                       )}
                     </div>
