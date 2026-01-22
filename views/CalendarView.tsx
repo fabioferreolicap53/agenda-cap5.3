@@ -474,7 +474,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
     <div className="flex-1 flex flex-col min-h-0 bg-white overflow-x-auto overflow-y-auto">
       <div className="grid grid-cols-7 border-b border-slate-200 bg-slate-50 shrink-0 min-w-[800px]">
         {weekDays.map(wd => (
-          <div key={wd.name} className="py-3 border-r border-slate-200 last:border-0 flex flex-col items-center gap-1">
+          <div key={wd.name} className="py-2 border-r border-slate-200 last:border-0 flex flex-col items-center gap-0.5">
             <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{wd.name}</span>
             <span
               onClick={() => {
@@ -546,8 +546,8 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
     });
     return (
       <div className="flex-1 flex flex-col min-h-0 bg-white overflow-y-auto">
-        <div className="p-3 md:p-5 border-b border-slate-100 bg-slate-50/50">
-          <div className="flex items-center gap-4 mb-2">
+        <div className="p-2 md:p-4 border-b border-slate-100 bg-slate-50/50">
+          <div className="flex items-center gap-3 mb-1">
             <span className="text-2xl md:text-3xl font-black text-slate-900">{currentDate.getDate()}</span>
             <div>
               <p className="text-[10px] md:text-xs font-bold text-primary-dark uppercase tracking-widest">
