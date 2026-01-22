@@ -615,7 +615,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
         {/* Header */}
         <header className="bg-primary-dark text-white flex flex-col shadow-xl shrink-0 z-20 relative overflow-visible transition-all duration-300">
           {/* Top Bar: Nav & Actions */}
-          <div className="flex flex-col md:flex-row md:h-20 md:items-center justify-between px-4 md:px-10 border-b border-white/10 relative overflow-hidden py-3 md:py-0 gap-2.5 md:gap-0">
+          <div className="flex flex-col md:flex-row md:h-16 md:items-center justify-between px-4 md:px-10 border-b border-white/10 relative overflow-hidden py-3 md:py-0 gap-2.5 md:gap-0">
             {/* Decorative background element */}
             <div className="absolute top-0 right-0 p-10 opacity-5 pointer-events-none">
               <span className="material-symbols-outlined text-[150px]">calendar_month</span>
@@ -632,7 +632,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
                 </button>
 
                 {/* Date Display */}
-                <h2 className="text-lg md:text-2xl font-black tracking-tight flex items-center gap-2 md:gap-3">
+                <h2 className="text-lg md:text-xl font-black tracking-tight flex items-center gap-2 md:gap-3">
                   {viewMode === 'month'
                     ? <>
                       <span className="capitalize">{currentDate.toLocaleDateString('pt-BR', { month: 'long' })}</span>
@@ -707,6 +707,14 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
                 </button>
               </div>
 
+              {/* Event Counter Badge - Desktop Only */}
+              <div className="hidden lg:flex items-center gap-2 px-3 py-1.5 bg-white/10 rounded-lg border border-white/20">
+                <span className="material-symbols-outlined text-sm text-sky-400">event</span>
+                <span className="text-xs font-bold text-white/90">
+                  {filteredAppointments.length} evento{filteredAppointments.length !== 1 ? 's' : ''}
+                </span>
+              </div>
+
               {/* Desktop Only Action Button */}
               <button
                 onClick={() => onOpenModal()}
@@ -719,7 +727,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
           </div>
 
           {/* Bottom Bar: Filters */}
-          <div className="hidden md:flex items-center gap-3 px-6 py-3 bg-white border-b border-slate-200 justify-between lg:justify-start shadow-sm z-10">
+          <div className="hidden md:flex items-center gap-2 px-6 py-2 bg-white border-b border-slate-200 justify-between lg:justify-start shadow-sm z-10">
             {/* View Toggles Group */}
             <div className="flex bg-slate-100 p-1 rounded-lg border border-slate-200 mr-2">
               <button onClick={() => changeViewMode('month')} className={`px-4 py-1.5 rounded-md text-[11px] font-bold uppercase tracking-wider transition-all ${viewMode === 'month' ? 'bg-white text-primary-dark shadow-sm ring-1 ring-black/5' : 'text-slate-500 hover:text-slate-700 hover:bg-slate-200/50'}`}>Mês</button>
