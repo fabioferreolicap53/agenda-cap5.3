@@ -32,8 +32,22 @@ export const AppointmentDetailView: React.FC<AppointmentDetailViewProps> = ({
   const [editTitle, setEditTitle] = useState(appointment.title);
   const [editDescription, setEditDescription] = useState(appointment.description || '');
   const [editDate, setEditDate] = useState(appointment.date);
-  const [editStartTime, setEditStartTime] = useState(appointment.startTime);
-  const [editEndTime, setEditEndTime] = useState(appointment.endTime || '');
+  const [editStartTime, setEditStartTime] = useState(() => {
+    // Ensure proper HH:MM format with zero-padding
+    if (appointment.startTime && appointment.startTime.includes(':')) {
+      const [hours, minutes] = appointment.startTime.split(':');
+      return `${hours.padStart(2, '0')}:${minutes.padStart(2, '0')}`;
+    }
+    return appointment.startTime;
+  });
+  const [editEndTime, setEditEndTime] = useState(() => {
+    // Ensure proper HH:MM format with zero-padding
+    if (appointment.endTime && appointment.endTime.includes(':')) {
+      const [hours, minutes] = appointment.endTime.split(':');
+      return `${hours.padStart(2, '0')}:${minutes.padStart(2, '0')}`;
+    }
+    return appointment.endTime || '';
+  });
   const [editType, setEditType] = useState(appointment.type);
   const [locations, setLocations] = useState<Location[]>([]);
   const [editLocationId, setEditLocationId] = useState(appointment.location_id || '');
