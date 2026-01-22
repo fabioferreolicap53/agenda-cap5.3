@@ -8,6 +8,7 @@ interface UserProfileModalProps {
     onNavigateToChat?: (userId: string) => void;
     sectorName?: string;
     currentUser?: User | null;
+    onRemoveAvatar?: (userId: string) => void;
 }
 
 export const UserProfileModal: React.FC<UserProfileModalProps> = ({
@@ -16,7 +17,8 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
     user,
     onNavigateToChat,
     sectorName,
-    currentUser
+    currentUser,
+    onRemoveAvatar
 }) => {
     if (!isOpen || !user) return null;
 
@@ -138,6 +140,20 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({
                     >
                         Fechar Perfil
                     </button>
+
+                    {onRemoveAvatar && user.avatar && (currentUser?.role === 'Administrador' || currentUser?.id === user.id) && (
+                        <button
+                            onClick={() => {
+                                if (window.confirm('Deseja realmente apagar esta foto do perfil?')) {
+                                    onRemoveAvatar(user.id);
+                                }
+                            }}
+                            className="mt-2 w-full bg-rose-50 hover:bg-rose-100 text-rose-500 py-3.5 rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] transition-all flex items-center justify-center gap-2 border border-rose-100/50"
+                        >
+                            <span className="material-symbols-outlined text-sm">no_photography</span>
+                            Apagar Foto
+                        </button>
+                    )}
                     {onNavigateToChat && user.id !== currentUser?.id && (
                         <button
                             onClick={() => {

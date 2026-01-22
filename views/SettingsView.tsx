@@ -204,6 +204,28 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ user, appointmentTyp
         }
     };
 
+    const handleRemoveAvatar = async () => {
+        if (!user || !avatar) return;
+        if (!window.confirm('Tem certeza que deseja remover sua foto de perfil?')) return;
+
+        setUploadingAvatar(true);
+        try {
+            const { error } = await supabase
+                .from('profiles')
+                .update({ avatar: null })
+                .eq('id', user.id);
+
+            if (error) throw error;
+
+            setAvatar('');
+            onUpdateTypes(); // Refresh global user state
+        } catch (err: any) {
+            alert('Erro ao remover imagem: ' + err.message);
+        } finally {
+            setUploadingAvatar(false);
+        }
+    };
+
     const handleUpdateProfile = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!user) return;
@@ -284,13 +306,25 @@ export const SettingsView: React.FC<SettingsViewProps> = ({ user, appointmentTyp
                                                 <p className="text-sm font-black text-slate-900 mb-1">{user?.full_name}</p>
                                                 <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">{user?.role === 'Administrador' ? 'Administrador do Sistema' : 'Normal'}</p>
                                             </div>
-                                            <button
-                                                type="button"
-                                                onClick={() => fileInputRef.current?.click()}
-                                                className="px-4 py-2 bg-slate-50 border border-slate-100 rounded-xl text-[10px] font-black uppercase tracking-widest text-primary-dark hover:bg-white hover:shadow-sm transition-all"
-                                            >
-                                                Upload de Foto
-                                            </button>
+                                            <div className="flex gap-2">
+                                                {avatar && (
+                                                    <button
+                                                        type="button"
+                                                        onClick={handleRemoveAvatar}
+                                                        disabled={uploadingAvatar}
+                                                        className="px-4 py-2 bg-rose-50 border border-rose-100 rounded-xl text-[10px] font-black uppercase tracking-widest text-rose-500 hover:bg-rose-100 transition-all"
+                                                    >
+                                                        {uploadingAvatar ? '...' : 'Remover Foto'}
+                                                    </button>
+                                                )}
+                                                <button
+                                                    type="button"
+                                                    onClick={() => fileInputRef.current?.click()}
+                                                    className="px-4 py-2 bg-slate-50 border border-slate-100 rounded-xl text-[10px] font-black uppercase tracking-widest text-primary-dark hover:bg-white hover:shadow-sm transition-all"
+                                                >
+                                                    Upload de Foto
+                                                </button>
+                                            </div>
                                         </div>
                                         <div className="flex flex-col gap-1">
                                             <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.15em] ml-1">Ou cole uma URL do Avatar</label>

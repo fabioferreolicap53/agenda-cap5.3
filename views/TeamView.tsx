@@ -71,6 +71,30 @@ export const TeamView: React.FC<TeamViewProps> = ({ onChangeView, currentUser, s
     }
   };
 
+  const handleRemoveAvatar = async (userId: string) => {
+    try {
+      const { error } = await supabase
+        .from('profiles')
+        .update({ avatar: null })
+        .eq('id', userId);
+
+      if (error) throw error;
+
+      // Update local state
+      setMembers(prev => prev.map(m => m.id === userId ? { ...m, avatar: null } : m));
+      if (selectedMember && selectedMember.id === userId) {
+        setSelectedMember({ ...selectedMember, avatar: null });
+      }
+
+      if (userId === currentUser?.id && onUpdateProfile) {
+        onUpdateProfile();
+      }
+    } catch (err: any) {
+      console.error('Erro ao apagar foto:', err.message);
+      alert('Erro ao apagar foto de perfil.');
+    }
+  };
+
   // ... rendered component ...
 
 
@@ -310,6 +334,7 @@ export const TeamView: React.FC<TeamViewProps> = ({ onChangeView, currentUser, s
         onNavigateToChat={onNavigateToChat}
         sectorName={selectedMember ? (sectors.find(s => s.id === selectedMember!.sector_id)?.name || 'Sem Setor') : undefined}
         currentUser={currentUser}
+        onRemoveAvatar={handleRemoveAvatar}
       />
     </div>
   );

@@ -557,13 +557,15 @@ export const AppointmentDetailView: React.FC<AppointmentDetailViewProps> = ({
                 {isEditing && (
                   <div className="mt-4 pt-4 border-t border-slate-100 grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <label className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-1">Tipo</label>
+                      <div className="flex items-center justify-between mb-1 h-4">
+                        <label className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">Tipo</label>
+                      </div>
                       <select value={editType} onChange={e => setEditType(e.target.value)} className="w-full p-2 border border-slate-200 rounded text-sm font-bold text-slate-700 outline-none">
                         {appointmentTypes.map(t => <option key={t.id} value={t.value}>{t.label}</option>)}
                       </select>
                     </div>
                     <div>
-                      <div className="flex items-center justify-between mb-1">
+                      <div className="flex items-center justify-between h-4 mb-1">
                         <label className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Local</label>
                         <label className="flex items-center gap-1 cursor-pointer"><input type="checkbox" checked={isExternalLocation} onChange={e => setIsExternalLocation(e.target.checked)} className="size-3 accent-primary-dark" /><span className="text-[9px] font-bold text-slate-400 uppercase">Externo</span></label>
                       </div>

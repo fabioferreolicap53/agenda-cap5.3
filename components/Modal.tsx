@@ -493,7 +493,9 @@ export const Modal: React.FC<ModalProps> = ({ isOpen, onClose, user, appointment
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-1.5">
-              <label className="text-xs font-bold uppercase tracking-wider text-primary-dark">Tipo de Evento</label>
+              <div className="flex items-center justify-between h-4">
+                <label className="text-xs font-bold uppercase tracking-wider text-primary-dark">Tipo de Evento</label>
+              </div>
               <select
                 required
                 value={type}
@@ -507,7 +509,7 @@ export const Modal: React.FC<ModalProps> = ({ isOpen, onClose, user, appointment
               </select>
             </div>
             <div className="space-y-1.5">
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between h-4">
                 <label className="text-xs font-bold uppercase tracking-wider text-primary-dark">Local</label>
                 <label className="flex items-center gap-1.5 cursor-pointer group">
                   <div className="relative flex items-center">
