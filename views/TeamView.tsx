@@ -276,12 +276,6 @@ export const TeamView: React.FC<TeamViewProps> = ({ onChangeView, currentUser, s
                   {member.observations || 'Nenhuma observação definida.'}
                 </p>
                 <div className="w-full mt-auto flex flex-col gap-2">
-                  <button
-                    onClick={() => setSelectedMember(member)}
-                    className="w-full bg-primary-dark hover:bg-slate-900 text-white py-3 rounded-xl font-black text-[10px] uppercase tracking-[0.2em] transition-all shadow-md active:scale-95"
-                  >
-                    Ver Perfil
-                  </button>
                   {onNavigateToChat && member.id !== currentUser?.id && (
                     <button
                       onClick={() => onNavigateToChat(member.id)}
@@ -291,6 +285,12 @@ export const TeamView: React.FC<TeamViewProps> = ({ onChangeView, currentUser, s
                       Mensagem
                     </button>
                   )}
+                  <button
+                    onClick={() => setSelectedMember(member)}
+                    className="w-full bg-primary-dark hover:bg-slate-900 text-white py-3 rounded-xl font-black text-[10px] uppercase tracking-[0.2em] transition-all shadow-md active:scale-95"
+                  >
+                    Ver Perfil
+                  </button>
                 </div>
               </div>
             ))}
