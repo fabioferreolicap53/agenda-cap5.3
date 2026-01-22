@@ -79,10 +79,13 @@ export const TeamView: React.FC<TeamViewProps> = ({ onChangeView, currentUser, s
   }, []);
 
   const filteredMembers = members.filter(member => {
-    const matchesSearch = member.full_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      member.observations?.toLowerCase().includes(searchTerm.toLowerCase());
+    const fullName = (member.full_name || '').toLowerCase();
+    const observations = (member.observations || '').toLowerCase();
+    const search = (searchTerm || '').toLowerCase();
 
-    if (selectedSectorId === 'Todos') return matchesSearch;
+    const matchesSearch = fullName.includes(search) || observations.includes(search);
+
+    if (selectedSectorId === 'Todos' || !selectedSectorId) return matchesSearch;
     return matchesSearch && member.sector_id === selectedSectorId;
   });
 
@@ -170,6 +173,7 @@ export const TeamView: React.FC<TeamViewProps> = ({ onChangeView, currentUser, s
           <div className="flex flex-col items-center justify-center py-32 text-slate-300">
             <span className="material-symbols-outlined text-6xl mb-4 opacity-20">person_search</span>
             <p className="font-black uppercase tracking-[0.2em] text-xs">Nenhum membro encontrado</p>
+            <p className="text-[10px] mt-2 opacity-50">Debug: Total={members.length}, Filtered={filteredMembers.length}, Sector={selectedSectorId}</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 pb-12">
