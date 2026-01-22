@@ -615,58 +615,24 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
         {/* Header */}
         <header className="bg-primary-dark text-white flex flex-col shadow-xl shrink-0 z-20 relative overflow-visible transition-all duration-300">
           {/* Top Bar: Nav & Actions */}
-          <div className="h-20 flex items-center justify-between px-6 md:px-10 border-b border-white/10 relative overflow-hidden">
+          <div className="flex flex-col md:flex-row md:h-20 md:items-center justify-between px-4 md:px-10 border-b border-white/10 relative overflow-hidden py-3 md:py-0 gap-2.5 md:gap-0">
             {/* Decorative background element */}
             <div className="absolute top-0 right-0 p-10 opacity-5 pointer-events-none">
               <span className="material-symbols-outlined text-[150px]">calendar_month</span>
             </div>
 
-            <div className="flex items-center gap-6 relative z-10">
-              <button
-                onClick={onToggleSidebar}
-                className="md:hidden size-12 flex items-center justify-center rounded-2xl hover:bg-white/10 active:scale-95 transition-all text-white/90 hover:text-white"
-              >
-                <span className="material-symbols-outlined text-[28px]">menu</span>
-              </button>
-
-              <div className="flex items-center gap-8">
-                {/* Navigation Controls */}
-                <div className="flex items-center bg-slate-900/40 rounded-xl p-1.5 shadow-inner border border-white/5">
-                  <button
-                    onClick={goToToday}
-                    className="px-5 py-2 text-[11px] font-black uppercase tracking-wider rounded-lg hover:bg-white/15 transition-all text-white/90 hover:text-white"
-                  >
-                    Hoje
-                  </button>
-                  <div className="w-px h-5 bg-white/10 mx-1"></div>
-                  <button
-                    onClick={() => {
-                      const d = new Date(currentDate);
-                      if (viewMode === 'month') d.setMonth(d.getMonth() - 1);
-                      else if (viewMode === 'week') d.setDate(d.getDate() - 7);
-                      else d.setDate(d.getDate() - 1);
-                      setCurrentDate(d);
-                    }}
-                    className="size-9 flex items-center justify-center rounded-lg hover:bg-white/15 transition-all text-white/90 hover:text-white active:scale-90"
-                  >
-                    <span className="material-symbols-outlined text-lg">chevron_left</span>
-                  </button>
-                  <button
-                    onClick={() => {
-                      const d = new Date(currentDate);
-                      if (viewMode === 'month') d.setMonth(d.getMonth() + 1);
-                      else if (viewMode === 'week') d.setDate(d.getDate() + 7);
-                      else d.setDate(d.getDate() + 1);
-                      setCurrentDate(d);
-                    }}
-                    className="size-9 flex items-center justify-center rounded-lg hover:bg-white/15 transition-all text-white/90 hover:text-white active:scale-90"
-                  >
-                    <span className="material-symbols-outlined text-lg">chevron_right</span>
-                  </button>
-                </div>
+            {/* Row 1 on Mobile: Menu, Date, Actions */}
+            <div className="flex items-center justify-between relative z-10 w-full md:w-auto">
+              <div className="flex items-center gap-3 md:gap-6">
+                <button
+                  onClick={onToggleSidebar}
+                  className="md:hidden size-10 flex items-center justify-center rounded-xl hover:bg-white/10 active:scale-95 transition-all text-white/90 hover:text-white border border-white/10"
+                >
+                  <span className="material-symbols-outlined text-[24px]">menu</span>
+                </button>
 
                 {/* Date Display */}
-                <h2 className="text-2xl font-black tracking-tight flex items-center gap-3">
+                <h2 className="text-lg md:text-2xl font-black tracking-tight flex items-center gap-2 md:gap-3">
                   {viewMode === 'month'
                     ? <>
                       <span className="capitalize">{currentDate.toLocaleDateString('pt-BR', { month: 'long' })}</span>
@@ -674,42 +640,80 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
                     </>
                     : viewMode === 'week'
                       ? <div className="flex flex-col leading-none">
-                        <span className="text-xs font-bold uppercase tracking-widest text-white/60 mb-1">Semana de</span>
-                        <span className="capitalize">{weekDays[0].fullDate.toLocaleDateString('pt-BR', { day: '2-digit', month: 'long' })}</span>
+                        <span className="text-[10px] md:text-xs font-bold uppercase tracking-widest text-white/60 mb-0.5 md:mb-1">Semana de</span>
+                        <span className="capitalize text-sm md:text-2xl">{weekDays[0].fullDate.toLocaleDateString('pt-BR', { day: '2-digit', month: 'long' })}</span>
                       </div>
-                      : <div className="flex items-center gap-3">
-                        <span className="text-4xl font-black text-sky-400">{currentDate.getDate()}</span>
+                      : <div className="flex items-center gap-2 md:gap-3">
+                        <span className="text-2xl md:text-4xl font-black text-sky-400">{currentDate.getDate()}</span>
                         <div className="flex flex-col leading-none">
-                          <span className="text-sm font-bold uppercase text-white/90">{currentDate.toLocaleDateString('pt-BR', { month: 'long' })}</span>
-                          <span className="text-xs font-bold text-white/40">{currentDate.toLocaleDateString('pt-BR', { weekday: 'long' })}</span>
+                          <span className="text-xs md:text-sm font-bold uppercase text-white/90">{currentDate.toLocaleDateString('pt-BR', { month: 'long' })}</span>
+                          <span className="text-[10px] md:text-xs font-bold text-white/40">{currentDate.toLocaleDateString('pt-BR', { weekday: 'long' })}</span>
                         </div>
                       </div>
                   }
                 </h2>
               </div>
+
+              {/* Action buttons on mobile (right side of Row 1) */}
+              <div className="flex md:hidden items-center gap-2">
+                <button
+                  onClick={() => onOpenModal()}
+                  className="size-10 flex items-center justify-center bg-sky-500 text-white rounded-xl shadow-lg active:scale-95 transition-all"
+                >
+                  <span className="material-symbols-outlined text-[24px]">add</span>
+                </button>
+                <button
+                  onClick={() => setMobileFiltersOpen(!mobileFiltersOpen)}
+                  className="size-10 flex items-center justify-center rounded-xl bg-slate-800 text-white/80 hover:bg-slate-700 transition-all border border-white/10"
+                >
+                  <span className="material-symbols-outlined text-xl">{mobileFiltersOpen ? 'filter_alt_off' : 'filter_alt'}</span>
+                </button>
+              </div>
             </div>
 
-            <div className="flex items-center gap-5 relative z-10">
-              {/* View Toggles */}
+            {/* Row 2 on Mobile: Navigation Controls */}
+            <div className="flex items-center justify-center md:justify-end gap-5 relative z-10 w-full md:w-auto">
+              <div className="flex items-center bg-slate-900/40 rounded-xl p-1 shadow-inner border border-white/5 w-full md:w-auto">
+                <button
+                  onClick={goToToday}
+                  className="flex-1 md:flex-none px-4 md:px-5 py-2 text-[10px] md:text-[11px] font-black uppercase tracking-wider rounded-lg hover:bg-white/15 transition-all text-white/90 hover:text-white"
+                >
+                  Hoje
+                </button>
+                <div className="w-px h-5 bg-white/10 mx-1"></div>
+                <button
+                  onClick={() => {
+                    const d = new Date(currentDate);
+                    if (viewMode === 'month') d.setMonth(d.getMonth() - 1);
+                    else if (viewMode === 'week') d.setDate(d.getDate() - 7);
+                    else d.setDate(d.getDate() - 1);
+                    setCurrentDate(d);
+                  }}
+                  className="flex-1 md:flex-none h-9 flex items-center justify-center rounded-lg hover:bg-white/15 transition-all text-white/90 hover:text-white active:scale-90"
+                >
+                  <span className="material-symbols-outlined text-lg">chevron_left</span>
+                </button>
+                <button
+                  onClick={() => {
+                    const d = new Date(currentDate);
+                    if (viewMode === 'month') d.setMonth(d.getMonth() + 1);
+                    else if (viewMode === 'week') d.setDate(d.getDate() + 7);
+                    else d.setDate(d.getDate() + 1);
+                    setCurrentDate(d);
+                  }}
+                  className="flex-1 md:flex-none h-9 flex items-center justify-center rounded-lg hover:bg-white/15 transition-all text-white/90 hover:text-white active:scale-90"
+                >
+                  <span className="material-symbols-outlined text-lg">chevron_right</span>
+                </button>
+              </div>
 
+              {/* Desktop Only Action Button */}
               <button
                 onClick={() => onOpenModal()}
                 className="hidden md:flex items-center gap-2 pl-4 pr-5 py-2.5 bg-white hover:bg-slate-50 text-primary-dark rounded-xl font-black text-xs uppercase tracking-widest transition-all shadow-lg active:scale-95 group border border-slate-100"
               >
                 <span className="material-symbols-outlined text-[20px] group-hover:rotate-90 transition-transform text-primary-dark">add_circle</span>
                 Adicionar
-              </button>
-              <button
-                onClick={() => onOpenModal()}
-                className="md:hidden size-12 flex items-center justify-center bg-sky-500 text-white rounded-2xl shadow-lg active:scale-95 transition-all"
-              >
-                <span className="material-symbols-outlined text-[28px]">add</span>
-              </button>
-              <button
-                onClick={() => setMobileFiltersOpen(!mobileFiltersOpen)}
-                className="md:hidden size-12 flex items-center justify-center rounded-2xl bg-slate-800 text-white/80 hover:bg-slate-700 transition-all border border-white/10"
-              >
-                <span className="material-symbols-outlined">{mobileFiltersOpen ? 'filter_alt_off' : 'filter_alt'}</span>
               </button>
             </div>
           </div>
@@ -787,15 +791,15 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
 
           {/* Mobile Filters Dropdown */}
           <div className={`md:hidden overflow-hidden transition-all duration-300 bg-slate-800 shadow-inner ${mobileFiltersOpen ? 'max-h-[500px] border-b border-white/10' : 'max-h-0'}`}>
-            <div className="p-6 space-y-4">
-              <p className="text-[10px] font-black uppercase tracking-widest text-white/40 mb-2">Opções de Visualização</p>
+            <div className="p-4 space-y-3.5">
+              <p className="text-[10px] font-black uppercase tracking-widest text-white/40 mb-1.5">Opções de Visualização</p>
               <div className="flex bg-slate-900/50 p-1.5 rounded-xl border border-white/5">
-                <button onClick={() => changeViewMode('month')} className={`flex-1 py-3 text-[10px] font-black uppercase rounded-lg transition-all ${viewMode === 'month' ? 'bg-white text-primary-dark shadow-md' : 'text-white/60'}`}>Mês</button>
-                <button onClick={() => changeViewMode('week')} className={`flex-1 py-3 text-[10px] font-black uppercase rounded-lg transition-all ${viewMode === 'week' ? 'bg-white text-primary-dark shadow-md' : 'text-white/60'}`}>Semana</button>
-                <button onClick={() => changeViewMode('day')} className={`flex-1 py-3 text-[10px] font-black uppercase rounded-lg transition-all ${viewMode === 'day' ? 'bg-white text-primary-dark shadow-md' : 'text-white/60'}`}>Dia</button>
+                <button onClick={() => changeViewMode('month')} className={`flex-1 py-2.5 text-[10px] font-black uppercase rounded-lg transition-all ${viewMode === 'month' ? 'bg-white text-primary-dark shadow-md' : 'text-white/60'}`}>Mês</button>
+                <button onClick={() => changeViewMode('week')} className={`flex-1 py-2.5 text-[10px] font-black uppercase rounded-lg transition-all ${viewMode === 'week' ? 'bg-white text-primary-dark shadow-md' : 'text-white/60'}`}>Semana</button>
+                <button onClick={() => changeViewMode('day')} className={`flex-1 py-2.5 text-[10px] font-black uppercase rounded-lg transition-all ${viewMode === 'day' ? 'bg-white text-primary-dark shadow-md' : 'text-white/60'}`}>Dia</button>
               </div>
 
-              <p className="text-[10px] font-black uppercase tracking-widest text-white/40 mb-2 mt-4">Filtros</p>
+              <p className="text-[10px] font-black uppercase tracking-widest text-white/40 mb-1.5 mt-3">Filtros</p>
               <div className="space-y-3">
                 <div className="relative">
                   <select value={filterUserId} onChange={(e) => setFilterUserId(e.target.value)} className="bg-slate-900/50 border border-white/10 text-white rounded-xl py-3 pl-10 pr-4 text-xs font-bold w-full outline-none appearance-none"><option value="all" className="text-slate-900">Todos Usuários</option>{allUsers.map(u => <option key={u.id} value={u.id} className="text-slate-900">{u.full_name}</option>)}</select>
