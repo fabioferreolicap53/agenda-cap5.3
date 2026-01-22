@@ -159,6 +159,12 @@ export const Modal: React.FC<ModalProps> = ({ isOpen, onClose, user, appointment
           }
         }
 
+        if (startTime && endTime && startTime > endTime) {
+          alert('O horário de início não pode ser posterior ao horário de término.');
+          setLoading(false);
+          return;
+        }
+
         console.log('Checking conflict for:', { selectedLocationId, date });
         const conflict = await checkConflict(selectedLocationId, date, startTime || '', endTime || '');
         if (conflict) {

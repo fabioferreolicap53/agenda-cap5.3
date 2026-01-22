@@ -174,7 +174,7 @@ export const TeamView: React.FC<TeamViewProps> = ({ onChangeView, currentUser, s
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 pb-12">
             {filteredMembers.map(member => (
-              <div key={member.id} className={`bg-white rounded-2xl border p-6 flex flex-col items-center text-center shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 relative group/card ${selectedMemberIds.includes(member.id) ? 'border-primary-dark ring-2 ring-primary-dark/20' : 'border-slate-100'}`}>
+              <div key={member.id} className={`bg-white rounded-2xl border p-6 flex flex-col items-center text-center shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 relative group/card h-full ${selectedMemberIds.includes(member.id) ? 'border-primary-dark ring-2 ring-primary-dark/20' : 'border-slate-100'}`}>
                 {member.id !== currentUser?.id && (
                   <div className="absolute top-3 right-3 opacity-0 group-hover/card:opacity-100 transition-opacity z-10">
                     <input
@@ -272,10 +272,10 @@ export const TeamView: React.FC<TeamViewProps> = ({ onChangeView, currentUser, s
                   </p>
                 </div>
 
-                <div className="w-full flex flex-col gap-2 mt-auto">
-                  <p className="text-[10px] text-slate-400 font-bold uppercase tracking-tight mb-4 min-h-[30px] line-clamp-2">
-                    {member.observations || 'Nenhuma observação definida.'}
-                  </p>
+                <p className="text-[10px] text-slate-400 font-bold uppercase tracking-tight mb-4 min-h-[30px] line-clamp-2">
+                  {member.observations || 'Nenhuma observação definida.'}
+                </p>
+                <div className="w-full mt-auto flex flex-col gap-2">
                   <button
                     onClick={() => setSelectedMember(member)}
                     className="w-full bg-primary-dark hover:bg-slate-900 text-white py-3 rounded-xl font-black text-[10px] uppercase tracking-[0.2em] transition-all shadow-md active:scale-95"

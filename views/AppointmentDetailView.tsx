@@ -230,6 +230,12 @@ export const AppointmentDetailView: React.FC<AppointmentDetailViewProps> = ({
         throw new Error("O horário de término é obrigatório.");
       }
 
+      if (editStartTime && editStartTime > finalEndTime) {
+        alert('O horário de início não pode ser posterior ao horário de término.');
+        setLoading(false);
+        return;
+      }
+
       // Conflict detection for edited appointment
       if (checkConflictFirst && editLocationId && !isExternalLocation && editDate) {
         const selectedLocation = locations.find(l => l.id === editLocationId);
