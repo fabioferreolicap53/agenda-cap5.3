@@ -227,6 +227,11 @@ export const MessagesView: React.FC<MessagesViewProps> = ({ currentUser, initial
                                         {STATUS_OPTIONS.find(s => s.id === (user.status || 'online'))?.label || 'Offline'}
                                     </span>
                                 </div>
+                                {user.observations && (
+                                    <p className="text-[10px] text-slate-400 truncate mt-0.5 italic">
+                                        {user.observations}
+                                    </p>
+                                )}
                             </div>
                         </button>
                     ))}
